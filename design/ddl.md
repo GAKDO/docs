@@ -1,0 +1,412 @@
+# 테이블 정의 (DDL)
+
+PostgreSQL `trace` DB의 스키마 7개, 테이블 30개입니다. Flyway 마이그레이션 `V1__init.sql`로 그대로 쓸 수 있게 썼습니다. ID는 앱에서 UUIDv7으로 만들고, 다른 서비스의 ID는 FK 없이 값으로만 둡니다. capture·inspection은 같은 capture-server가 가져서 서로 FK를 씁니다.
+
+## rental (rental-server)
+
+```sql
+CREATE SCHEMA IF NOT EXISTS rental;
+
+CREATE TABLE rental.device_model (
+  id            uuid PRIMARY KEY,
+  model_code    varchar(64)  NOT NULL UNIQUE,          -- 예: MBA13-M2
+  name          varchar(128) NOT NULL,
+  manufacturer  varchar(64),                           -- 예: Apple
+  form_factor   varchar(16)  NOT NULL DEFAULT 'CLAMSHELL'
+                CHECK (form_factor IN ('CLAMSHELL')),  -- 촬영 면·3D 트윈의 형태. 새 형태는 codes.yaml에 먼저 추가
+  spec          jsonb,                                 -- 기준 사양 {cpu, ramGb, ssdGb}
+  width_mm      numeric(6,1) NOT NULL,                 -- 3D 트윈 치수
+  depth_mm      numeric(6,1) NOT NULL,
+  base_h_mm     numeric(5,1) NOT NULL,
+  lid_h_mm      numeric(5,1) NOT NULL,
+  updated_by    uuid,                                  -- auth.account.id (FK 없음)
+  created_at    timestamptz NOT NULL DEFAULT now(),
+  updated_at    timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE rental.device (
+  id               uuid PRIMARY KEY,
+  serial           varchar(64) NOT NULL UNIQUE,       -- 기기 신원. 등록 뒤에는 바꾸지 않음
+  device_model_id  uuid NOT NULL REFERENCES rental.device_model(id),
+  os               varchar(8)  NOT NULL CHECK (os IN ('MACOS','WINDOWS')),
+  color            varchar(32),
+  asset_no         varchar(64),                       -- 발표 자료에서 가림
+  status           varchar(16) NOT NULL DEFAULT 'ACTIVE'
+                   CHECK (status IN ('ACTIVE','MAINTENANCE','RETIRED')),  -- FR-RNT-05
+  retired_at       timestamptz,                       -- 폐기해도 행은 지우지 않음(이력 보존)
+  updated_by       uuid,                              -- auth.account.id (FK 없음)
+  created_at       timestamptz NOT NULL DEFAULT now(),
+  updated_at       timestamptz NOT NULL DEFAULT now(),
+  CHECK ((status = 'RETIRED') = (retired_at IS NOT NULL))
+);
+CREATE INDEX ix_device_model_status ON rental.device(device_model_id, status);
+
+CREATE TABLE rental.rental (
+  id          uuid PRIMARY KEY,
+  device_id   uuid NOT NULL REFERENCES rental.device(id),  -- ACTIVE 기기만 (서버에서 409)
+  renter_ref  varchar(128) NOT NULL,                  -- 이름 대신 내부 참조 번호
+  status      varchar(16)  NOT NULL CHECK (status IN ('OPEN','RETURNED','CLOSED')),
+  started_at  timestamptz,
+  ended_at    timestamptz,
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  updated_at  timestamptz NOT NULL DEFAULT now()
+);
+-- FR-RNT-01: 같은 기기에 진행 중인 렌탈은 하나만
+CREATE UNIQUE INDEX ux_rental_open_device ON rental.rental(device_id) WHERE status = 'OPEN';
+
+CREATE TABLE rental.checkpoint (
+  id           uuid PRIMARY KEY,
+  rental_id    uuid NOT NULL REFERENCES rental.rental(id),
+  type         varchar(3)  NOT NULL CHECK (type IN ('OUT','RCV','RET')),
+  status       varchar(16) NOT NULL CHECK (status IN ('OPEN','CAPTURED','GRADED','SEALED')),
+  occurred_at  timestamptz,
+  created_at   timestamptz NOT NULL DEFAULT now(),
+  updated_at   timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (rental_id, type)                            -- FR-RNT-02
+);
+
+CREATE TABLE rental.pilot_participant (
+  id          uuid PRIMARY KEY,
+  alias       varchar(16) NOT NULL UNIQUE,            -- P01 … 실명은 따로 보관
+  device_id   uuid NOT NULL REFERENCES rental.device(id),
+  consent_at  timestamptz NOT NULL,
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  updated_at  timestamptz NOT NULL DEFAULT now()
+);
+```
+
+## capture·inspection (capture-server)
+
+```sql
+CREATE SCHEMA IF NOT EXISTS capture;
+CREATE SCHEMA IF NOT EXISTS inspection;
+
+CREATE TABLE capture.capture_set (
+  id             uuid PRIMARY KEY,
+  checkpoint_id  uuid NOT NULL,                       -- rental.checkpoint.id (FK 없음)
+  source         varchar(8)  NOT NULL CHECK (source IN ('BOOTH','PHONE')),
+  booth_id       varchar(32),
+  status         varchar(16) NOT NULL CHECK (status IN ('UPLOADING','UPLOADED','INSPECTED','GRADED')),
+  quality        varchar(16) NOT NULL DEFAULT 'OK' CHECK (quality IN ('OK','UNJUDGEABLE')),
+  created_at     timestamptz NOT NULL DEFAULT now(),
+  updated_at     timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX ix_capture_set_checkpoint ON capture.capture_set(checkpoint_id);
+
+CREATE TABLE capture.photo (
+  id              uuid PRIMARY KEY,
+  capture_set_id  uuid NOT NULL REFERENCES capture.capture_set(id),
+  face            varchar(4)   NOT NULL CHECK (face IN ('TOP','BOT','SF','SB','SL','SR','KB','SCR0','SCR1')),
+  light           varchar(4)   NOT NULL CHECK (light IN ('L1','L2','L3','ROOM','OFF')),
+  camera          varchar(8)   NOT NULL CHECK (camera IN ('CAM','PHONE')),
+  object_key      varchar(512) NOT NULL,
+  sha256          char(64)     NOT NULL,
+  blur_score      real,
+  quality_ok      boolean      NOT NULL DEFAULT true,
+  taken_at        timestamptz  NOT NULL,
+  created_at      timestamptz  NOT NULL DEFAULT now(),
+  updated_at      timestamptz  NOT NULL DEFAULT now(),
+  UNIQUE (capture_set_id, face, light)
+);
+
+CREATE TABLE inspection.face_alignment (
+  id             uuid PRIMARY KEY,
+  photo_id       uuid NOT NULL UNIQUE REFERENCES capture.photo(id),
+  method         varchar(16)  NOT NULL CHECK (method IN ('CONTOUR','LIGHTGLUE')),
+  homography     jsonb        NOT NULL,               -- 3x3 행렬
+  error_px       real,
+  rectified_key  varchar(512) NOT NULL,               -- 표준 좌표로 펼친 이미지
+  created_at     timestamptz  NOT NULL DEFAULT now(),
+  updated_at     timestamptz  NOT NULL DEFAULT now()
+);
+
+CREATE TABLE inspection.defect (
+  id             uuid PRIMARY KEY,
+  photo_id       uuid NOT NULL REFERENCES capture.photo(id),
+  class          varchar(8)  NOT NULL CHECK (class IN ('scratch','dent','crack','stain')),
+  polygon        jsonb       NOT NULL,                -- 표준 좌표 [[x,y], …]
+  length_mm      real,
+  area_mm2       real,
+  confidence     real        NOT NULL,
+  model_version  varchar(64) NOT NULL,
+  source         varchar(8)  NOT NULL DEFAULT 'AUTO' CHECK (source IN ('AUTO','HUMAN')),
+  created_at     timestamptz NOT NULL DEFAULT now(),
+  updated_at     timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX ix_defect_photo ON inspection.defect(photo_id);
+
+CREATE TABLE inspection.defect_match (
+  id              uuid PRIMARY KEY,
+  defect_id       uuid NOT NULL UNIQUE REFERENCES inspection.defect(id),
+  prev_defect_id  uuid REFERENCES inspection.defect(id),  -- NULL이면 신규
+  status          varchar(8) NOT NULL CHECK (status IN ('NEW','EXISTING')),
+  distance_mm     real,
+  created_at      timestamptz NOT NULL DEFAULT now(),
+  updated_at      timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE inspection.grade_result (
+  id             uuid PRIMARY KEY,
+  checkpoint_id  uuid NOT NULL UNIQUE,                -- rental.checkpoint.id (FK 없음)
+  grade          char(1)     NOT NULL CHECK (grade IN ('A','B','C','D')),
+  rule_version   varchar(32) NOT NULL,
+  reasons        jsonb       NOT NULL,
+  created_at     timestamptz NOT NULL DEFAULT now(),
+  updated_at     timestamptz NOT NULL DEFAULT now()
+);
+```
+
+## diagnostics (diagnostics-server)
+
+```sql
+CREATE SCHEMA IF NOT EXISTS diagnostics;
+
+CREATE TABLE diagnostics.diagnostic_run (
+  id              uuid PRIMARY KEY,
+  checkpoint_id   uuid NOT NULL,                      -- rental.checkpoint.id (FK 없음)
+  device_serial   varchar(64)  NOT NULL,
+  os              varchar(8)   NOT NULL CHECK (os IN ('MACOS','WINDOWS')),
+  agent_version   varchar(32)  NOT NULL,
+  conditions      jsonb        NOT NULL,              -- 전원 연결, 배터리 잔량, 실행 중인 앱 수
+  raw_object_key  varchar(512) NOT NULL,              -- MinIO의 원본 JSON
+  sha256          char(64)     NOT NULL,
+  consented_at    timestamptz  NOT NULL,              -- FR-DIA-05
+  created_at      timestamptz  NOT NULL DEFAULT now(),
+  updated_at      timestamptz  NOT NULL DEFAULT now()
+);
+CREATE INDEX ix_run_checkpoint ON diagnostics.diagnostic_run(checkpoint_id);
+CREATE INDEX ix_run_serial     ON diagnostics.diagnostic_run(device_serial);
+
+CREATE TABLE diagnostics.hardware_component (
+  id          uuid PRIMARY KEY,
+  run_id      uuid NOT NULL REFERENCES diagnostics.diagnostic_run(id),
+  kind        varchar(16)  NOT NULL CHECK (kind IN ('CPU','RAM','SSD','BATTERY','DISPLAY','OTHER')),
+  identifier  varchar(128) NOT NULL,                  -- 모델명·시리얼
+  detail      jsonb,
+  created_at  timestamptz  NOT NULL DEFAULT now(),
+  updated_at  timestamptz  NOT NULL DEFAULT now()
+);
+
+CREATE TABLE diagnostics.battery_reading (
+  id                uuid PRIMARY KEY,
+  run_id            uuid NOT NULL UNIQUE REFERENCES diagnostics.diagnostic_run(id),
+  cycle_count       integer,
+  design_capacity       integer,
+  full_charge_capacity  integer,
+  capacity_unit         varchar(3) CHECK (capacity_unit IN ('mAh','mWh')),  -- macOS mAh, Windows mWh (환산하지 않음)
+  max_capacity_pct      numeric(5,2),                -- 서버 계산: 완충 ÷ 설계 × 100
+  os_max_capacity_pct   smallint,                    -- macOS가 보여 주는 값, 없으면 NULL
+  condition             varchar(32),                 -- NORMAL, SERVICE_RECOMMENDED
+  created_at        timestamptz NOT NULL DEFAULT now(),
+  updated_at        timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE diagnostics.ssd_health (
+  id              uuid PRIMARY KEY,
+  run_id          uuid NOT NULL UNIQUE REFERENCES diagnostics.diagnostic_run(id),
+  percent_used         smallint,                     -- NVMe percentage_used (100 넘을 수 있음)
+  available_spare_pct  smallint,
+  critical_warning     smallint,                     -- 0이 아니면 고장 신호
+  power_on_hours       integer,
+  media_errors         integer,
+  skipped_reason  varchar(128),                       -- 권한이 없어 생략한 이유 (FR-DIA-03)
+  created_at      timestamptz NOT NULL DEFAULT now(),
+  updated_at      timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE diagnostics.benchmark_result (
+  id            uuid PRIMARY KEY,
+  run_id        uuid NOT NULL REFERENCES diagnostics.diagnostic_run(id),
+  metric        varchar(16) NOT NULL CHECK (metric IN ('CPU_SINGLE','CPU_MULTI','MEM_COPY','DISK_READ','DISK_WRITE')),
+  trial_values  jsonb       NOT NULL,                 -- 3회 측정값
+  median        double precision NOT NULL,
+  created_at    timestamptz NOT NULL DEFAULT now(),
+  updated_at    timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (run_id, metric)
+);
+
+CREATE TABLE diagnostics.inspection_flag (
+  id             uuid PRIMARY KEY,
+  checkpoint_id  uuid NOT NULL,                       -- rental.checkpoint.id (FK 없음)
+  run_id         uuid NOT NULL REFERENCES diagnostics.diagnostic_run(id),
+  base_run_id    uuid NOT NULL REFERENCES diagnostics.diagnostic_run(id),  -- 비교 기준(이전 시점)
+  kind           varchar(24) NOT NULL CHECK (kind IN ('COMPONENT_CHANGED','CAPACITY_DROP','BENCH_DROP')),
+  detail         jsonb       NOT NULL,
+  created_at     timestamptz NOT NULL DEFAULT now(),
+  updated_at     timestamptz NOT NULL DEFAULT now()
+);
+```
+
+## report (report-server)
+
+```sql
+CREATE SCHEMA IF NOT EXISTS report;
+
+CREATE TABLE report.record_chain (
+  id             uuid PRIMARY KEY,
+  rental_id      uuid NOT NULL,                       -- rental.rental.id (FK 없음)
+  checkpoint_id  uuid NOT NULL,
+  seq            integer  NOT NULL,                   -- 렌탈 건 안에서 1부터
+  payload_hash   char(64) NOT NULL,                   -- 사진·진단 JSON 해시를 묶은 값
+  prev_hash      char(64),                            -- 첫 기록은 NULL
+  signature      text     NOT NULL,                   -- Ed25519, base64
+  signed_at      timestamptz NOT NULL,
+  created_at     timestamptz NOT NULL DEFAULT now(),
+  updated_at     timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (rental_id, seq)
+);
+
+CREATE TABLE report.report (
+  id            uuid PRIMARY KEY,
+  rental_id     uuid NOT NULL UNIQUE,
+  verify_token  char(32) NOT NULL UNIQUE,             -- 검증 QR에 들어가는 값
+  created_at    timestamptz NOT NULL DEFAULT now(),
+  updated_at    timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE report.report_view (
+  id          uuid PRIMARY KEY,
+  rental_id   uuid  NOT NULL UNIQUE,
+  timeline    jsonb NOT NULL,                         -- 이벤트로 만드는 읽기 모델
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  updated_at  timestamptz NOT NULL DEFAULT now()
+);
+```
+
+## ml (데이터 도구)
+
+```sql
+CREATE SCHEMA IF NOT EXISTS ml;
+
+CREATE TABLE ml.dataset_device (
+  id           uuid PRIMARY KEY,
+  device_code  varchar(8)  NOT NULL UNIQUE,           -- G01 …
+  model_name   varchar(128) NOT NULL,
+  color        varchar(32),
+  split        varchar(8)  NOT NULL CHECK (split IN ('TRAIN','VAL','TEST')),
+  created_at   timestamptz NOT NULL DEFAULT now(),
+  updated_at   timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE ml.dataset_version (
+  id              uuid PRIMARY KEY,
+  version         varchar(8)   NOT NULL UNIQUE,       -- v001 …
+  manifest_key    varchar(512) NOT NULL,
+  builder_commit  varchar(40)  NOT NULL,
+  counts          jsonb        NOT NULL,              -- 클래스별·분할별 개수
+  built_at        timestamptz  NOT NULL,
+  created_at      timestamptz  NOT NULL DEFAULT now(),
+  updated_at      timestamptz  NOT NULL DEFAULT now()
+);
+
+CREATE TABLE ml.training_run (
+  id                  uuid PRIMARY KEY,
+  dataset_version_id  uuid NOT NULL REFERENCES ml.dataset_version(id),
+  base_weights        varchar(128) NOT NULL,          -- 예: yolo11s-seg.pt
+  metrics             jsonb        NOT NULL,          -- mAP50, mAP50-95 …
+  model_key           varchar(512) NOT NULL,
+  onnx_key            varchar(512) NOT NULL,
+  created_at          timestamptz  NOT NULL DEFAULT now(),
+  updated_at          timestamptz  NOT NULL DEFAULT now()
+);
+```
+
+## auth (auth-server)
+
+관리자와 고객은 account 한 테이블에 role로 나누고, 고객이 볼 수 있는 렌탈은 rental\_access에 둬서 로그인 때 JWT rentals 클레임에 넣습니다. 이메일 인증·비밀번호 재설정 코드는 email\_token 하나에 purpose로 나눠 둡니다. seal\_receipt는 trace.record.sealed를 받아 둔 봉인 영수증으로, 고객이 연결되면 메일로 보냅니다. 리프레시 토큰은 DB가 아니라 Redis `trace:auth:refresh:{jti}`에 둡니다. 고객 QR 링크와 에이전트 페어링 코드는 렌탈 시점에 묶이지만, checkpoint·rental은 rental-server의 ID라 FK 없이 값으로만 둡니다.
+
+```sql
+CREATE SCHEMA IF NOT EXISTS auth;
+
+-- 관리자·고객 계정 (FR-AUTH-01, FR-USR-01·04·05). 관리자는 초기 데이터(ACTIVE)로 넣음
+CREATE TABLE auth.account (
+  id                 uuid PRIMARY KEY,
+  email              varchar(254) UNIQUE,              -- 소문자로 저장, 탈퇴하면 NULL
+  password_hash      varchar(100),                     -- BCrypt, 탈퇴하면 NULL
+  name               varchar(64),                      -- 탈퇴하면 NULL
+  role               varchar(16)  NOT NULL CHECK (role IN ('ADMIN','CUSTOMER')),
+  status             varchar(16)  NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING','ACTIVE','WITHDRAWN')),
+  email_verified_at  timestamptz,                      -- FR-USR-05, 인증하면 ACTIVE
+  privacy_agreed_at  timestamptz,                      -- 고객 가입 때 개인정보 수집 동의
+  withdrawn_at       timestamptz,
+  created_at         timestamptz  NOT NULL DEFAULT now(),
+  updated_at         timestamptz  NOT NULL DEFAULT now(),
+  CHECK (status = 'WITHDRAWN' OR (email IS NOT NULL AND password_hash IS NOT NULL)),
+  CHECK (role <> 'CUSTOMER' OR status = 'WITHDRAWN' OR privacy_agreed_at IS NOT NULL)
+);
+
+-- 고객과 렌탈 연결 (FR-USR-02·03). 렌탈 하나는 계정 하나에만
+CREATE TABLE auth.rental_access (
+  id          uuid PRIMARY KEY,
+  account_id  uuid NOT NULL REFERENCES auth.account(id),
+  rental_id   uuid NOT NULL UNIQUE,                    -- rental.rental.id (FK 없음)
+  linked_at   timestamptz NOT NULL,
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  updated_at  timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX ix_access_account ON auth.rental_access(account_id);
+
+-- 이메일 인증·비밀번호 재설정 6자리 코드 (FR-USR-05·06)
+CREATE TABLE auth.email_token (
+  id          uuid PRIMARY KEY,
+  account_id  uuid NOT NULL REFERENCES auth.account(id),
+  purpose     varchar(8)  NOT NULL CHECK (purpose IN ('VERIFY','RESET')),
+  code_hash   char(64)    NOT NULL,                  -- 코드의 SHA-256, 원문은 저장하지 않음
+  attempts    smallint    NOT NULL DEFAULT 0,        -- 5번 틀리면 폐기
+  expires_at  timestamptz NOT NULL,                  -- 발급 10분 뒤
+  used_at     timestamptz,
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  updated_at  timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX ix_email_token_account ON auth.email_token(account_id, purpose);
+
+-- 봉인 영수증 (FR-INT-03). trace.record.sealed를 받아 두었다가 연결된 고객에게 메일로 보냄
+CREATE TABLE auth.seal_receipt (
+  id               uuid PRIMARY KEY,
+  rental_id        uuid NOT NULL,                     -- rental.rental.id (FK 없음)
+  checkpoint_id    uuid NOT NULL UNIQUE,              -- 같은 시점은 한 번만 (멱등)
+  checkpoint_type  varchar(3)  NOT NULL CHECK (checkpoint_type IN ('OUT','RCV','RET')),
+  payload_hash     char(64)    NOT NULL,              -- 봉인 지문
+  sealed_at        timestamptz NOT NULL,
+  sent_at          timestamptz,                       -- NULL이면 아직 연결된 고객이 없음
+  created_at       timestamptz NOT NULL DEFAULT now(),
+  updated_at       timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX ix_receipt_unsent ON auth.seal_receipt(rental_id) WHERE sent_at IS NULL;
+
+-- 부스(Jetson)의 client credentials
+CREATE TABLE auth.client_credential (
+  id           uuid PRIMARY KEY,
+  client_id    varchar(64)  NOT NULL UNIQUE,          -- 예: booth-out, booth-ret
+  secret_hash  varchar(100) NOT NULL,                 -- BCrypt
+  kind         varchar(16)  NOT NULL CHECK (kind IN ('BOOTH')),
+  active       boolean      NOT NULL DEFAULT true,
+  created_at   timestamptz  NOT NULL DEFAULT now(),
+  updated_at   timestamptz  NOT NULL DEFAULT now()
+);
+
+-- 고객 수령 촬영용 1회용 QR 링크 (FR-RNT-04). rental_id는 렌탈 연결에 씀
+CREATE TABLE auth.capture_link (
+  id             uuid PRIMARY KEY,
+  checkpoint_id  uuid NOT NULL,                       -- rental.checkpoint.id (FK 없음)
+  rental_id      uuid NOT NULL,                       -- rental.rental.id (FK 없음)
+  token_hash     char(64) NOT NULL UNIQUE,            -- 토큰 원문은 저장하지 않음
+  expires_at     timestamptz NOT NULL,
+  used_at        timestamptz,
+  created_at     timestamptz NOT NULL DEFAULT now(),
+  updated_at     timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX ix_link_checkpoint ON auth.capture_link(checkpoint_id);
+
+-- 진단 에이전트가 시점 하나에 붙을 때 쓰는 6자리 코드
+CREATE TABLE auth.pairing_code (
+  id             uuid PRIMARY KEY,
+  checkpoint_id  uuid NOT NULL,                       -- rental.checkpoint.id (FK 없음)
+  code_hash      char(64)    NOT NULL,                -- 코드의 SHA-256
+  expires_at     timestamptz NOT NULL,                -- 발급 5분 뒤
+  used_at        timestamptz,
+  created_at     timestamptz NOT NULL DEFAULT now(),
+  updated_at     timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX ix_pairing_checkpoint ON auth.pairing_code(checkpoint_id);
+```
