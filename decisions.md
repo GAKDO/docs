@@ -60,4 +60,8 @@
 
 **빌드와 CI/CD: 블로그 것을 가져온다.** 블로그(AIGJ-01-002-blog/devlog)에서 쓰던 CI/CD를 TRACE 레포 전부에 옮겼습니다. 블로그 `backend-ci`(Maven·JaCoCo 40%·SonarQube)를 그대로 쓰려고 서버 빌드 도구는 Maven으로 정했습니다. 버전은 Java 21, Spring Boot 3.5.7, gateway는 Spring Cloud 2025.0.3입니다. 배포만 블로그와 다릅니다. 블로그는 GitHub Actions가 SSH 터널로 학교 서버의 k3d에 직접 배포했지만, TRACE는 강사님 지시대로 학교에 이미 설치된 Rancher 클러스터와 Argo CD를 씁니다. Actions는 이미지와 gitops 태그까지만 만들고, 실제 반영은 Argo CD가 합니다. 자세한 내용은 [cicd.md](cicd.md)에 있습니다.
 
+**서버 레포 이름은 `_server`.** 레포를 만든 뒤 서버 5개의 레포 이름을 `auth-server` → `auth_server`처럼 바꿨습니다. 쿠버네티스 리소스 이름에는 밑줄을 쓸 수 없어서, 클러스터 안 서비스·이미지(`ghcr.io/gakdo/auth-server`)·gitops 이름은 하이픈 그대로 둡니다. 배포 워크플로가 레포 이름의 `_`를 `-`로 바꿔 gitops 이미지 태그를 갱신합니다.
+
+**배포 방식: SSH 직접 배포를 쓰지 않는 이유.** 블로그는 Actions가 SSH 터널로 우리가 만든 k3d에 kubectl로 배포했지만, TRACE는 강사님 조건대로 학교 Rancher 클러스터와 Argo CD를 씁니다. 둘을 같이 두면 Argo CD 자동 동기화(selfHeal)가 Actions의 변경을 되돌려 서로 덮어쓰고, SSH 방식은 서버 비밀번호를 GitHub에 둬야 합니다. 블로그 배포의 연기 시험·자동 롤백은 Argo CD 방식(동기화 후 공개 주소 확인, 실패 시 gitops 커밋 되돌리기)으로 옮길 예정입니다.
+
 **문서는 이 레포에.** 팀이 나눈 내용을 GAKDO/docs에 모읍니다. 설계 원본은 Claude 문서와 Crowfoot이고, 이 레포는 그 사본과 결정 기록입니다.

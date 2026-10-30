@@ -35,7 +35,7 @@ flowchart LR
   bump --> argo["Argo CD 자동 동기화<br/>trace 네임스페이스"]
 ```
 
-- 이미지 이름: `ghcr.io/<조직 소문자>/<레포 이름>` (예: `ghcr.io/gakdo/auth-server`)
+- 이미지 이름: `ghcr.io/<조직 소문자>/<서비스 이름>` (예: `ghcr.io/gakdo/auth-server`). 서비스 이름은 레포 이름의 `_`를 `-`로 바꾼 것입니다(`auth_server` 레포 → `auth-server`). 쿠버네티스 이름에 밑줄을 쓸 수 없기 때문입니다.
 - 태그: 커밋 SHA(항상), `latest`(main), `develop`(develop)
 - gitops 갱신은 여러 서버가 동시에 커밋해도 꼬이지 않게 한 줄로 세우고(`concurrency: gitops-bump`), 충돌하면 받아서 최대 3번 다시 시도합니다.
 - 학교 클러스터가 amd64라 이미지는 amd64 한 가지만 만듭니다(블로그는 Oracle ARM VM 때문에 arm64도 만들었음).

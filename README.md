@@ -43,17 +43,19 @@ TRACE는 노트북 렌탈의 **출고·수령·반납 세 시점**에 외관(흠
 | 레포 | 내용 | 담당 |
 |---|---|---|
 | `gateway` | JWT 검증·라우팅·요청 제한 (Spring Cloud Gateway) | A |
-| `auth-server` | 회원·로그인·자격·QR 링크·페어링·JWKS·봉인 영수증 메일 | A |
-| `rental-server` | 렌탈·기기·기종·시점·파일럿 | A |
-| `capture-server` | 촬영 세트·사전 서명 URL·검사 결과·등급 | A |
-| `diagnostics-server` | 진단 검증·비교·점검 플래그·추이 | A |
-| `report-server` | 타임라인·해시 체인·검증·SSE | A |
+| `auth_server` | 회원·로그인·자격·QR 링크·페어링·JWKS·봉인 영수증 메일 | A |
+| `rental_server` | 렌탈·기기·기종·시점·파일럿 | A |
+| `capture_server` | 촬영 세트·사전 서명 URL·검사 결과·등급 | A |
+| `diagnostics_server` | 진단 검증·비교·점검 플래그·추이 | A |
+| `report_server` | 타임라인·해시 체인·검증·SSE | A |
 | `web` | 관리자 화면·폰 촬영·3D 리포트·검증 페이지 | C |
 | `contracts` | OpenAPI·진단 JSON Schema·이벤트 스키마·codes.yaml | A (B·C 리뷰) |
 | `gitops` | Kustomize overlays/school·Argo CD·PostgreSQL·Label Studio | A |
 | `agent` | 진단 에이전트 (macOS·Windows) | B |
 | `booth` | 부스 Jetson 앱·학습 데이터 촬영 도구 | B |
 | `ml` | inspect-worker·recon-worker·데이터셋 빌더·학습 (집 PC) | A |
+
+서버 레포 이름은 `_server`를 씁니다(예: `auth_server`). 쿠버네티스 이름에는 밑줄을 쓸 수 없어서, 클러스터 안 서비스와 이미지 이름은 `auth-server`처럼 하이픈으로 남습니다. 배포 워크플로가 레포 이름의 `_`를 `-`로 바꿔 씁니다.
 
 ## 주요 일정
 
