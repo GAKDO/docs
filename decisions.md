@@ -62,6 +62,8 @@
 
 **서버 레포 이름은 `_server`.** 레포를 만든 뒤 서버 5개의 레포 이름을 `auth-server` → `auth_server`처럼 바꿨습니다. 쿠버네티스 리소스 이름에는 밑줄을 쓸 수 없어서, 클러스터 안 서비스·이미지(`ghcr.io/gakdo/auth-server`)·gitops 이름은 하이픈 그대로 둡니다. 배포 워크플로가 레포 이름의 `_`를 `-`로 바꿔 gitops 이미지 태그를 갱신합니다.
 
-**배포 방식: SSH 직접 배포를 쓰지 않는 이유.** 블로그는 Actions가 SSH 터널로 우리가 만든 k3d에 kubectl로 배포했지만, TRACE는 강사님 조건대로 학교 Rancher 클러스터와 Argo CD를 씁니다. 둘을 같이 두면 Argo CD 자동 동기화(selfHeal)가 Actions의 변경을 되돌려 서로 덮어쓰고, SSH 방식은 서버 비밀번호를 GitHub에 둬야 합니다. 블로그 배포의 연기 시험·자동 롤백은 Argo CD 방식(동기화 후 공개 주소 확인, 실패 시 gitops 커밋 되돌리기)으로 옮길 예정입니다.
+**배포 방식: SSH 직접 배포를 쓰지 않는 이유.** 블로그는 Actions가 SSH 터널로 우리가 만든 k3d에 kubectl로 배포했지만, TRACE는 강사님 조건대로 학교 Rancher 클러스터와 Argo CD를 씁니다. 둘을 같이 두면 Argo CD 자동 동기화(selfHeal)가 Actions의 변경을 되돌려 서로 덮어쓰고, SSH 방식은 서버 비밀번호를 GitHub에 둬야 합니다. 블로그 배포의 연기 시험·자동 롤백은 Argo CD 방식으로 옮겼습니다(아래).
+
+**연기 시험·자동 롤백을 Argo CD 방식으로.** 블로그의 `smoke.sh`·`kubectl rollout undo`를 그대로 쓰면 Argo CD selfHeal과 부딪혀서, 이미지에 커밋 SHA를 넣고(`/ping`의 `commit`, web `/version.txt`) gitops 커밋 뒤 바깥 주소에서 그 SHA가 보이는지 최대 12분 확인합니다. 안 보이면 방금 올린 gitops 커밋을 `git revert`해 Argo CD가 직전 버전으로 돌리게 합니다. 조직 변수 `SMOKE_API_URL`·`SMOKE_WEB_URL`을 넣어야 켜집니다. 자세한 내용은 [cicd.md](cicd.md#연기-시험과-자동-롤백).
 
 **문서는 이 레포에.** 팀이 나눈 내용을 GAKDO/docs에 모읍니다. 설계 원본은 Claude 문서와 Crowfoot이고, 이 레포는 그 사본과 결정 기록입니다.

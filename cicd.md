@@ -11,7 +11,7 @@
 | `python-ci` (ruff·pytest, OS별) | | | ✓ | | | render-worker-ci.yml |
 | `계약 검사` (YAML·JSON Schema·OpenAPI 린트) | | | | ✓ | | 새로 만듦 |
 | `매니페스트 검증` (kustomize build·kubeconform) | | | | | ✓ | deploy.yml의 validate |
-| `배포` (이미지 → GHCR, main이면 gitops 태그 갱신) | ✓ | ✓ | | | | deploy.yml의 image + 배포 단계를 Argo CD 방식으로 |
+| `배포` (이미지 → GHCR, main이면 gitops 태그 갱신 → 연기 시험 → 실패 시 자동 롤백) | ✓ | ✓ | | | | deploy.yml의 image + 배포·smoke·롤백을 Argo CD 방식으로 |
 | `비밀값 검사` (학교 비밀번호 패턴·gitleaks) | ✓ | ✓ | ✓ | ✓ | ✓ | check-no-secrets.sh + gitleaks(NFR-03) |
 | `release` (CHANGELOG 버전 → 태그·Release) | ✓ | ✓ | ✓ | ✓ | ✓ | release.yml |
 | `PR 알림`·`CI 결과 알림` (Discord·텔레그램) | ✓ | ✓ | ✓ | ✓ | ✓ | pr-notify.yml, ci-notify.yml, actions/notify |
@@ -33,12 +33,35 @@ flowchart LR
   main["main push<br/>(릴리스 PR 머지)"] --> img2["테스트 → 이미지 :SHA·:latest"]
   img2 --> bump["gitops overlays/school<br/>kustomize edit set image"]
   bump --> argo["Argo CD 자동 동기화<br/>trace 네임스페이스"]
+  argo --> smoke{"연기 시험<br/>바깥 주소가 이번 커밋으로 응답?<br/>(최대 12분)"}
+  smoke -- 예 --> ok["배포 완료 알림"]
+  smoke -- 아니오 --> rb["자동 롤백<br/>gitops 커밋 git revert"]
+  rb --> argo2["Argo CD가 직전 버전으로"] --> fail["실패·롤백 알림"]
 ```
 
 - 이미지 이름: `ghcr.io/<조직 소문자>/<서비스 이름>` (예: `ghcr.io/gakdo/auth-server`). 서비스 이름은 레포 이름의 `_`를 `-`로 바꾼 것입니다(`auth_server` 레포 → `auth-server`). 쿠버네티스 이름에 밑줄을 쓸 수 없기 때문입니다.
 - 태그: 커밋 SHA(항상), `latest`(main), `develop`(develop)
-- gitops 갱신은 여러 서버가 동시에 커밋해도 꼬이지 않게 한 줄로 세우고(`concurrency: gitops-bump`), 충돌하면 받아서 최대 3번 다시 시도합니다.
+- gitops 갱신은 같은 레포 안에서 한 줄로 세우고(`concurrency: gitops-bump`, 레포 단위), 다른 서버의 커밋과 겹치면 받아서 최대 3번 다시 시도합니다.
 - 학교 클러스터가 amd64라 이미지는 amd64 한 가지만 만듭니다(블로그는 Oracle ARM VM 때문에 arm64도 만들었음).
+
+## 연기 시험과 자동 롤백
+
+블로그는 `smoke.sh`로 새 버전을 확인하고 실패하면 `kubectl rollout undo`로 되돌렸습니다. TRACE는 Argo CD가 클러스터를 맞추므로 같은 일을 **바깥에서 확인하고 gitops 커밋을 되돌리는** 방식으로 합니다. kubectl로 직접 되돌리면 Argo CD 자동 동기화(selfHeal)가 다시 새 버전으로 덮어씁니다.
+
+1. 이미지를 만들 때 커밋 SHA를 넣습니다(`APP_COMMIT`). 서버는 `GET /api/v1/<경로>/ping` 응답의 `commit`에, web은 `/version.txt`에 그 값을 내보냅니다.
+2. gitops 커밋을 올린 뒤 `연기 시험` 작업이 10초마다 바깥 주소를 두드립니다. 응답에 이번 커밋 SHA가 보이면 통과입니다. Argo CD 기본 확인 주기(3분)와 롤아웃 시간을 생각해 최대 12분 기다립니다.
+3. 12분 안에 안 보이면 `자동 롤백` 작업이 방금 올린 gitops 커밋을 `git revert`합니다. Argo CD가 그 커밋을 읽어 직전 버전으로 되돌립니다. 그사이 같은 서버의 더 새 버전이 올라갔으면 되돌리지 않고 그 배포의 연기 시험에 맡깁니다.
+4. 결과(완료·롤백·롤백 실패)를 Discord·텔레그램으로 한 번 알립니다.
+
+| 레포 | 확인 주소 |
+|---|---|
+| gateway | `<SMOKE_API_URL>/api/v1/gateway/ping` (gateway 자신) |
+| auth_server · rental_server · capture_server · diagnostics_server · report_server | `<SMOKE_API_URL>/api/v1/auth/ping` · `rentals` · `captures` · `diagnostics` · `reports` (gateway를 거쳐 각 서버) |
+| web | `<SMOKE_WEB_URL>/version.txt` |
+
+- 조직 변수 `SMOKE_API_URL`·`SMOKE_WEB_URL`이 없으면 연기 시험을 건너뛰고 "배포 요청됨"만 알립니다. 클러스터가 처음 뜨기 전에는 비워 두고, 화면이 열리는 것을 확인한 뒤 넣습니다.
+- gateway에 JWT 검증을 붙일 때 `/api/v1/*/ping`은 로그인 없이 열어 둡니다. 막히면 연기 시험이 늘 실패해 모든 배포가 롤백됩니다.
+- 롤백은 gitops만 되돌립니다. DB 마이그레이션(Flyway)은 되돌리지 않으므로, 스키마를 바꾸는 배포는 이전 버전 코드에서도 동작하게(컬럼 추가 먼저, 삭제는 다음 배포) 나눠 올립니다.
 
 ## 처음 한 번 설정할 것
 
@@ -47,6 +70,8 @@ flowchart LR
 | 종류 | 이름 | 값 | 없으면 |
 |---|---|---|---|
 | Secret | `GITOPS_TOKEN` | gitops 레포 Contents 읽기·쓰기만 준 fine-grained 토큰 | 이미지까지만 올리고 배포 갱신은 건너뜀 |
+| 변수 | `SMOKE_API_URL` | gateway 바깥 주소. 지금은 `http://<클러스터 노드 외부 주소>:8314`, 도메인 뒤에는 `https://<도메인>:8314` | 연기 시험·자동 롤백 건너뜀 |
+| 변수 | `SMOKE_WEB_URL` | web 바깥 주소 (`…:8315`) | web 연기 시험 건너뜀 |
 | Secret | `SONAR_TOKEN` | 학교 SonarQube 토큰 | 분석 건너뜀 |
 | Secret | `SONAR_HOST_URL` | `http://s4.java21.net:9000` | SonarCloud로 시도 |
 | 변수 | `SONAR_ENABLED` | `true` | 분석 안 함 |
@@ -71,9 +96,9 @@ CI가 첫 실행부터 초록이 되도록 레포마다 가장 작은 뼈대를 
 
 | 레포 | 뼈대 | 로컬 확인 |
 |---|---|---|
-| 서버 6개 | Spring Boot 앱, `GET /api/v1/<경로>/ping`, 테스트, Dockerfile(비루트·계층 분리), Maven 래퍼 | `./mvnw verify` 통과 (gateway·rental-server 확인) |
+| 서버 6개 | Spring Boot 앱, `GET /api/v1/<경로>/ping`(서비스·상태·커밋 SHA), 테스트, Dockerfile(비루트·계층 분리), Maven 래퍼 | `./mvnw verify` 통과 (gateway·rental-server 확인) |
 | gateway | 위 + REST API v0 경로 앞부분으로 서버 5개 라우팅 | `./mvnw verify` 통과 |
-| web | Vite + React + TypeScript, Vitest, nginx(8080, 비루트) Dockerfile | typecheck·test·build 통과 |
+| web | Vite + React + TypeScript, Vitest, nginx(8080, 비루트) Dockerfile, `/version.txt`(커밋 SHA) | typecheck·test·build 통과 |
 | agent·booth·ml | `pyproject.toml`, 패키지, pytest | ruff·pytest 통과 |
 | contracts | `codes.yaml`(DB CHECK 값과 같음), openapi·diagnostics·events 폴더 | yamllint 통과 |
 | gitops | base(앱 8개·PostgreSQL·네트워크 정책), overlays/school, Argo CD Application | gitops README 참고 |

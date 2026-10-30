@@ -83,6 +83,11 @@ sequenceDiagram
   GA->>Ops: overlays/school 이미지 태그를 커밋SHA로 (kustomize edit)
   Argo->>Ops: 변경 감지
   Argo->>K8s: 동기화 (prune·selfHeal)
+  GA->>K8s: 연기 시험: 바깥 주소 /ping의 commit이 이번 SHA인지 (최대 12분)
+  alt 실패
+    GA->>Ops: 방금 올린 커밋 git revert
+    Argo->>K8s: 직전 버전으로 동기화
+  end
 ```
 
 자세한 워크플로와 설정은 [cicd.md](cicd.md)에 있습니다.

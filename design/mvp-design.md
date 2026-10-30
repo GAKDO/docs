@@ -126,16 +126,16 @@ MVP 필수 요구사항은 기능 44개, 비기능 6개입니다. 집 PC(RTX 407
 
 배포는 GitHub Actions가 이미지를 GHCR에 올리고, Argo CD가 gitops 레포의 `overlays/school`(Kustomize)을 Rancher 클러스터에 맞춥니다. 앱은 인프라를 `postgres.trace.svc` 같은 고정 Service 이름으로 찾고, 비밀번호·키는 Rancher Secret에서 읽습니다.
 
-**레포 구성 (12개, 10/31 결정)**: 서버마다 레포를 따로 두고, 팀 조직 안이라 이름에 trace 접두사를 붙이지 않습니다.
+**레포 구성 (12개, 10/31 결정)**: 서버마다 레포를 따로 두고, 팀 조직 안이라 이름에 trace 접두사를 붙이지 않습니다. 서버 레포 이름은 `_server`(예: `auth_server`)입니다. 쿠버네티스 이름에는 밑줄을 쓸 수 없어서 클러스터 안 서비스·이미지 이름은 `auth-server`처럼 하이픈으로 남고, 배포 워크플로가 `_`를 `-`로 바꿔 씁니다.
 
 | 레포 | 내용 | 담당 | 기술 |
 | --- | --- | --- | --- |
 | `gateway` | JWT 검증·라우팅·요청 제한 | A | Spring Cloud Gateway |
-| `auth-server` | 회원·로그인·자격·QR 링크·페어링·JWKS·봉인 영수증 메일 | A | Spring Boot 3 |
-| `rental-server` | 렌탈·기기·기종·시점·파일럿 | A | Spring Boot 3 |
-| `capture-server` | 촬영 세트·사전 서명 URL·검사 결과·등급 | A | Spring Boot 3 |
-| `diagnostics-server` | 진단 검증·비교·점검 플래그·추이 | A | Spring Boot 3 |
-| `report-server` | 타임라인·해시 체인·검증·SSE | A | Spring Boot 3 |
+| `auth_server` | 회원·로그인·자격·QR 링크·페어링·JWKS·봉인 영수증 메일 | A | Spring Boot 3 |
+| `rental_server` | 렌탈·기기·기종·시점·파일럿 | A | Spring Boot 3 |
+| `capture_server` | 촬영 세트·사전 서명 URL·검사 결과·등급 | A | Spring Boot 3 |
+| `diagnostics_server` | 진단 검증·비교·점검 플래그·추이 | A | Spring Boot 3 |
+| `report_server` | 타임라인·해시 체인·검증·SSE | A | Spring Boot 3 |
 | `web` | 관리자 화면·폰 촬영·3D 리포트·검증 페이지 | C | React·TS·Vite·three.js |
 | `contracts` | OpenAPI 5개·진단 JSON Schema·이벤트 스키마·codes.yaml | A (B·C 리뷰) | YAML·JSON |
 | `gitops` | Kustomize overlays/school·Argo CD Application·PostgreSQL·Label Studio | A | YAML |
@@ -144,7 +144,8 @@ MVP 필수 요구사항은 기능 44개, 비기능 6개입니다. 집 PC(RTX 407
 | `ml` | inspect-worker·recon-worker·데이터셋 빌더·학습 | A | Python·PyTorch |
 
 - **공통 코드:** 서버 레포끼리 공유 라이브러리를 두지 않습니다. 요청·응답 타입은 contracts의 OpenAPI로 생성하고, 오류 응답은 Spring 기본 ProblemDetail, JWT 검증은 Spring Security 리소스 서버 설정으로 auth-server의 JWKS를 읽습니다.
-- **배포 흐름:** 각 레포의 GitHub Actions가 이미지를 GHCR(`ghcr.io/<조직>/<레포>`)에 올리고 gitops 레포의 이미지 태그를 바꾸면, Argo CD가 클러스터에 맞춥니다.
+- **배포 흐름:** 각 레포의 GitHub Actions가 이미지를 GHCR(`ghcr.io/<조직>/<서비스>`)에 올리고 gitops 레포의 이미지 태그를 바꾸면, Argo CD가 클러스터에 맞춥니다. 그 뒤 연기 시험이 바깥 주소에서 새 커밋이 응답하는지 최대 12분 확인하고, 실패하면 gitops 커밋을 되돌려 직전 버전으로 자동 롤백합니다(블로그의 smoke·롤백을 Argo CD 방식으로 옮김).
+- **문서:** 결정 기록·CI/CD·환경 설정은 [GAKDO/docs](https://github.com/GAKDO/docs)에 모읍니다. 이 설계서가 원본이고, docs의 `design/`은 내보낸 사본입니다.
 
 ## 서버 구성과 연결
 
