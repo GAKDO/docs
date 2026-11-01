@@ -82,7 +82,7 @@ MVP 필수 요구사항은 기능 44개, 비기능 6개입니다. 집 PC(RTX 407
 
 ## 아키텍처
 
-학교 클러스터의 `trace` 네임스페이스에는 앱 8개와 PostgreSQL 1개를 올리고, 나머지 데이터는 학교 서버의 공유 인프라에 둡니다. GPU가 필요한 일은 Jetson 2대(부스)와 집 PC 4070 Ti(워커·학습)가 나눠 맡습니다.
+학교 클러스터의 `trace` 네임스페이스에는 앱 8개와 PostgreSQL 1개를 올리고, 나머지 데이터는 학교 서버의 공유 인프라에 둡니다. GPU가 필요한 일은 Jetson 1대(부스, 출고·반납·데이터 촬영 공용)와 집 PC 4070 Ti(워커·학습)가 나눠 맡습니다.
 
 &#91;embedded content: TRACE 아키텍처 · 클러스터 앱 8개 + PostgreSQL, 집 PC 워커, 공유 인프라 5종\]
 
@@ -104,7 +104,7 @@ MVP 필수 요구사항은 기능 44개, 비기능 6개입니다. 집 PC(RTX 407
 | inspect-worker | 집 PC (4070 Ti) | 폰 사진 탐지, 9면 정합, 3D 텍스처 생성 | — | 아니오 (큐·MinIO·gateway에 밖에서 접속) |
 | recon-worker (실험) | 집 PC (4070 Ti) | 3DGS 학습 | — | 아니오 (큐에 접속) |
 | 학습·데이터셋 빌더 | 집 PC (4070 Ti) | 데이터셋 버전 생성, YOLO11-seg 파인튜닝 | — | 아니오 |
-| 부스 × 2 | Jetson Orin Nano | 촬영 제어, 조명 전환, TensorRT 탐지 | — | 아니오 |
+| 부스 × 1 (출고·반납·데이터 촬영 공용) | Jetson Orin Nano | 촬영 제어, 조명 전환, TensorRT 탐지 | — | 아니오 |
 | 진단 에이전트 | 렌탈 노트북 | 배터리·부품·SSD·벤치마크 측정 | — | 아니오 |
 
 - **포트:** 학교 서버는 8300\~8499를 학생마다 10개씩 나눠 줍니다. 클러스터 Service는 이 범위 안의 NodePort로 엽니다(지난 프로젝트에서 8318을 같은 방식으로 씀). A 계정 범위(8310\~8319)에서 비어 있는 8314\~8316을 쓰고, 8310\~8313·8317·8319는 예비로 둡니다(8318은 지난 프로젝트가 사용 중). 클러스터 안 앱은 모두 8080으로 받고, 같은 네임스페이스 안에서는 Service 이름으로 부릅니다.
@@ -213,8 +213,8 @@ JWT로 합니다. 지난 프로젝트처럼 인증·인가는 auth-server로 분
 | 렌탈·기기·시점 관리 | rental-server | Java 21, Spring Boot 3, Spring Data JPA, Flyway | PostgreSQL `rental` | FR-RNT-01\~03 |
 | 수령 링크·QR 발급 | auth-server, web | 랜덤 토큰 + 만료 시각, QR은 web에서 생성 | PostgreSQL `auth` | FR-RNT-04 |
 | 파일럿 등록 | rental-server | 별칭으로 등록, 실명은 따로 보관 | PostgreSQL `rental` | FR-PIL-01 |
-| 부스 촬영 제어 | Jetson × 2 | Python 3.10(JetPack 6), OpenCV, v4l2-ctl 고정 설정, Jetson.GPIO 릴레이(조명 L1·L2·L3), 턴테이블 | gateway API, MinIO `trace-captures` | FR-CAP-01, 02 |
-| 부스 흠집 탐지 | Jetson × 2 | YOLO11-seg → ONNX → TensorRT FP16(Jetson에서 빌드), 고해상 타일 추론 | 결과는 gateway를 거쳐 capture-server로 | FR-INS-01, NFR-01 |
+| 부스 촬영 제어 | Jetson × 1 | Python 3.10(JetPack 6), OpenCV, v4l2-ctl 고정 설정, C920 2대(CAM1 앞 반·CAM2 뒤 반), 조명 L1~L4 손 전환, 노트북 회전은 손으로(11/1 결정) | gateway API, MinIO `trace-captures` | FR-CAP-01, 02 |
+| 부스 흠집 탐지 | Jetson × 1 | YOLO11-seg → ONNX → TensorRT FP16(Jetson에서 빌드), 고해상 타일 추론 | 결과는 gateway를 거쳐 capture-server로 | FR-INS-01, NFR-01 |
 | 폰 가이드 촬영 | web (고객 폰 브라우저) | React + TypeScript(Vite), getUserMedia, 면 윤곽 오버레이, OpenCV.js 블러·반사 검사 | MinIO `trace-captures` | FR-CAP-03, 04 |
 | 촬영 세트·사전 서명 URL | capture-server | Spring Boot 3, AWS SDK v2 S3Presigner, Spring AMQP | PostgreSQL `capture`, MinIO, RabbitMQ | FR-CAP-01\~05 |
 | 폰 사진 탐지·9면 정합·텍스처 | inspect-worker (집 PC) | Python 3.11, PyTorch, Ultralytics YOLO11-seg, SuperPoint + LightGlue, OpenCV 호모그래피, pika | RabbitMQ, MinIO `trace-derived` | FR-INS-01, 02 |

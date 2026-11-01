@@ -17,6 +17,7 @@ TRACE는 노트북 렌탈의 **출고·수령·반납 세 시점**에 외관(흠
 | [design/rest-api-v0.md](design/rest-api-v0.md) | REST API v0, 역할 × 경로 표, 화면별로 부르는 API | A·C |
 | [design/diagnostics-json-v0.md](design/diagnostics-json-v0.md) | 진단 결과 JSON v0, 다른 서비스 조사, macOS 실제 키 | A·B |
 | [design/kickoff-plan.md](design/kickoff-plan.md) | 착수 준비: 일정, 공유 인프라 자원, 체크리스트 | 전원 |
+| [booth/README.md](booth/README.md) | **11/2 부스 제작·촬영 실행 가이드**: 시간표, 준비물, 만드는 순서, 촬영 순서, 막힐 때, 도면 그림 | 전원 |
 
 `design/`의 5개 파일은 팀이 함께 고친 Claude 문서를 Markdown으로 그대로 내보낸 것입니다. 그림(위젯)은 내보내지지 않아 자리 표시만 남았고, 같은 내용을 [architecture.md](architecture.md)에 Mermaid로 다시 그렸습니다.
 
@@ -24,6 +25,8 @@ TRACE는 노트북 렌탈의 **출고·수령·반납 세 시점**에 외관(흠
 
 - MVP 설계서(Claude 문서, 원본): https://claude.ai/artifact/N4cytmEdkbFuN9nSomf4jb
 - 착수 준비 문서(Claude 문서, 원본): https://claude.ai/artifact/Bt6De2e2K8PXoTAmHkP9NG
+- 11/2 부스 실행 가이드(Claude 문서, 원본): https://claude.ai/artifact/BM3Q7r17FJpSY9tRDhhnn9
+- 부스 도면: https://claude.ai/artifact/4i5UxWH21dzm3pcAqk2ThL
 - Crowfoot ERD v1: https://crowfoot.java21.net/workspaces/68/models/688 (워크스페이스 TRACE)
 
 설계가 바뀌면 원본(Claude 문서·Crowfoot)을 먼저 고치고, 이 레포의 `design/`을 다시 내보내 커밋합니다.
