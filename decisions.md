@@ -75,3 +75,5 @@
 **코드 값 추가.** 부스 설계에 맞춰 조명 L4(앞쪽 스침광, 키보드 촬영)를 더하고, 부스 카메라를 CAM1(앞 반)·CAM2(뒤 반)로 나눴습니다. `contracts/codes.yaml` 0.2.0과 [db/V1__init.sql](db/V1__init.sql)의 CHECK 제약을 함께 고쳤습니다. 11/3 계약 고정 전에 바꾼 것입니다.
 
 **구현은 Spec Kit으로.** 남은 구현은 GitHub Spec Kit(specify-cli 1.2.5)으로 명세 → 계획 → 작업 → 구현 순서로 진행합니다. 팀원은 Claude 프로젝트(베타)에서 레포마다 세션을 열고 기능 하나씩 끝냅니다. 모든 레포에 같은 헌법([speckit/constitution.md](speckit/constitution.md))을 두고, 요구사항 50개를 기능 26개로 나눈 목록은 [speckit/backlog.md](speckit/backlog.md)에 있습니다. 클라우드 세션에는 Docker가 없어 Testcontainers 테스트는 GitHub Actions에서만 돕니다. 부스 Jetson이 Python 3.10이라 booth 레포의 설치 조건을 3.10으로 낮췄습니다.
+
+**스탠드업은 docs에, Claude가 읽고 쓴다.** 팀원 모두 Claude로 개발하므로 코드 컨벤션([team/conventions.md](team/conventions.md)), 작업 보드([team/board.md](team/board.md)), 날짜별 스탠드업(team/standup/)을 docs에 두고, 모든 레포의 `/trace-standup` 스킬이 세션 시작·끝에 읽고 자기 칸만 고칩니다. 스탠드업은 자주 바뀌어서 docs 레포는 PR 없이 main에 바로 올립니다.

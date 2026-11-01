@@ -5,7 +5,7 @@ TRACE는 남은 구현을 [GitHub Spec Kit](https://github.com/github/spec-kit)(
 | 문서 | 내용 |
 | --- | --- |
 | [constitution.md](constitution.md) | TRACE 헌법: 모든 기능이 지킬 원칙 6가지, 기술·형식, 개발 흐름 |
-| [backlog.md](backlog.md) | 기능 26개의 순서·마감·담당과 `/speckit-specify`에 붙여 넣을 설명 |
+| [backlog.md](backlog.md) | 기능 27개의 순서·마감·담당과 `/speckit-specify`에 붙여 넣을 설명 |
 
 ## 각 레포에 들어간 것
 
