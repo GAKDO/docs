@@ -73,3 +73,5 @@
 **부스는 1개.** 출고·반납 부스와 학습 데이터 촬영을 부스 하나로 합니다. 학습 사진과 운영 사진이 같은 카메라·조명에서 나와 조건이 맞습니다. 폼보드 2장으로 기둥 2개와 빔을 만들고 C920 2대를 빔에 매다는 설계이고, 조명 전환과 노트북 회전은 손으로 합니다. 설계서의 "부스 × 2", 릴레이, 턴테이블 항목은 이 결정으로 바뀝니다.
 
 **코드 값 추가.** 부스 설계에 맞춰 조명 L4(앞쪽 스침광, 키보드 촬영)를 더하고, 부스 카메라를 CAM1(앞 반)·CAM2(뒤 반)로 나눴습니다. `contracts/codes.yaml` 0.2.0과 [db/V1__init.sql](db/V1__init.sql)의 CHECK 제약을 함께 고쳤습니다. 11/3 계약 고정 전에 바꾼 것입니다.
+
+**구현은 Spec Kit으로.** 남은 구현은 GitHub Spec Kit(specify-cli 1.2.5)으로 명세 → 계획 → 작업 → 구현 순서로 진행합니다. 팀원은 Claude 프로젝트(베타)에서 레포마다 세션을 열고 기능 하나씩 끝냅니다. 모든 레포에 같은 헌법([speckit/constitution.md](speckit/constitution.md))을 두고, 요구사항 50개를 기능 26개로 나눈 목록은 [speckit/backlog.md](speckit/backlog.md)에 있습니다. 클라우드 세션에는 Docker가 없어 Testcontainers 테스트는 GitHub Actions에서만 돕니다. 부스 Jetson이 Python 3.10이라 booth 레포의 설치 조건을 3.10으로 낮췄습니다.
