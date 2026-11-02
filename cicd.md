@@ -65,6 +65,8 @@ flowchart LR
 
 ## 처음 한 번 설정할 것
 
+**11/2에 모두 넣었습니다.** `SMOKE_API_URL`·`SMOKE_WEB_URL`만 클러스터에 화면이 뜬 뒤 넣습니다. 다시 확인할 때는 아래 [점검](#점검).
+
 조직(GAKDO) **Settings → Secrets and variables → Actions**에 조직 단위로 한 번만 넣으면 12개 레포가 함께 씁니다.
 
 | 종류 | 이름 | 값 | 없으면 |
@@ -72,7 +74,7 @@ flowchart LR
 | Secret | `GITOPS_TOKEN` | gitops 레포 Contents 읽기·쓰기만 준 fine-grained 토큰 | 이미지까지만 올리고 배포 갱신은 건너뜀 |
 | 변수 | `SMOKE_API_URL` | gateway 바깥 주소. 지금은 `http://<클러스터 노드 외부 주소>:8314`, 도메인 뒤에는 `https://<도메인>:8314` | 연기 시험·자동 롤백 건너뜀 |
 | 변수 | `SMOKE_WEB_URL` | web 바깥 주소 (`…:8315`) | web 연기 시험 건너뜀 |
-| Secret | `SONAR_TOKEN` | 학교 SonarQube 토큰 | 분석 건너뜀 |
+| Secret | `SONAR_TOKEN` | 학교 SonarQube **User Token** 하나(서버 6개 공용). Global·Project Analysis 토큰은 이슈·핫스팟 조회 API가 막혀 `SonarQube 이슈 내보내기`가 실패합니다 | 분석 건너뜀 |
 | Secret | `SONAR_HOST_URL` | `http://s4.java21.net:9000` | SonarCloud로 시도 |
 | 변수 | `SONAR_ENABLED` | `true` | 분석 안 함 |
 | Secret | `DISCORD_WEBHOOK_URL` (`DISCORD_PR_WEBHOOK_URL`) | 팀 디스코드 웹훅 | 알림 없음 |
@@ -86,9 +88,35 @@ flowchart LR
 1. **GHCR 패키지 공개:** 첫 이미지가 올라가면 조직 Packages에서 각 패키지를 Public으로 바꿉니다. 비공개로 두려면 클러스터에 이미지 받는 비밀(imagePullSecret)을 만들어야 합니다.
 2. **Argo CD 등록:** `gitops/argocd/application.yaml`을 학교 Argo CD에 등록합니다(gitops 레포 README 참고).
 3. **클러스터 비밀:** `gitops/scripts/create-secrets.sh`로 `trace-secrets`·`trace-postgres`를 만듭니다. 비밀번호는 레포에 넣지 않습니다.
-4. **develop 브랜치와 보호 규칙:** 각 레포에 `develop`을 만들고, main·develop에 "PR 필수 + CI 통과 필수"를 겁니다.
-5. **CodeRabbit:** 조직에 CodeRabbit GitHub 앱을 설치하면 PR마다 한국어 리뷰가 달립니다.
+4. **develop 브랜치와 보호 규칙:** 12개 레포 main·develop에 걸었습니다(11/2). 아래 [브랜치 보호](#브랜치-보호).
+5. **CodeRabbit:** GAKDO 조직에 설치했습니다(11/2, All repositories). 설치 전에 만든 PR에는 리뷰가 없고, 열린 PR은 댓글 `@coderabbitai review`로 리뷰를 받습니다.
 6. **SonarQube 프로젝트 키:** 기본값은 `trace-<레포 이름>`입니다. 다르게 쓰려면 레포 변수 `SONAR_PROJECT_KEY`.
+
+## 브랜치 보호
+
+12개 레포 main·develop 공통입니다(11/2).
+
+- PR로만 머지합니다. 아래 필수 검사가 통과하고 팀원 1명이 승인해야 합니다([team/conventions.md](team/conventions.md) 리뷰 규칙). contracts는 2명(B·C)입니다.
+- 강제 push와 브랜치 삭제를 막습니다.
+- 조직 소유자(민서)는 규칙에서 빠져 있습니다(enforce_admins 끔). 헌법·문서 동기화 스크립트는 그대로 직접 올리고, 급할 때는 `gh pr merge --admin`으로 머지합니다.
+
+| 레포 | 필수 검사(job 이름) |
+|---|---|
+| 서버 6개 | `test`(backend-ci), `secrets`(비밀값 검사) |
+| web | `build`(화면 CI), `secrets` |
+| agent·booth·ml | `test (ubuntu-latest)`·`test (macos-latest)`·`test (windows-latest)`(python-ci), `secrets` |
+| contracts | `lint`(계약 검사), `secrets` |
+| gitops | `매니페스트 검증`, `secrets` |
+
+- **PR CI는 문서만 바뀌어도 돕니다.** 필수 검사의 워크플로가 경로 필터로 건너뛰어지면 검사가 '대기'로 남아 머지가 막힙니다. Spec Kit 산출물(`specs/…/*.md`)·README·CHANGELOG만 바뀐 PR이 여기에 걸리므로 backend-ci·화면 CI·python-ci의 PR 트리거에서 `paths-ignore`를 뺐습니다. develop·main push는 그대로 문서만 바뀌면 CI·배포를 건너뜁니다.
+- 필수 검사는 job 이름으로 걸립니다. job 이름이나 matrix를 바꾸면 보호 규칙의 필수 검사도 같이 바꿉니다. 안 바꾸면 모든 PR이 '대기'로 멈춥니다.
+
+## 점검
+
+[scripts/check-cicd.sh](scripts/check-cicd.sh)(읽기 전용)를 조직 관리자 gh로 돌리면 CodeRabbit 설치·리뷰, SonarQube 설정과 마지막 분석 결과, 알림·배포 설정, 레포별 최근 워크플로 결과, 브랜치 보호를 ✅/❌로 보여 줍니다. 비밀값은 이름만 봅니다.
+
+- SonarQube 단계는 `continue-on-error`라 단계가 초록이어도 분석이 실패했을 수 있습니다. 점검은 로그의 실제 출력(`ANALYSIS SUCCESSFUL`)으로 판단합니다. 분석이 실패하면 서버 채널에 "SonarQube 분석 실패" 알림이 옵니다.
+- 11/2 결과: 모두 ✅(CodeRabbit 리뷰 web PR #6, SonarQube 서버 6개 분석 성공, 보호 24곳). `SMOKE_*`만 클러스터 뒤.
 
 ## 뼈대 코드
 
