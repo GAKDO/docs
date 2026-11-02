@@ -173,6 +173,8 @@ CREATE TABLE inspection.grade_result (
 
 ## diagnostics (diagnostics-server)
 
+> DI1(11/2, diagnostics_server PR #1)은 아래 V1에 Flyway `V2__di1_run_upload.sql`을 더합니다: diagnostic_run에 `rental_id`·`collected_at`·`raw_body`(원본 JSON, MinIO 대신)·`idempotency_key`·`benchmark_skipped_reason`, `raw_object_key` NULL 허용, `UNIQUE(checkpoint_id)`(시점당 하나), battery_reading `status`·`skipped_reason`, ssd_health `status`·`protocol`. 자세한 표는 diagnostics_server `specs/001-diagnostics-upload/data-model.md`.
+
 ```sql
 CREATE SCHEMA IF NOT EXISTS diagnostics;
 
