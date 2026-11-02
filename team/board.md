@@ -29,7 +29,7 @@
 | AU3 | auth_server | 수령 QR·렌탈 연결·봉인 영수증 | A | 11/9 | 대기 |  |  | 11/01 |
 | CA2 | capture_server | 검사 결과·시점 비교·등급 | A·C | 11/9 | 완료 | C 비교 모듈 #2·#4, A 부분 [#6](https://github.com/GAKDO/capture_server/pull/6) 머지, 후속 [#7](https://github.com/GAKDO/capture_server/pull/7)(/media) 머지 |  | 11/02 |
 | DI2 | diagnostics_server | 점검 플래그·추이 | A | 11/9 | 대기 |  |  | 11/01 |
-| ML2 | ml | inspect-worker | A | 11/9 | 리뷰 | 간소화: 정합 [#8](https://github.com/GAKDO/ml/pull/8) 머지, 워커 [#9](https://github.com/GAKDO/ml/pull/9). 남은 것: 집 PC 설치·자동 시작, 실제 부스·폰 사진 `align pair` 실측, 폰 탐지 모델(B 답 대기) | `claude/project-thread-gnyohx` | 11/02 |
+| ML2 | ml | inspect-worker | A | 11/9 | 리뷰 | 간소화: 정합 [#8](https://github.com/GAKDO/ml/pull/8) 머지, 워커 [#9](https://github.com/GAKDO/ml/pull/9) 머지. 남은 것: 집 PC 설치·자동 시작, 실제 부스·폰 사진 `align pair` 실측, 폰 탐지 모델(B 답 대기) | `claude/project-thread-gnyohx` | 11/02 |
 | AG2 | agent | Windows 진단 에이전트 | B | 11/10 | 대기 |  |  | 11/01 |
 | WE3 | web | 고객 화면·3D 리포트 | C | 11/10 | 진행 | web #10·#12·#13·#15·#16·#18(진행률 SSE)·#25(faces.md 방향)·#26(재설정·탈퇴) 머지 | 실서버(11/5 배포 뒤) 확인 | 11/02 |
 | WE4 | web | 검증 페이지·파일럿 대시보드 | C | 11/10 | 진행 | web #7·#22·#30·#31(Grafana Docker Compose) 대시보드, #8 검증 페이지 머지(목 서버 기준) | 검증 페이지 실서버 확인(RP1 11/7 뒤), InfluxDB 버킷·토큰(A 확인 중) | 11/02 |
