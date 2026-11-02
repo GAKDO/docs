@@ -107,7 +107,7 @@ gateway가 모든 요청의 JWT를 auth-server JWKS로 검증하고, design/rest
 
 **CA1 촬영 세트·사전 서명 URL**
 ```
-부스와 폰이 한 시점의 촬영 세트를 만들고, 사진마다 사전 서명 URL을 받아 MinIO trace-captures에 직접 올린 뒤 면·조명·카메라 코드와 SHA-256을 등록한다. 세트가 다 올라오면 trace.capture.uploaded 이벤트를 낸다(FR-CAP-02, FR-CAP-05). 코드 값은 codes.yaml 0.3.0(조명 L1~L4, 카메라 CAM1·CAM2·PHONE, 출처별 필수 면 face_required)이다. 수용 기준: 게이트웨이 트래픽에 사진 본문이 없다. 내려받은 파일 해시와 저장된 해시가 같다. 세트 출처의 필수 면(codes.yaml capture.face_required, 부스는 TOP·BOT·SF·SB·SL·SR·KB·SCR0 8면)이 빠지면 세트가 완료되지 않는다(409). SCR1은 선택이고 건너뛸 때는 skippedFaces에 사유를 남긴다. 업로드 URL 응답은 사진마다 face·light·camera를 돌려준다(부스는 같은 면·조명을 CAM1·CAM2로 두 장 찍음). 폰의 필수 면은 WE2에서 정해 face_required.PHONE에 더한다.
+부스와 폰이 한 시점의 촬영 세트를 만들고, 사진마다 사전 서명 URL을 받아 MinIO trace-captures에 직접 올린 뒤 면·조명·카메라 코드와 SHA-256을 등록한다. 세트가 다 올라오면 trace.capture.uploaded 이벤트를 낸다(FR-CAP-02, FR-CAP-05). 코드 값은 codes.yaml 0.3.0(조명 L1~L4, 카메라 CAM1·CAM2·PHONE, 출처별 필수 면 face_required)이다. 수용 기준: 게이트웨이 트래픽에 사진 본문이 없다. 내려받은 파일 해시와 저장된 해시가 같다. 세트 출처의 필수 면(codes.yaml capture.face_required, 부스는 TOP·BOT·SF·SB·SL·SR·KB·SCR0 8면)이 빠지면 세트가 완료되지 않는다(409). SCR1은 선택이고 건너뛸 때는 skippedFaces에 사유를 남긴다. 업로드 URL 응답은 사진마다 face·light·camera를 돌려준다(부스는 같은 면·조명을 CAM1·CAM2로 두 장 찍음). 폰의 필수 면은 추천안 7면(KB 제외, face_required.PHONE)이고 C가 WE2에서 확인한다. 필수 면이 빠지면 409 CAPTURE_FACES_MISSING(빠진 면 목록 포함).
 ```
 
 **CA2 검사 결과·시점 비교·등급**
