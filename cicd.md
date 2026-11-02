@@ -102,3 +102,28 @@ CI가 첫 실행부터 초록이 되도록 레포마다 가장 작은 뼈대를 
 | agent·booth·ml | `pyproject.toml`, 패키지, pytest | ruff·pytest 통과 |
 | contracts | `codes.yaml`(DB CHECK 값과 같음), openapi·diagnostics·events 폴더 | yamllint 통과 |
 | gitops | base(앱 8개·PostgreSQL·네트워크 정책), overlays/school, Argo CD Application | gitops README 참고 |
+
+## 디스코드 알림 채널
+
+서버마다 채널을 나눠 CI/CD 알림을 받습니다. 웹훅 주소는 레포 Secret `DISCORD_WEBHOOK_URL`에 레포마다 따로 넣고(레포 값이 조직 값보다 먼저 쓰임), 레포 변수 `DISCORD_ENABLED=true`로 켭니다. 넣을 때는 팀장 맥에서 `setup-discord.sh`를 씁니다.
+
+| 채널 | 레포 |
+| --- | --- |
+| `#ci-gateway` | gateway |
+| `#ci-auth` | auth_server |
+| `#ci-rental` | rental_server |
+| `#ci-capture` | capture_server |
+| `#ci-diagnostics` | diagnostics_server |
+| `#ci-report` | report_server |
+| `#ci-web` | web |
+| `#ci-etc` | contracts, gitops, agent, booth, ml |
+| `#pr` (선택) | 모든 레포의 PR 리뷰 요청·머지 (`DISCORD_PR_WEBHOOK_URL`). 없으면 각 서버 채널로 |
+
+**무엇이 오나**
+
+- CI 실패(테스트·검사·배포 실패)는 언제나 옵니다.
+- CI 성공은 main·develop에 올라갔을 때만 옵니다. 기능 브랜치와 PR의 성공은 조용합니다.
+- 배포(main)는 결과를 한 번 보냅니다: 배포 완료(연기 시험 통과), 연기 시험 실패 → 롤백, 롤백 실패.
+- PR은 리뷰 요청과 머지 때 옵니다.
+
+웹훅 주소는 비밀값이라 채팅·문서·레포에 적지 않습니다. 새어 나갔으면 디스코드에서 그 웹훅을 지우고 새로 만든 뒤 `bash setup-discord.sh <채널 이름>`으로 다시 넣습니다.
