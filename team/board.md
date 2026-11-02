@@ -9,7 +9,7 @@
 | C1 | contracts | OpenAPI 5개 | A (B·C 리뷰) | 11/3 | 완료 | [PR #1](https://github.com/GAKDO/contracts/pull/1) 머지, ID→PublicId [PR #6](https://github.com/GAKDO/contracts/pull/6) 머지 |  | 11/02 |
 | C2 | contracts | 진단 결과 JSON Schema v1 | A (B 리뷰) | 11/3 | 완료 | [PR #3](https://github.com/GAKDO/contracts/pull/3) 머지 |  | 11/02 |
 | C3 | contracts | 이벤트 스키마 5종 | A | 11/3 | 완료 | [PR #2](https://github.com/GAKDO/contracts/pull/2) 머지, ID→PublicId [PR #6](https://github.com/GAKDO/contracts/pull/6) 머지 |  | 11/02 |
-| BO1 | booth | 촬영 도구·부스 촬영 | B | 11/4 | 진행 | 머지 [#2](https://github.com/GAKDO/booth/pull/2)·[#3](https://github.com/GAKDO/booth/pull/3)·[#4](https://github.com/GAKDO/booth/pull/4)·[#5](https://github.com/GAKDO/booth/pull/5)(업로드)·[#6](https://github.com/GAKDO/booth/pull/6)(capture/README)·[#7](https://github.com/GAKDO/booth/pull/7)(publicId)·[#9](https://github.com/GAKDO/booth/pull/9)(코드 이름)·[#10](https://github.com/GAKDO/booth/pull/10)(출고·반납 올리기), 리뷰 [#11](https://github.com/GAKDO/booth/pull/11)(출고·반납 화면), 남은 것: Jetson 실기, CA1 뒤 실제 연결 |  | 11/02 |
+| BO1 | booth | 촬영 도구·부스 촬영 | B | 11/4 | 진행 | 머지 [#2](https://github.com/GAKDO/booth/pull/2)·[#3](https://github.com/GAKDO/booth/pull/3)·[#4](https://github.com/GAKDO/booth/pull/4)·[#5](https://github.com/GAKDO/booth/pull/5)(업로드)·[#6](https://github.com/GAKDO/booth/pull/6)(capture/README)·[#7](https://github.com/GAKDO/booth/pull/7)(publicId)·[#9](https://github.com/GAKDO/booth/pull/9)(코드 이름)·[#10](https://github.com/GAKDO/booth/pull/10)(출고·반납 올리기)·[#11](https://github.com/GAKDO/booth/pull/11)(출고·반납 화면), 남은 것: Jetson 실기, CA1 뒤 실제 연결 |  | 11/02 |
 | ML3 | ml | Label Studio 연동 | B | 11/4 | 진행 | 머지 [#1](https://github.com/GAKDO/ml/pull/1)(setup·sync 명령), 남은 것: 클러스터 Label Studio에서 실제 확인(A 배포 뒤) |  | 11/02 |
 | AU1 | auth_server | 로그인·JWT·자격 교환 | A | 11/5 | 완료 | [PR #1](https://github.com/GAKDO/auth_server/pull/1) 머지(QR 발급·렌탈 연결 포함), 설정 키 [gitops #1](https://github.com/GAKDO/gitops/pull/1) |  | 11/02 |
 | GW1 | gateway | JWT 검증·역할×경로 | A | 11/5 | 완료 | [PR #1](https://github.com/GAKDO/gateway/pull/1) 머지, 남은 것: 클러스터 라우팅 확인·TRACE_WEB_ORIGIN 값 |  | 11/02 |
@@ -17,7 +17,7 @@
 | CA1 | capture_server | 촬영 세트·사전 서명 URL | A | 11/6 | 완료 | [PR #1](https://github.com/GAKDO/capture_server/pull/1) 머지, 이벤트 설명 [contracts #7](https://github.com/GAKDO/contracts/pull/7). 남은 것: 학교 MinIO 체크섬 거절·CORS 한 번 확인(environment.md) |  | 11/02 |
 | WE1 | web | 로그인·출고·반납·기기 관리 | C | 11/6 | 대기 |  |  | 11/01 |
 | ML1 | ml | 데이터셋 빌더·학습 기록 | A | 11/6 | 리뷰 | 머지 [#2](https://github.com/GAKDO/ml/pull/2)(설정·저장소·기록부)·[#3](https://github.com/GAKDO/ml/pull/3)(빌더)·[#4](https://github.com/GAKDO/ml/pull/4)(학습 기록), 남은 것: 집 PC에서 db init·v001 빌드(11/5 라벨링 뒤)·실제 학습 |  | 11/02 |
-| BO2 | booth | Jetson 흠집 탐지 | B | 11/6 | 진행 | 머지 [#8](https://github.com/GAKDO/booth/pull/8)(타일 추론·중복 제거), 남은 것: Jetson 엔진 빌드·30초 실측, 결과 올리기 | 결과 올리기: detections에 camera 없음·좌표 기준 A에게 질문 | 11/02 |
+| BO2 | booth | Jetson 흠집 탐지 | B | 11/6 | 진행 | 머지 [#8](https://github.com/GAKDO/booth/pull/8)(타일 추론·중복 제거)·[#12](https://github.com/GAKDO/booth/pull/12)(detect 명령·실측 절차), 남은 것: Jetson 엔진 빌드·30초 실측, 결과 올리기 | 결과 올리기: detections에 camera 없음·좌표 기준 A에게 질문 | 11/02 |
 | AG1 | agent | macOS 진단 에이전트 | B | 11/9 | 진행 | 머지 [#1](https://github.com/GAKDO/agent/pull/1)(수집·검증), [#2](https://github.com/GAKDO/agent/pull/2)(벤치마크·업로드), 남은 것: 팀 노트북 3대 실행·DI1 뒤 저장 확인 |  | 11/02 |
 | DI1 | diagnostics_server | 진단 수신·저장 | A | 11/7 | 대기 |  |  | 11/01 |
 | RP1 | report_server | 타임라인·해시 체인·검증 API | A | 11/7 | 대기 |  |  | 11/01 |
