@@ -19,7 +19,7 @@
 | ML1 | ml | 데이터셋 빌더·학습 기록 | A | 11/6 | 리뷰 | 머지 [#2](https://github.com/GAKDO/ml/pull/2)(설정·저장소·기록부)·[#3](https://github.com/GAKDO/ml/pull/3)(빌더)·[#4](https://github.com/GAKDO/ml/pull/4)(학습 기록), 남은 것: 집 PC에서 db init·v001 빌드(11/5 라벨링 뒤)·실제 학습 |  | 11/02 |
 | BO2 | booth | Jetson 흠집 탐지 | B | 11/6 | 진행 | 머지 [#8](https://github.com/GAKDO/booth/pull/8)·[#12](https://github.com/GAKDO/booth/pull/12)·[#14](https://github.com/GAKDO/booth/pull/14)(결과 올리기, camera 필수·원본 px). 남은 것: Jetson 엔진 빌드·30초 실측 | 엔진 빌드에 pypi 되는 망·학습된 가중치 필요 | 11/02 |
 | AG1 | agent | macOS 진단 에이전트 | B | 11/9 | 진행 | 머지 [#1](https://github.com/GAKDO/agent/pull/1)(수집·검증), [#2](https://github.com/GAKDO/agent/pull/2)(벤치마크·업로드), 남은 것: 팀 노트북 3대 실행·DI1 뒤 저장 확인 |  | 11/02 |
-| DI1 | diagnostics_server | 진단 수신·저장 | A | 11/7 | 대기 |  |  | 11/01 |
+| DI1 | diagnostics_server | 진단 수신·저장 | A | 11/7 | 진행 | `claude/project-thread-png5yk` |  | 11/02 |
 | RP1 | report_server | 타임라인·해시 체인·검증 API | A | 11/7 | 대기 |  |  | 11/01 |
 | G1 | gitops | 로컬 Compose 폴백 | A | 11/7 | 대기 | MinIO 이미지는 quay.io/minio/minio 고정 태그(안 되면 pgsty/minio), decisions.md 11/2 |  | 11/02 |
 | AU2 | auth_server | 회원가입·인증·재설정·탈퇴 | A | 11/8 | 대기 |  |  | 11/01 |
