@@ -85,3 +85,5 @@
 **API 계약은 서버별 OpenAPI 5개 + 공통 파일.** C1에서 rest-api-v0의 경로 41개와 ping 5개를 `contracts/openapi/<서버>-server.yaml`로 옮기고, Problem Details·커서 목록·인증 방식은 `openapi/components/common.yaml` 한 곳에 둡니다. 코드 값은 codes.yaml이 원본이고 OpenAPI용 enum(`codes.gen.yaml`)은 스크립트로 만들며, CI가 둘이 어긋나지 않는지 검사합니다. 역할·범위는 operation마다 `x-trace-access`로 적어 gateway 테스트가 그대로 읽습니다.
 
 **오류 code는 codes.yaml에, 목록은 모두 커서.** 화면이 오류 문장을 미리 정할 수 있도록 Problem Details의 `code` 값을 codes.yaml `error_code`로 고정했습니다(예: 렌탈 생성 409를 `RENTAL_OPEN_EXISTS`와 `DEVICE_NOT_ACTIVE`로 구분). rest-api-v0에서 `GET /devices`만 `page`였던 것을 다른 목록처럼 커서로 맞췄습니다. codes.yaml은 0.3.0(값 추가만)입니다.
+
+**촬영 세트의 필수 면은 출처별로, 빠진 선택 면은 사유와 함께.** 세트 완료(`/captures/sets/{setId}/complete`)는 codes.yaml `capture.face_required`의 면이 모두 있어야 받고, 빠지면 409 `CAPTURE_FACES_MISSING`(빠진 면 목록 포함)입니다. 부스는 8면(SCR1 화면 흰색은 선택), 폰은 추천안 7면(KB 제외)이며 폰 목록은 C(WE2)가 확인합니다. 찍지 못한 선택 면은 완료 요청의 `skippedFaces`에 면 → 사유로 적습니다. 세트 생성 응답의 업로드 URL 목록에는 `camera`를 넣고 요청 사진과 같은 순서로 돌려줍니다.
