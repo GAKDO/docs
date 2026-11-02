@@ -117,7 +117,7 @@ MVP 필수 요구사항은 기능 44개, 비기능 6개입니다. 집 PC(RTX 407
 | 인프라 | 우리 자원 | 접속 주소 | 쓰는 곳 |
 | --- | --- | --- | --- |
 | PostgreSQL (클러스터 안, 예외) | DB `trace`(스키마 rental·capture·inspection·diagnostics·report·ml·auth), DB `labelstudio` | postgres:5432 (클러스터 안) | 서버 5개, 데이터 도구, Label Studio |
-| MinIO | `trace-captures`·`trace-derived`(서비스), `trace-raw`·`trace-labels`·`trace-datasets`·`trace-models`(학습), trace-backups(DB 백업) | `https://storage.java21.net` | capture·report, 워커, 부스, 촬영 도구, Label Studio, Jetson |
+| MinIO | `trace-captures`·`trace-derived`(서비스), `trace-raw`·`trace-labels`·`trace-datasets`·`trace-models`(학습), trace-backups(DB 백업) | S3 API `http://storage.java21.net:8000`(HTTP만), 콘솔 `https://storage.java21.net` | capture·report, 워커, 부스, 촬영 도구, Label Studio, Jetson |
 | RabbitMQ | vhost `/trace` | `s4.java21.net:5672` (관리 화면 15672) | 기능 서버 4개, auth-server(영수증), 워커 2개 |
 | Redis | DB 2번(학번 끝자리 규칙), 키 접두사 `trace:` | 학교 Redis `:6379` (클러스터는 내부망 주소, 집 PC는 외부 주소) | gateway(요청 제한), auth(리프레시 토큰), capture·report(진행률) |
 | InfluxDB | 버킷 `trace-pilot` | `http://influx.java21.net` | diagnostics(쓰기), Grafana(읽기, 학교 공용) |

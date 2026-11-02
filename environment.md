@@ -16,7 +16,7 @@
 | 인프라 | 우리 자원 | 접속 주소 | 비고 |
 |---|---|---|---|
 | PostgreSQL | DB `trace`(스키마 7), `labelstudio` | 클러스터 안 `postgres:5432` | 예외로 클러스터에 직접 설치(리뷰 결정 14), 매일 MinIO 백업 |
-| MinIO | `trace-captures`·`trace-derived`·`trace-raw`·`trace-labels`·`trace-datasets`·`trace-models`·`trace-backups` | `https://storage.java21.net` | 사진은 사전 서명 URL로 직접 업로드 |
+| MinIO | 버킷 7개 `trace-captures`·`trace-derived`·`trace-raw`·`trace-labels`·`trace-datasets`·`trace-models`·`trace-backups` (11/2 생성, `trace-raw`만 버전 관리, 모두 공개 안 함) | S3 API `http://storage.java21.net:8000` (**HTTP만**), 콘솔 `https://storage.java21.net` | 앱·기기는 아래 역할별 키만 쓴다. 사진은 사전 서명 URL로 직접 업로드 |
 | RabbitMQ | vhost `/trace` | `s4.java21.net:5672` (관리 화면 15672) | 이벤트 5종, 집 PC 워커도 접속 |
 | Redis | DB 2번(학번 끝자리 규칙), 키 접두사 `trace:` | 학교 Redis 6379 | 클러스터는 내부망 주소(gitops `infra.env`), 집 PC는 외부 주소 |
 | InfluxDB | 버킷 `trace-pilot` | `http://influx.java21.net` | Grafana는 로컬 Docker(11/2) |
@@ -24,26 +24,45 @@
 | SonarQube | 프로젝트 `trace-<레포>` | `http://s4.java21.net:9000` | CI에서 분석 |
 | Gmail SMTP | 팀 Google 계정 하나 | `smtp.gmail.com:587` | 앱 비밀번호는 Rancher Secret. 이메일 인증·재설정·봉인 영수증 3개가 여기에 달림 |
 
-## 학교 MinIO 한 번 확인 (CA1, 11/2)
+## 학교 MinIO (11/2)
 
-CI와 세션은 MinIO 이미지를 받을 수 없어 moto로 시험하는데, moto는 `x-amz-checksum-sha256`이 틀린 파일도 받습니다. 그래서 "다른 파일은 저장소가 거절한다"는 학교 MinIO에서 한 번 직접 확인합니다. 키는 trace-secrets의 `MINIO_ACCESS_KEY`·`MINIO_SECRET_KEY`를 터미널 환경 변수로만 넣고 파일·커밋에 적지 않습니다.
+- **주소:** S3 API는 `http://storage.java21.net:8000`(HTTP만, HTTPS 없음), 웹 콘솔은 `https://storage.java21.net`. 콘솔 주소는 S3 API가 아니므로 `MINIO_ENDPOINT`·`mc alias`·SDK에는 8000 주소를 쓴다.
+- **버킷:** `trace-` 버킷 7개를 11/2에 만들었다. `trace-raw`(학습용 원본 사진)는 버전 관리를 켜 실수로 덮어써도 원본이 남고, 7개 모두 익명 공개를 하지 않는다.
+- **키:** 공용 계정은 설정 확인용으로만 쓰고, 앱·기기에는 역할별 키만 넣는다(decisions.md 11/2). 키 6개는 모두 우리 버킷만, 필요한 최소 권한만 가진다. **키 값은 Git·문서·채팅에 두지 않는다.**
 
-1. 버킷이 있는지 본다: `mc alias set school https://storage.java21.net "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY"` → `mc ls school/trace-captures`. 없으면 `mc mb school/trace-captures`.
-2. 브라우저(폰 웹앱)에서 올릴 수 있게 CORS가 `PUT`과 헤더 `Content-Type`·`x-amz-checksum-sha256`을 허용하는지 본다. web 주소로 사전 요청을 보내 `Access-Control-Allow-Headers`에 두 헤더가 있으면 된다.
+| 키 | 쓰는 곳 | 용도 |
+|---|---|---|
+| `trace-server` | 클러스터 앱(capture·report·diagnostics)·매일 DB 백업(pg-backup) | 서비스 사진 사전 서명·확인(`trace-captures`), 리포트·원본 JSON(`trace-derived`), DB 백업(`trace-backups`). trace-secrets `MINIO_ACCESS_KEY`·`MINIO_SECRET_KEY` |
+| `trace-worker` | 집 PC inspect-worker·recon-worker | 서비스 사진 읽기, 탐지·텍스처 결과 쓰기(`trace-derived`) |
+| `trace-capture` | 학습 데이터 촬영 도구(노트북·Jetson) | `trace-raw` 쓰기(삭제 권한 없음) |
+| `trace-labelstudio` | Label Studio | `trace-raw` 읽기, `trace-labels` 쓰기 |
+| `trace-trainer` | 집 PC 빌더·학습 | `trace-raw`·`trace-labels` 읽기, `trace-datasets`·`trace-models` 쓰기(ml `deploy/minio/`) |
+| `trace-jetson` | 부스 Jetson | `trace-models` 읽기 |
+
+키는 각 기기의 환경 변수나 Rancher Secret에만 둔다. 클러스터 밖 기기(집 PC·Jetson·노트북)는 trace-secrets에 넣지 않는다.
+
+### 한 번 확인 (CA1)
+
+CI와 세션은 MinIO 이미지를 받을 수 없어 moto로 시험하는데, moto는 `x-amz-checksum-sha256`이 틀린 파일도 받습니다. 그래서 "다른 파일은 저장소가 거절한다"와 CORS는 학교 MinIO에서 한 번 직접 확인합니다. 키는 터미널 환경 변수로만 넣고 파일·커밋에 적지 않습니다.
+
+1. **설정 확인(공용 계정):** 공용 계정은 이 단계에서만 쓴다. `mc alias set school-admin http://storage.java21.net:8000 "$MINIO_ADMIN_USER" "$MINIO_ADMIN_PASSWORD"` → `mc ls school-admin | grep trace-`로 버킷 7개, `mc version info school-admin/trace-raw`가 `versioning is enabled`, `mc anonymous get school-admin/trace-raw`(다른 버킷도)가 `private`인지 본다. 끝나면 `mc alias rm school-admin`.
+2. **앱 키로 접근 확인:** `mc alias set school http://storage.java21.net:8000 "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY"`(trace-server 키) → `mc ls school/trace-captures`는 되고, `mc ls school/trace-raw`는 거절되면 최소 권한이 맞다.
+3. **CORS:** 브라우저(폰 웹앱)에서 올릴 수 있게 `PUT`과 헤더 `Content-Type`·`x-amz-checksum-sha256`을 허용하는지 본다. 사전 요청의 `Access-Control-Allow-Headers`에 두 헤더가 있으면 된다.
    ```
-   curl -si -X OPTIONS https://storage.java21.net/trace-captures/check.jpg \
-     -H "Origin: https://gakdo.site:8315" -H "Access-Control-Request-Method: PUT" \
+   curl -si -X OPTIONS http://storage.java21.net:8000/trace-captures/check.jpg \
+     -H "Origin: https://gakdo.site" -H "Access-Control-Request-Method: PUT" \
      -H "Access-Control-Request-Headers: content-type,x-amz-checksum-sha256"
    ```
    허용하지 않으면 학교 MinIO 관리자에게 이 오리진·헤더를 요청한다(공용 MinIO라 우리가 바꿀 수 없을 수 있음).
-3. capture_server의 통합 시험을 학교 MinIO에 대고 돌린다. 로컬에 Docker가 있어야 한다(PostgreSQL·RabbitMQ 컨테이너).
+   **주의:** S3 API가 HTTP뿐이라, HTTPS 웹앱(`https://gakdo.site`)에서 `http://` 사전 서명 URL로 PUT하면 브라우저가 혼합 콘텐츠로 막는다. CORS가 맞아도 폰 업로드는 HTTPS로 S3 API를 여는 경로가 정해져야 된다(미정, 11/2).
+4. **해시 거절:** capture_server의 통합 시험을 학교 MinIO에 대고 돌린다. 로컬에 Docker가 있어야 한다(PostgreSQL·RabbitMQ 컨테이너).
    ```
-   S3_TEST_ENDPOINT=https://storage.java21.net S3_TEST_VERIFIES_CHECKSUM=true \
+   S3_TEST_ENDPOINT=http://storage.java21.net:8000 S3_TEST_VERIFIES_CHECKSUM=true \
    S3_TEST_ACCESS_KEY="$MINIO_ACCESS_KEY" S3_TEST_SECRET_KEY="$MINIO_SECRET_KEY" \
    ./mvnw test -Dtest=CaptureIntegrationTest
    ```
    통과하면 사전 서명 PUT·완료·이벤트·해시 대조가 실제 MinIO에서 맞고, 알린 해시와 다른 파일 PUT이 4xx로 거절된 것이다. 시험은 `trace-captures/captures/<새 세트 ID>/`와 `captures/plain/`에 작은 파일을 남기므로 끝나면 `mc rm --recursive --force school/trace-captures/captures/plain/`처럼 지운다.
-4. 결과를 `team/board.md` CA1 비고와 그날 스탠드업에 적는다. 거절되지 않으면(200) 계약을 바꾸지 말고 바로 알린다(서버의 complete 해시 대조가 마지막 방어선이라 데이터는 안전).
+5. 결과를 `team/board.md` CA1 비고와 그날 스탠드업에 적는다. 거절되지 않으면(200) 계약을 바꾸지 말고 바로 알린다(서버의 complete 해시 대조가 마지막 방어선이라 데이터는 안전).
 
 ## 도메인과 HTTPS (11/2)
 
