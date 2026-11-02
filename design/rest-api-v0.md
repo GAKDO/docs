@@ -102,6 +102,8 @@
 | GET | /reports/rentals/{rentalId}/stream | ADMIN·CUSTOMER(본인)·촬영 | 진행률 SSE | 200 `text/event-stream` | FR-RPT-04 |
 | GET | /reports/rentals/{rentalId}/chain | ADMIN | 해시 체인 전체 | 200 | FR-INT-01 |
 | GET | /verify/{verifyToken} | PUBLIC | 체인 정상 여부, 시점별 등급·지문·서명 시각 | 200 · 404 | FR-INT-02·03 |
+| POST | /reports/rentals/{rentalId}/checkpoints/{checkpointId}/seal | ADMIN | 관리자 수동 봉인(시연 우회로, 사유 5~300자, 사용 기록 남김) | 201 · 400 · 404 · 409 `RECORD_ALREADY_SEALED`·`CHECKPOINT_ORDER_VIOLATION` | FR-INT-01 |
+| GET | /reports/manual-seals | ADMIN | 수동 봉인 사용 기록(커서) | 200 | FR-INT-01 |
 | GET | /reports/search?q= | ADMIN | 기록 검색(선택) | 200 | FR-RPT-05 |
 
 ## 역할 × 경로 표
@@ -124,6 +126,7 @@ FR-AUTH-03의 수용 기준입니다. 칸마다 gateway 통합 테스트를 하�
 | 진단 결과 읽기 | ✗ | ✓ | 본인 | ✗ | ✗ | ✗ |
 | 리포트·진행률 | ✗ | ✓ | 본인 | 진행률만 | ✗ | ✗ |
 | 체인 전체·검색 | ✗ | ✓ | ✗ | ✗ | ✗ | ✗ |
+| 수동 봉인·사용 기록 | ✗ | ✓ | ✗ | ✗ | ✗ | ✗ |
 | 검증 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 
 ## 화면별로 부르는 API (C)

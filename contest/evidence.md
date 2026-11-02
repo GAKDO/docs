@@ -37,5 +37,5 @@
 |---|---|---|---|
 | F1 | 아키텍처 한 장(발표용으로 단순화) | [../architecture.md](../architecture.md) 구성도 | 대기 |
 | F2 | 세 시점 흐름(출고→수령→반납, 비교 짝) | 시연 시나리오 | 대기 |
-| F3 | 해시 체인·검증 구조 | RP1 설계 | 대기 |
+| F3 | 해시 체인·검증 구조 | RP1 설계 | 원본(mermaid) [figures/F3-hash-chain.md](figures/F3-hash-chain.md), PNG 대기 |
 | F4 | 9면 정합 개념(원본 사진 → 표준 면) | contracts/capture/faces.md | 대기 |
