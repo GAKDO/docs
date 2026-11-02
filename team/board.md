@@ -16,7 +16,7 @@
 | RE1 | rental_server | 렌탈·기기·기종·시점 | A | 11/5 | 완료 | [PR #1](https://github.com/GAKDO/rental_server/pull/1) 머지 |  | 11/02 |
 | CA1 | capture_server | 촬영 세트·사전 서명 URL | A | 11/6 | 진행 | `claude/project-thread-aosr81` |  | 11/02 |
 | WE1 | web | 로그인·출고·반납·기기 관리 | C | 11/6 | 대기 |  |  | 11/01 |
-| ML1 | ml | 데이터셋 빌더·학습 기록 | A | 11/6 | 진행 | `claude/project-thread-rlen71` |  | 11/02 |
+| ML1 | ml | 데이터셋 빌더·학습 기록 | A | 11/6 | 리뷰 | 머지 [#2](https://github.com/GAKDO/ml/pull/2)(설정·저장소·기록부)·[#3](https://github.com/GAKDO/ml/pull/3)(빌더)·[#4](https://github.com/GAKDO/ml/pull/4)(학습 기록), 남은 것: 집 PC에서 db init·v001 빌드(11/5 라벨링 뒤)·실제 학습 |  | 11/02 |
 | BO2 | booth | Jetson 흠집 탐지 | B | 11/6 | 진행 | 머지 [#8](https://github.com/GAKDO/booth/pull/8)(타일 추론·중복 제거), 남은 것: Jetson 엔진 빌드·30초 실측, 결과 올리기 | 결과 올리기: detections에 camera 없음·좌표 기준 A에게 질문 | 11/02 |
 | AG1 | agent | macOS 진단 에이전트 | B | 11/9 | 진행 | 머지 [#1](https://github.com/GAKDO/agent/pull/1)(수집·검증), [#2](https://github.com/GAKDO/agent/pull/2)(벤치마크·업로드), 남은 것: 팀 노트북 3대 실행·DI1 뒤 저장 확인 |  | 11/02 |
 | DI1 | diagnostics_server | 진단 수신·저장 | A | 11/7 | 대기 |  |  | 11/01 |
