@@ -9,7 +9,7 @@
 | C1 | contracts | OpenAPI 5개 | A (B·C 리뷰) | 11/3 | 완료 | [PR #1](https://github.com/GAKDO/contracts/pull/1) 머지 |  | 11/02 |
 | C2 | contracts | 진단 결과 JSON Schema v1 | A (B 리뷰) | 11/3 | 진행 | `claude/project-thread-h201ph` |  | 11/02 |
 | C3 | contracts | 이벤트 스키마 5종 | A | 11/3 | 진행 | contracts `claude/project-thread-q6o6zf` |  | 11/02 |
-| BO1 | booth | 촬영 도구·부스 촬영 | B | 11/4 | 진행 | MVP 머지 [#2](https://github.com/GAKDO/booth/pull/2)·[#3](https://github.com/GAKDO/booth/pull/3)·[#4](https://github.com/GAKDO/booth/pull/4), 다음은 업로드·재시도 |  | 11/02 |
+| BO1 | booth | 촬영 도구·부스 촬영 | B | 11/4 | 진행 | 머지 [#2](https://github.com/GAKDO/booth/pull/2)·[#3](https://github.com/GAKDO/booth/pull/3)·[#4](https://github.com/GAKDO/booth/pull/4)·[#5](https://github.com/GAKDO/booth/pull/5)(업로드), 남은 것: Jetson 실기·capture/README.md·출고·반납 모드 |  | 11/02 |
 | ML3 | ml | Label Studio 연동 | B | 11/4 | 대기 |  |  | 11/01 |
 | AU1 | auth_server | 로그인·JWT·자격 교환 | A | 11/5 | 대기 |  |  | 11/01 |
 | GW1 | gateway | JWT 검증·역할×경로 | A | 11/5 | 대기 |  |  | 11/01 |
