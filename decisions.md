@@ -143,3 +143,5 @@
 **세트 사진 최대 80, 첫 기종은 MacBook Air M2.** 세트 생성의 사진 최대 54는 카메라 2대를 세지 않은 값이라 80으로 올렸습니다(부스 실제 29장, C 지적). 기종 시드 첫 값은 MBA13-M2(폭 304.1·깊이 215.0 mm는 Apple 사양, 본체 7.0·상판 4.0 mm는 B 실측)이고 그램은 11/4 실측 뒤 넣습니다.
 
 **파일럿 대시보드는 로컬 Docker Grafana.** 학교 Grafana 관리자 계정을 찾지 못해 파일럿 대시보드는 C의 Docker Grafana(provisioning, 읽기 토큰은 .env)로 띄운다. 학교 클러스터에는 올리지 않는다(NFR-05). 시연은 노트북 또는 G1 Compose.
+
+**흠집 다각형은 어디서나 표준 좌표 px, 단위 바꾸기는 없다.** 검사 완료 이벤트(trace.inspect.completed)만 polygon을 mm로 적고 있어 REST·DB(px)와 어긋났습니다(C 지적). 이벤트 설명을 표준 좌표 px(1 px = 0.25 mm)로 고쳐, 워커가 px로 내고 capture-server는 그대로 저장합니다. mm는 길이·넓이·거리 값에만 씁니다(contracts).
