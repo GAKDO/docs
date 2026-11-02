@@ -41,7 +41,7 @@ MVP 필수 요구사항은 기능 44개, 비기능 6개입니다. 집 PC(RTX 407
 | FR-USR-04 | 회원 | 고객은 탈퇴할 수 있고, 탈퇴하면 이메일·이름을 지우고 렌탈 기록은 익명으로 남긴다 | 탈퇴 후 DB에 이메일·이름이 남지 않는다 | A | 필수 |
 | FR-USR-05 | 회원 | 가입하면 이메일로 6자리 인증 코드가 가고, 코드를 넣어야 계정이 활성화된다 | 인증 전 로그인은 403, 코드는 10분 뒤 만료되고 5번 틀리면 새로 받아야 한다 | A | 필수 |
 | FR-USR-06 | 회원 | 비밀번호를 잊은 고객은 이메일로 받은 코드로 새 비밀번호를 정한다 | 없는 이메일도 같은 응답을 받고, 재설정하면 그 계정의 리프레시 토큰이 모두 지워진다 | A | 필수 |
-| FR-CAP-01 | 촬영 | 부스는 자세별 면·조명 세트를 버튼 한 번에 찍어 올린다 | 한 세트에서 빠진 면이 0개다 | B | 필수 |
+| FR-CAP-01 | 촬영 | 부스는 자세별 면·조명 세트를 버튼 한 번에 찍어 올린다 | 한 세트에서 필수 8면 중 빠진 면이 0개다(SCR1은 선택, 건너뛰면 사유) | B | 필수 |
 | FR-CAP-02 | 촬영 | 모든 사진에 면·조명·카메라 코드와 SHA-256을 남긴다 | 내려받은 파일 해시와 저장된 해시가 같다 | B | 필수 |
 | FR-CAP-03 | 촬영 | 폰 웹앱은 면마다 윤곽 가이드를 띄우고 블러·반사를 검사한다 | 불량 사진은 재촬영 전까지 제출되지 않는다 | C | 필수 |
 | FR-CAP-04 | 촬영 | 품질 미달 면은 "판정 불가"로 두고 비교에서 뺀다 | 판정 불가 면은 등급 계산에 쓰이지 않는다 | C | 필수 |
@@ -273,7 +273,7 @@ Crowfoot ERD v1(10/31): [TRACE MVP ERD](https://crowfoot.java21.net/workspaces/6
 
 | 라우팅 키 | 발행 | 소비 (큐) | 언제 | 핵심 필드 |
 | --- | --- | --- | --- | --- |
-| `trace.capture.uploaded` | capture-server | inspect-worker (`trace.inspect.requested`) | 촬영 세트 9면 업로드 완료 | captureSetId, source(BOOTH·PHONE), needDetection, photos\[photoId, face, light, objectKey, sha256\] |
+| `trace.capture.uploaded` | capture-server | inspect-worker (`trace.inspect.requested`) | 촬영 세트 업로드 완료(출처별 필수 면, SCR1 선택) | captureSetId, source(BOOTH·PHONE), needDetection, photos\[photoId, face, light, objectKey, sha256\] |
 | `trace.inspect.completed` | inspect-worker | capture-server (`trace.capture.inspected`) | 정합·탐지·텍스처 완료 | captureSetId, alignments\[photoId, homography, errorPx\], defects\[photoId, class, polygon, confidence\], textureKeys, modelVersion |
 | `trace.checkpoint.graded` | capture-server | report-server (`trace.report.updates`) | 이전 시점과 비교·등급 완료 | grade, ruleVersion, newDefectIds, unjudgeableFaces |
 | `trace.diagnostics.recorded` | diagnostics-server | report-server (`trace.report.updates`) | 진단 저장·비교 완료 | runId, sha256, flags\[kind, detail\] |

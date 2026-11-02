@@ -79,8 +79,8 @@
 
 | 메서드 | 경로 | 역할 | 하는 일 | 주요 응답 | 요구사항 |
 | --- | --- | --- | --- | --- | --- |
-| POST | /captures/sets | BOOTH·촬영 | 촬영 세트 생성 + 사진별 업로드 URL(PUT, 10분) | 201 · 403 범위 밖 시점 | FR-CAP-01·05 |
-| POST | /captures/sets/{setId}/complete | BOOTH·촬영 | 해시 확인 후 capture.uploaded 발행 | 202 · 409 빠진 면 | FR-CAP-01·02 |
+| POST | /captures/sets | BOOTH·촬영 | 촬영 세트 생성 + 사진별 업로드 URL(PUT, 10분). 응답 uploads는 사진마다 face·light·camera를 돌려줌 | 201 · 403 범위 밖 시점 | FR-CAP-01·05 |
+| POST | /captures/sets/{setId}/complete | BOOTH·촬영 | 해시 확인 후 capture.uploaded 발행. 본문 skippedFaces {면: 사유}는 선택 면(SCR1)만 | 202 · 409 출처별 필수 면 빠짐(부스 8면, SCR1 선택) | FR-CAP-01·02 |
 | POST | /captures/sets/{setId}/detections | BOOTH | Jetson 탐지 결과 저장 | 201 | FR-INS-01 |
 | GET | /captures/sets/{setId} | ADMIN·촬영 | 세트 상태 | 200 | FR-CAP-01 |
 | GET | /captures/checkpoints/{checkpointId}/inspection | ADMIN·CUSTOMER(본인) | 흠집·신규 판정·등급 | 200 | FR-INS-03·04 |
@@ -158,10 +158,12 @@ FR-AUTH-03의 수용 기준입니다. 칸마다 gateway 통합 테스트를 하�
 {
   "captureSetId": "0193a1c2-0000-7000-8000-0000000000aa",
   "uploads": [
-    { "face": "TOP", "light": "ROOM", "method": "PUT", "url": "https://<minio>/trace-captures/…", "expiresAt": "2026-11-12T10:20:00+09:00" }
+    { "face": "TOP", "light": "ROOM", "camera": "PHONE", "method": "PUT", "url": "https://<minio>/trace-captures/…", "expiresAt": "2026-11-12T10:20:00+09:00" }
   ]
 }
 ```
+
+`uploads`는 요청 `photos`와 같은 순서로 face·light·camera를 그대로 돌려줍니다. 부스는 같은 면·조명을 CAM1·CAM2로 두 장 올리므로 camera로 구분합니다. 완료(`/complete`)는 세트 출처의 필수 면(codes.yaml `face_required`, 부스 8면)이 빠지면 409이고, 선택 면 SCR1을 건너뛸 때는 본문 `skippedFaces`에 사유를 넣습니다.
 
 검증 `GET /api/v1/verify/{verifyToken}` 응답 200
 

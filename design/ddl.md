@@ -88,6 +88,7 @@ CREATE TABLE capture.capture_set (
   booth_id       varchar(32),
   status         varchar(16) NOT NULL CHECK (status IN ('UPLOADING','UPLOADED','INSPECTED','GRADED')),
   quality        varchar(16) NOT NULL DEFAULT 'OK' CHECK (quality IN ('OK','UNJUDGEABLE')),
+  skipped_faces  jsonb       NOT NULL DEFAULT '{}',              -- 건너뛴 선택 면과 사유 {"SCR1": "사유"} (11/2)
   created_at     timestamptz NOT NULL DEFAULT now(),
   updated_at     timestamptz NOT NULL DEFAULT now()
 );
@@ -106,7 +107,7 @@ CREATE TABLE capture.photo (
   taken_at        timestamptz  NOT NULL,
   created_at      timestamptz  NOT NULL DEFAULT now(),
   updated_at      timestamptz  NOT NULL DEFAULT now(),
-  UNIQUE (capture_set_id, face, light)
+  UNIQUE (capture_set_id, face, light, camera)   -- 위 카메라 2대가 같은 면·조명을 찍음 (11/2)
 );
 
 CREATE TABLE inspection.face_alignment (
