@@ -9,7 +9,7 @@
 | C1 | contracts | OpenAPI 5개 | A (B·C 리뷰) | 11/3 | 완료 | [PR #1](https://github.com/GAKDO/contracts/pull/1) 머지, ID→PublicId [PR #6](https://github.com/GAKDO/contracts/pull/6) 머지 |  | 11/02 |
 | C2 | contracts | 진단 결과 JSON Schema v1 | A (B 리뷰) | 11/3 | 완료 | [PR #3](https://github.com/GAKDO/contracts/pull/3) 머지 |  | 11/02 |
 | C3 | contracts | 이벤트 스키마 5종 | A | 11/3 | 완료 | [PR #2](https://github.com/GAKDO/contracts/pull/2) 머지, ID→PublicId [PR #6](https://github.com/GAKDO/contracts/pull/6) 머지 |  | 11/02 |
-| BO1 | booth | 촬영 도구·부스 촬영 | B | 11/4 | 진행 | 머지 [#2](https://github.com/GAKDO/booth/pull/2)·[#3](https://github.com/GAKDO/booth/pull/3)·[#4](https://github.com/GAKDO/booth/pull/4)·[#5](https://github.com/GAKDO/booth/pull/5)(업로드)·[#6](https://github.com/GAKDO/booth/pull/6)(capture/README), 남은 것: Jetson 실기·출고·반납 모드 |  | 11/02 |
+| BO1 | booth | 촬영 도구·부스 촬영 | B | 11/4 | 진행 | 머지 [#2](https://github.com/GAKDO/booth/pull/2)·[#3](https://github.com/GAKDO/booth/pull/3)·[#4](https://github.com/GAKDO/booth/pull/4)·[#5](https://github.com/GAKDO/booth/pull/5)(업로드)·[#6](https://github.com/GAKDO/booth/pull/6)(capture/README)·[#7](https://github.com/GAKDO/booth/pull/7)(publicId), 남은 것: Jetson 실기·출고·반납 모드 |  | 11/02 |
 | ML3 | ml | Label Studio 연동 | B | 11/4 | 진행 | 머지 [#1](https://github.com/GAKDO/ml/pull/1)(setup·sync 명령), 남은 것: 클러스터 Label Studio에서 실제 확인(A 배포 뒤) |  | 11/02 |
 | AU1 | auth_server | 로그인·JWT·자격 교환 | A | 11/5 | 진행 | `claude/project-thread-tht1mn` (specs/001-login-jwt-credentials) |  | 11/02 |
 | GW1 | gateway | JWT 검증·역할×경로 | A | 11/5 | 완료 | [PR #1](https://github.com/GAKDO/gateway/pull/1) 머지, 남은 것: 클러스터 라우팅 확인·TRACE_WEB_ORIGIN 값 |  | 11/02 |
@@ -18,7 +18,7 @@
 | WE1 | web | 로그인·출고·반납·기기 관리 | C | 11/6 | 대기 |  |  | 11/01 |
 | ML1 | ml | 데이터셋 빌더·학습 기록 | A | 11/6 | 대기 |  |  | 11/01 |
 | BO2 | booth | Jetson 흠집 탐지 | B | 11/6 | 대기 |  |  | 11/01 |
-| AG1 | agent | macOS 진단 에이전트 | B | 11/9 | 대기 |  |  | 11/01 |
+| AG1 | agent | macOS 진단 에이전트 | B | 11/9 | 진행 | 머지 [#1](https://github.com/GAKDO/agent/pull/1)(수집·검증), 리뷰 [#2](https://github.com/GAKDO/agent/pull/2)(벤치마크·업로드), 남은 것: 팀 노트북 3대 실행·DI1 뒤 저장 확인 |  | 11/02 |
 | DI1 | diagnostics_server | 진단 수신·저장 | A | 11/7 | 대기 |  |  | 11/01 |
 | RP1 | report_server | 타임라인·해시 체인·검증 API | A | 11/7 | 대기 |  |  | 11/01 |
 | G1 | gitops | 로컬 Compose 폴백 | A | 11/7 | 대기 |  |  | 11/01 |
