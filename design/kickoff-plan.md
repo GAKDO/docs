@@ -221,7 +221,7 @@ Oct 30, 2026 · @민서
 | 계약 | JSON 필드는 camelCase(Python은 Pydantic 별칭), 시간은 ISO 8601 + 오프셋, ID는 NanoID 21자 publicId(DB 기본 키는 내보내지 않음), REST 오류는 RFC 9457 Problem Details, 메시지마다 schemaVersion |
 | 코드 사전 | 면·조명·카메라·클래스·등급·시점 코드는 `contracts/codes.yaml` 한 곳에서만 정의 |
 | 인프라 접근 | 저장소는 S3 API(boto3·AWS SDK)로만, 인프라 주소는 환경 변수로만 |
-| Git | main 보호, squash merge, 브랜치 `feat/W21-face-rectify`, Conventional Commits, `contracts/` 변경은 CODEOWNERS로 3명 승인 |
+| Git | main 보호, squash merge, 브랜치 `feat/W21-face-rectify`, Conventional Commits, PR 승인·머지는 팀장(A)이 함(11/2) |
 | 비밀 값 | `.env.example`만 커밋, gitleaks, 실제 값은 Rancher Secret |
 | 완료 정의 | 완료 조건을 재현하는 명령을 PR에 적고, 테스트·SonarQube·계약 테스트를 통과하고, 리뷰 1명 |
 | 작업 보드 | 작업을 GitHub Issues + Projects로 관리, 라벨은 작업 묶음, 담당은 A·B·C |
