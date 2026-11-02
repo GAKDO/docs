@@ -1,0 +1,60 @@
+{
+  "method": "CONTOUR",
+  "deviceModel": "MBA13-M2",
+  "n": 100,
+  "seed": 0,
+  "phone": {
+    "TOP": {
+      "count": 100,
+      "failed": 0,
+      "mean_px": 0.462,
+      "p95_px": 0.917,
+      "max_px": 1.372,
+      "mean_mm": 0.115,
+      "p95_mm": 0.229,
+      "max_mm": 0.343
+    },
+    "SF": {
+      "count": 100,
+      "failed": 0,
+      "mean_px": 0.944,
+      "p95_px": 1.486,
+      "max_px": 1.917,
+      "mean_mm": 0.236,
+      "p95_mm": 0.371,
+      "max_mm": 0.479
+    },
+    "SL": {
+      "count": 100,
+      "failed": 0,
+      "mean_px": 0.536,
+      "p95_px": 0.882,
+      "max_px": 0.955,
+      "mean_mm": 0.134,
+      "p95_mm": 0.221,
+      "max_mm": 0.239
+    }
+  },
+  "boothHalf": {
+    "TOP-front": {
+      "count": 100,
+      "failed": 0,
+      "mean_px": 3.537,
+      "p95_px": 6.547,
+      "max_px": 8.86,
+      "mean_mm": 0.884,
+      "p95_mm": 1.637,
+      "max_mm": 2.215
+    },
+    "TOP-back": {
+      "count": 100,
+      "failed": 0,
+      "mean_px": 3.61,
+      "p95_px": 6.704,
+      "max_px": 9.196,
+      "mean_mm": 0.902,
+      "p95_mm": 1.676,
+      "max_mm": 2.299
+    }
+  }
+}
