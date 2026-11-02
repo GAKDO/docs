@@ -21,7 +21,7 @@
 | AG1 | agent | macOS 진단 에이전트 | B | 11/9 | 진행 | 머지 [#1](https://github.com/GAKDO/agent/pull/1)(수집·검증), [#2](https://github.com/GAKDO/agent/pull/2)(벤치마크·업로드), 남은 것: 팀 노트북 3대 실행·DI1 뒤 저장 확인 |  | 11/02 |
 | DI1 | diagnostics_server | 진단 수신·저장 | A | 11/7 | 진행 | `claude/project-thread-png5yk` |  | 11/02 |
 | RP1 | report_server | 타임라인·해시 체인·검증 API | A | 11/7 | 진행 | `claude/project-thread-vnpr8u` |  | 11/02 |
-| G1 | gitops | 로컬 Compose 폴백 | A | 11/7 | 대기 | MinIO 이미지는 quay.io/minio/minio 고정 태그(안 되면 pgsty/minio), decisions.md 11/2 |  | 11/02 |
+| G1 | gitops | 로컬 Compose 폴백 | A | 11/7 | 진행 | `claude/project-thread-rac6t2`: [gitops #11](https://github.com/GAKDO/gitops/pull/11)(compose), [web #37](https://github.com/GAKDO/web/pull/37)(nginx /api·MinIO), [capture_server #5](https://github.com/GAKDO/capture_server/pull/5)(MINIO_PUBLIC_BASE) |  | 11/02 |
 | AU2 | auth_server | 회원가입·인증·재설정·탈퇴 | A | 11/8 | 대기 |  |  | 11/01 |
 | RE2 | rental_server | 파일럿 등록 | A | 11/8 | 대기 |  |  | 11/01 |
 | RP2 | report_server | 검사 진행률 SSE | A | 11/8 | 대기 |  |  | 11/01 |
