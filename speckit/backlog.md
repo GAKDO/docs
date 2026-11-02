@@ -107,7 +107,7 @@ gateway가 모든 요청의 JWT를 auth-server JWKS로 검증하고, design/rest
 
 **CA1 촬영 세트·사전 서명 URL**
 ```
-부스와 폰이 한 시점의 촬영 세트를 만들고, 사진마다 사전 서명 URL을 받아 MinIO trace-captures에 직접 올린 뒤 면·조명·카메라 코드와 SHA-256을 등록한다. 세트가 다 올라오면 trace.capture.uploaded 이벤트를 낸다(FR-CAP-02, FR-CAP-05). 코드 값은 codes.yaml 0.3.0(조명 L1~L4, 카메라 CAM1·CAM2·PHONE, 출처별 필수 면 face_required)이다. 수용 기준: 게이트웨이 트래픽에 사진 본문이 없다. 내려받은 파일 해시와 저장된 해시가 같다. 세트 출처의 필수 면(codes.yaml capture.face_required, 부스는 TOP·BOT·SF·SB·SL·SR·KB·SCR0 8면)이 빠지면 세트가 완료되지 않는다(409). SCR1은 선택이고 건너뛸 때는 skippedFaces에 사유를 남긴다. 업로드 URL 응답은 사진마다 face·light·camera를 돌려준다(부스는 같은 면·조명을 CAM1·CAM2로 두 장 찍음). 폰의 필수 면은 추천안 7면(KB 제외, face_required.PHONE)이고 C가 WE2에서 확인한다. 필수 면이 빠지면 409 CAPTURE_FACES_MISSING(빠진 면 목록 포함).
+부스와 폰이 한 시점의 촬영 세트를 만들고, 사진마다 사전 서명 URL을 받아 MinIO trace-captures에 직접 올린 뒤 면·조명·카메라 코드와 SHA-256을 등록한다. 세트가 다 올라오면 trace.capture.uploaded 이벤트를 낸다(FR-CAP-02, FR-CAP-05). 코드 값은 codes.yaml 0.3.0(조명 L1~L4, 카메라 CAM1·CAM2·PHONE, 출처별 필수 면 face_required)이다. 수용 기준: 게이트웨이 트래픽에 사진 본문이 없다. 내려받은 파일 해시와 저장된 해시가 같다. 세트 출처의 필수 면(codes.yaml capture.face_required, 부스는 TOP·BOT·SF·SB·SL·SR·KB·SCR0 8면)이 빠지면 세트가 완료되지 않는다(409). SCR1은 선택이고 건너뛸 때는 skippedFaces에 사유를 남긴다. 업로드 URL 응답은 사진마다 face·light·camera를 돌려준다(부스는 같은 면·조명을 CAM1·CAM2로 두 장 찍음). 폰의 필수 면은 TOP·BOT·SF·SB·SL·SR·SCR0 7면이다(KB는 찍지 않고 SCR1은 선택, face_required.PHONE, 11/2 C 확인). 폰 SCR1의 조명 코드(ROOM 또는 OFF)는 C가 WE2 명세에서 정한다. 필수 면이 빠지면 409 CAPTURE_FACES_MISSING(빠진 면 목록 포함).
 ```
 
 **CA2 검사 결과·시점 비교·등급**
@@ -148,7 +148,7 @@ inspect-worker가 Redis에 올린 검사 진행률을 화면에 SSE로 흘려보
 
 **WE2 폰 수령 촬영**
 ```
-고객이 수령 QR로 들어와 로그인한 뒤, 면마다 윤곽 가이드를 보며 폰으로 촬영하고 블러·반사를 검사해 통과한 사진만 사전 서명 URL로 올린다(FR-CAP-03, FR-CAP-04). 수용 기준: 불량 사진은 재촬영 전까지 제출되지 않는다. 카메라 권한을 거부하면 이유와 다시 허용하는 방법을 보여 준다. HTTPS에서만 동작한다.
+고객이 수령 QR로 들어와 로그인한 뒤, 면마다 윤곽 가이드를 보며 폰으로 촬영하고 블러·반사를 검사해 통과한 사진만 사전 서명 URL로 올린다(FR-CAP-03, FR-CAP-04). 수용 기준: 불량 사진은 재촬영 전까지 제출되지 않는다. 카메라 권한을 거부하면 이유와 다시 허용하는 방법을 보여 준다. HTTPS에서만 동작한다. 필수 면은 codes.yaml capture.face_required.PHONE(TOP·BOT·SF·SB·SL·SR·SCR0 7면, KB는 찍지 않음)이고, SCR1(화면 흰색)은 선택이라 건너뛰면 skippedFaces에 사유를 남긴다. 폰으로 SCR1을 찍을 때 조명 코드(ROOM 또는 OFF)는 이 명세에서 정한다.
 ```
 
 **WE3 고객 화면·3D 리포트**
