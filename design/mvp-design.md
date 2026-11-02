@@ -273,11 +273,11 @@ Crowfoot ERD v1(10/31): [TRACE MVP ERD](https://crowfoot.java21.net/workspaces/6
 
 | 라우팅 키 | 발행 | 소비 (큐) | 언제 | 핵심 필드 |
 | --- | --- | --- | --- | --- |
-| `trace.capture.uploaded` | capture-server | inspect-worker (`trace.inspect.requested`) | 촬영 세트 업로드 완료(출처별 필수 면, SCR1 선택) | captureSetId, source(BOOTH·PHONE), needDetection, photos\[photoId, face, light, objectKey, sha256\] |
+| `trace.capture.uploaded` | capture-server | inspect-worker (`trace.inspect.requested`), rental-server (`trace.rental.checkpoints`) | 촬영 세트 업로드 완료(출처별 필수 면, SCR1 선택) | captureSetId, source(BOOTH·PHONE), needDetection, photos\[photoId, face, light, objectKey, sha256\] |
 | `trace.inspect.completed` | inspect-worker | capture-server (`trace.capture.inspected`) | 정합·탐지·텍스처 완료 | captureSetId, alignments\[photoId, homography, errorPx\], defects\[photoId, class, polygon, confidence\], textureKeys, modelVersion |
-| `trace.checkpoint.graded` | capture-server | report-server (`trace.report.updates`) | 이전 시점과 비교·등급 완료 | grade, ruleVersion, newDefectIds, unjudgeableFaces |
+| `trace.checkpoint.graded` | capture-server | report-server (`trace.report.updates`), rental-server (`trace.rental.checkpoints`) | 이전 시점과 비교·등급 완료 | grade, ruleVersion, newDefectIds, unjudgeableFaces |
 | `trace.diagnostics.recorded` | diagnostics-server | report-server (`trace.report.updates`) | 진단 저장·비교 완료 | runId, sha256, flags\[kind, detail\] |
-| `trace.record.sealed` | report-server | web(SSE), auth-server 영수증 메일(trace.auth.receipts), 검색 색인(선택) | 해시 체인 봉인 | seq, checkpointType, grade, payloadHash, prevHash, signedAt |
+| `trace.record.sealed` | report-server | web(SSE), auth-server 영수증 메일(trace.auth.receipts), rental-server (`trace.rental.checkpoints`), 검색 색인(선택) | 해시 체인 봉인 | seq, checkpointType, grade, payloadHash, prevHash, signedAt |
 
 공통 규칙
 
