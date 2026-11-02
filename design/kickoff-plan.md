@@ -130,7 +130,7 @@ Oct 30, 2026 · @민서
 설계 규칙
 
 - **서비스 간 FK 금지:** capture\_set.checkpoint\_id는 rental의 ID를 값으로만 들고, 정합성은 이벤트로 맞춥니다. FK는 같은 스키마 안에서만 씁니다.
-- **공통 컬럼:** 모든 테이블에 id(UUIDv7)·created\_at·updated\_at를 둡니다. Crowfoot에는 문서 전체 공통 요구사항으로 올립니다.
+- **공통 컬럼:** 모든 테이블에 id(bigint identity, 밖에 내보내지 않음)·created\_at·updated\_at를 둡니다. 밖에 보이는 행은 public\_id(NanoID 21자)를 더합니다. Crowfoot에는 문서 전체 공통 요구사항으로 올립니다.
 - **파일은 키만:** 사진·3D 텍스처·진단 원본 JSON은 MinIO에 두고, DB에는 object\_key와 sha256만 남깁니다.
 - **추이는 InfluxDB에도:** 배터리·벤치마크 원본은 PostgreSQL이고, 대시보드용 시계열은 InfluxDB `trace-pilot` 버킷에 따로 씁니다.
 - **검색은 복사본:** Elasticsearch 인덱스는 report-service가 이벤트로 채우는 복사본이고, 원본은 항상 PostgreSQL입니다.
@@ -218,7 +218,7 @@ Oct 30, 2026 · @민서
 | 영역 | 규칙 |
 | --- | --- |
 | 포맷·린트 | Java는 Spotless + google-java-format, Python은 uv + ruff(format·check), Web은 ESLint + Prettier. 공통 .editorconfig와 pre-commit |
-| 계약 | JSON 필드는 camelCase(Python은 Pydantic 별칭), 시간은 ISO 8601 + 오프셋, ID는 UUIDv7, REST 오류는 RFC 9457 Problem Details, 메시지마다 schemaVersion |
+| 계약 | JSON 필드는 camelCase(Python은 Pydantic 별칭), 시간은 ISO 8601 + 오프셋, ID는 NanoID 21자 publicId(DB 기본 키는 내보내지 않음), REST 오류는 RFC 9457 Problem Details, 메시지마다 schemaVersion |
 | 코드 사전 | 면·조명·카메라·클래스·등급·시점 코드는 `contracts/codes.yaml` 한 곳에서만 정의 |
 | 인프라 접근 | 저장소는 S3 API(boto3·AWS SDK)로만, 인프라 주소는 환경 변수로만 |
 | Git | main 보호, squash merge, 브랜치 `feat/W21-face-rectify`, Conventional Commits, `contracts/` 변경은 CODEOWNERS로 3명 승인 |

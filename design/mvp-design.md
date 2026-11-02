@@ -256,7 +256,7 @@ rental의 checkpoint가 모든 기록의 기준점이고, 다른 서비스는 �
 설계 규칙
 
 - **서비스 간 FK 금지:** 다른 스키마의 ID는 값으로만 들고, 정합성은 이벤트로 맞춥니다. 서비스를 따로 배포하고 DB 계정도 나눌 수 있게 하려는 것입니다.
-- **공통 컨럼:** 모든 테이블에 `id`(UUIDv7, PK)·`created_at`·`updated_at`(timestamptz)를 둡니다.
+- **공통 컬럼:** 모든 테이블에 `id`(bigint identity, PK, 밖에 내보내지 않음)·`created_at`·`updated_at`(timestamptz)를 둡니다. API·이벤트·URL에 나가는 행에는 `public_id`(NanoID 21자, 앱에서 생성, UNIQUE)를 더하고, 다른 서비스의 행은 그 `public_id`를 값으로 둡니다.
 - **파일은 키만:** 사진·텍스처·진단 원본 JSON은 MinIO에 두고, DB에는 `object_key`와 `sha256`만 남깁니다.
 - **코드 값은 한 곳에서:** 면·조명·클래스·등급·시점 값은 `contracts/codes.yaml`을 따르고, DB에는 CHECK 제약으로 넣습니다.
 - **추이는 InfluxDB에도:** 배터리·벤치마크 원본은 PostgreSQL이고, 대시보드용 시계열은 InfluxDB `trace-pilot`에 따로 씁니다.
@@ -281,7 +281,7 @@ Crowfoot ERD v1(10/31): [TRACE MVP ERD](https://crowfoot.java21.net/workspaces/6
 
 공통 규칙
 
-- **봉투:** 모든 이벤트에 `schemaVersion`, `eventId`(UUIDv7), `occurredAt`(ISO 8601 + 오프셋), `rentalId`, `checkpointId`를 넣습니다. JSON 필드는 camelCase입니다.
+- **봉투:** 모든 이벤트에 `schemaVersion`, `eventId`(NanoID 21자), `occurredAt`(ISO 8601 + 오프셋), `rentalId`, `checkpointId`를 넣습니다. JSON 필드는 camelCase입니다.
 - **유실 방지:** 큐는 durable, 메시지는 persistent입니다. 발행하는 쪽도 시작할 때 큐를 선언합니다. 소비는 처리가 끝난 뒤 ack하고, 계속 실패하는 메시지는 `trace.dlx`로 보냅니다.
 - **중복 안전:** 같은 `eventId`가 두 번 와도 결과가 같게 만듭니다(멱등). 집 PC가 처리 도중 꺼지면 같은 작업이 다시 오기 때문입니다.
 - **집 PC 워커:** 꺼져 있는 동안 작업은 큐에 쌓이고, 켜지면 prefetch 1로 하나씩 처리합니다.

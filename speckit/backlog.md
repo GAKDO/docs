@@ -54,7 +54,7 @@ NFR-03(비밀값)·NFR-04(trace 접두사)는 헌법 V로 모든 기능에 적�
 
 **C1 OpenAPI 5개**
 ```
-auth, rental, capture, diagnostics, report 서버의 REST API를 OpenAPI 3.1 파일 5개(openapi/<서버>.yaml)로 고정한다. 원본은 GAKDO/docs design/rest-api-v0.md의 경로·역할 표와 요청·응답 예시다. 모든 오류는 RFC 9457 Problem Details, JSON 필드는 camelCase, ID는 UUIDv7, 시각은 ISO 8601 + 오프셋이다. 각 경로에 필요한 역할(ADMIN, CUSTOMER, BOOTH, AGENT)과 범위를 적고, /api/v1/<경로>/ping은 인증 없음으로 둔다. 코드 값은 codes.yaml을 참조한다. 수용 기준: redocly lint가 통과하고, rest-api-v0.md의 모든 경로가 빠짐없이 있으며, 화면(C)·에이전트(B) 담당이 리뷰에서 승인한다.
+auth, rental, capture, diagnostics, report 서버의 REST API를 OpenAPI 3.1 파일 5개(openapi/<서버>.yaml)로 고정한다. 원본은 GAKDO/docs design/rest-api-v0.md의 경로·역할 표와 요청·응답 예시다. 모든 오류는 RFC 9457 Problem Details, JSON 필드는 camelCase, ID는 NanoID 21자 publicId(DB bigint 기본 키는 내보내지 않음), 시각은 ISO 8601 + 오프셋이다. 각 경로에 필요한 역할(ADMIN, CUSTOMER, BOOTH, AGENT)과 범위를 적고, /api/v1/<경로>/ping은 인증 없음으로 둔다. 코드 값은 codes.yaml을 참조한다. 수용 기준: redocly lint가 통과하고, rest-api-v0.md의 모든 경로가 빠짐없이 있으며, 화면(C)·에이전트(B) 담당이 리뷰에서 승인한다.
 ```
 
 **C2 진단 결과 JSON Schema v1**
@@ -64,7 +64,7 @@ auth, rental, capture, diagnostics, report 서버의 REST API를 OpenAPI 3.1 파
 
 **C3 이벤트 스키마 5종**
 ```
-RabbitMQ trace.events로 오가는 이벤트 5종의 JSON Schema(events/*.schema.json)를 만든다. 원본은 GAKDO/docs design/mvp-design.md의 "이벤트 계약" 표다. 모든 이벤트는 schemaVersion, eventId(UUIDv7), occurredAt, rentalId, checkpointId 봉투를 가진다. 수용 기준: 이벤트마다 예시 1개가 스키마를 통과하고, 라우팅 키가 설계서 표와 같다.
+RabbitMQ trace.events로 오가는 이벤트 5종의 JSON Schema(events/*.schema.json)를 만든다. 원본은 GAKDO/docs design/mvp-design.md의 "이벤트 계약" 표다. 모든 이벤트는 schemaVersion, eventId(NanoID 21자), occurredAt, rentalId, checkpointId 봉투를 가진다. 수용 기준: 이벤트마다 예시 1개가 스키마를 통과하고, 라우팅 키가 설계서 표와 같다.
 ```
 
 ### auth_server
