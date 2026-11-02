@@ -27,7 +27,7 @@
 | RP2 | report_server | 검사 진행률 SSE | A | 11/8 | 대기 |  |  | 11/01 |
 | WE2 | web | 폰 수령 촬영 | C | 11/8 | 진행 | web #9·#11·#14·#19·#20·#23·#24(가입·메일 인증)·#27(페어링 코드·URL 다시 받기)·#28 머지 | 폰 해상도 요청(ideal 3840×2160·takePhoto, 축소 없이 4:3 자르기·EXIF 회전·최종 파일 해시), 업로드 nginx 경유 주소 반영 확인, 11/5 실서버 폰 시험 | 11/02 |
 | AU3 | auth_server | 수령 QR·렌탈 연결·봉인 영수증 | A | 11/9 | 대기 |  |  | 11/01 |
-| CA2 | capture_server | 검사 결과·시점 비교·등급 | A·C | 11/9 | 대기 |  |  | 11/01 |
+| CA2 | capture_server | 검사 결과·시점 비교·등급 | A·C | 11/9 | 진행 | C 비교 모듈 capture_server #2·#4 머지, A 부분 `claude/project-thread-om86mt` |  | 11/02 |
 | DI2 | diagnostics_server | 점검 플래그·추이 | A | 11/9 | 대기 |  |  | 11/01 |
 | ML2 | ml | inspect-worker | A | 11/9 | 진행 | 간소화(윤곽 4점 호모그래피·펼친 면 텍스처, 폰 탐지는 인터페이스만) `claude/project-thread-gnyohx` |  | 11/02 |
 | AG2 | agent | Windows 진단 에이전트 | B | 11/10 | 대기 |  |  | 11/01 |
