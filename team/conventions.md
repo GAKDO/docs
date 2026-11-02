@@ -5,7 +5,7 @@
 ## 공통
 
 - **언어:** 식별자는 영어, 주석·문서·커밋·PR·테스트 설명은 한국어.
-- **형식:** JSON은 camelCase, 시각은 ISO 8601 + 오프셋(저장은 UTC, 화면은 KST), ID는 UUIDv7, 오류는 RFC 9457 Problem Details.
+- **형식:** JSON은 camelCase, 시각은 ISO 8601 + 오프셋(저장은 UTC, 화면은 KST), ID는 밖에 보이는 `publicId`(NanoID 21자: Java jnanoid, Python nanoid, TS nanoid)만 쓰고 DB 기본 키(bigint `id`)는 내보내지 않음, 오류는 RFC 9457 Problem Details.
 - **코드 값:** 면·조명·카메라·클래스·등급·시점 값은 `contracts/codes.yaml`만 쓴다. 문자열을 코드에 흩뿌리지 않고 상수나 enum 하나로 모은다.
 - **설정:** 주소·비밀은 환경 변수. 기본값은 로컬 개발용만 두고, 비밀 기본값은 두지 않는다.
 - **로그:** 이메일·이름·토큰·비밀번호·사진 URL 서명은 로그에 남기지 않는다. 요청마다 `traceId`를 싣는다.

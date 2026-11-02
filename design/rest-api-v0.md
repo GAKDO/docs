@@ -6,7 +6,7 @@
 
 - **주소:** `https://<gateway>/api/v1/...`. 경로 앞부분으로 서버를 나눕니다: `/auth` auth-server, `/rentals`·`/devices`·`/device-models`·`/pilot` rental-server, `/captures` capture-server, `/diagnostics` diagnostics-server, `/reports`·`/verify` report-server.
 - **인증:** `Authorization: Bearer <액세스 JWT>`. 리프레시 토큰은 HttpOnly 쿠키이고 `/api/v1/auth/refresh`에만 실려 갑니다.
-- **형식:** JSON camelCase, 시각은 ISO 8601 + 오프셋, ID는 UUIDv7.
+- **형식:** JSON camelCase, 시각은 ISO 8601 + 오프셋, ID는 `publicId`(NanoID 21자, 예: `IPv6mcQOlTkKj6mOecAQt`)이고 DB 기본 키(bigint)는 내보내지 않습니다.
 - **오류:** RFC 9457 Problem Details(`application/problem+json`)에 `code`를 더합니다. Spring Boot 3의 ProblemDetail을 그대로 씁니다.
 - **목록:** `?limit=20&cursor=...` → `{ "items": [], "nextCursor": "..." }`
 - **요청 제한:** 가입·로그인·코드 확인·페어링 교환은 gateway가 Redis로 IP당 분당 10회까지 받고, 넘으면 429.
@@ -144,7 +144,7 @@ FR-AUTH-03의 수용 기준입니다. 칸마다 gateway 통합 테스트를 하�
 
 ```json
 {
-  "checkpointId": "0193a1c2-0000-7000-8000-000000000001",
+  "checkpointId": "IPv6mcQOlTkKj6mOecAQt",
   "source": "PHONE",
   "photos": [
     { "face": "TOP", "light": "ROOM", "camera": "PHONE", "sha256": "9f2c…", "contentType": "image/jpeg" }
@@ -156,7 +156,7 @@ FR-AUTH-03의 수용 기준입니다. 칸마다 gateway 통합 테스트를 하�
 
 ```json
 {
-  "captureSetId": "0193a1c2-0000-7000-8000-0000000000aa",
+  "captureSetId": "RxWs4wfLjxC2Rjla92Xe1",
   "uploads": [
     { "face": "TOP", "light": "ROOM", "camera": "PHONE", "method": "PUT", "url": "https://<minio>/trace-captures/…", "expiresAt": "2026-11-12T10:20:00+09:00" }
   ]
