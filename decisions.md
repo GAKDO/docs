@@ -142,7 +142,9 @@
 
 **세트 사진 최대 80, 첫 기종은 MacBook Air M2.** 세트 생성의 사진 최대 54는 카메라 2대를 세지 않은 값이라 80으로 올렸습니다(부스 실제 29장, C 지적). 기종 시드 첫 값은 MBA13-M2(폭 304.1·깊이 215.0 mm는 Apple 사양, 본체 7.0·상판 4.0 mm는 B 실측)이고 그램은 11/4 실측 뒤 넣습니다.
 
-**파일럿 대시보드는 로컬 Docker Grafana.** 학교 Grafana 관리자 계정을 찾지 못해 파일럿 대시보드는 C의 Docker Grafana(provisioning, 읽기 토큰은 .env)로 띄운다. 학교 클러스터에는 올리지 않는다(NFR-05). 시연은 노트북 또는 G1 Compose.
+**파일럿 대시보드는 로컬 Docker Grafana.** 학교 Grafana 관리자 계정을 찾지 못해 파일럿 대시보드는 C의 Docker Grafana(provisioning, 읽기 토큰은 .env)로 띄운다. 학교 클러스터에는 올리지 않는다(NFR-05). 시연은 노트북 또는 G1 Compose. (같은 날 아래 "파일럿 Grafana는 우리 클러스터에"로 바뀜)
+
+**파일럿 Grafana는 우리 클러스터에(NFR-05 예외).** 학교 InfluxDB(`10.116.64.13:8086`, 버킷 `trace-pilot`)는 학교 내부망 전용이라 학교 밖 노트북의 로컬 Docker Grafana에서는 닿지 않고(방화벽 차단 페이지), 학교 Grafana는 관리자 계정을 잃어 쓸 수 없습니다. 그래서 파일럿 대시보드용 Grafana를 PostgreSQL처럼 예외로 우리 클러스터에 띄웁니다. NFR-05(클러스터에는 앱과 PostgreSQL만)의 두 번째 예외이며, 이유는 학교 Grafana 계정 분실과 InfluxDB 내부망 전용 두 가지입니다. gitops base에 `grafana/grafana-oss` 고정 태그로 저장 공간 없이 provisioning만 두고(메모리 256Mi, 비루트, 익명은 Viewer), 관리자 비밀번호와 Influx 읽기 토큰은 trace-secrets, Influx 주소·org는 `infra.env`에서 받습니다. provisioning 원본은 web `grafana/`이고 gitops ConfigMap은 그 복사본이라 바꾸면 같이 갱신합니다. 공개 주소는 web nginx가 `/grafana/`를 `http://grafana:3000`으로 넘기는 `https://gakdo.site/grafana/`입니다. 노트북용 Docker Compose(web `grafana/`)는 로컬 가짜 데이터 Influx로 대시보드를 만드는 개발용으로 남깁니다(민서, 11/2).
 
 **흠집 다각형은 어디서나 표준 좌표 px, 단위 바꾸기는 없다.** 검사 완료 이벤트(trace.inspect.completed)만 polygon을 mm로 적고 있어 REST·DB(px)와 어긋났습니다(C 지적). 이벤트 설명을 표준 좌표 px(1 px = 0.25 mm)로 고쳐, 워커가 px로 내고 capture-server는 그대로 저장합니다. mm는 길이·넓이·거리 값에만 씁니다(contracts).
 
