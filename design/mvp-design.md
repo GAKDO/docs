@@ -269,14 +269,15 @@ Crowfoot ERD v1(10/31): [TRACE MVP ERD](https://crowfoot.java21.net/workspaces/6
 
 ## 이벤트 계약
 
-서비스와 워커는 RabbitMQ topic exchange `trace.events` 하나로 이벤트 5종을 주고받습니다. 부스의 탐지 결과만 예외로, Jetson이 gateway를 거쳐 capture-server에 REST로 올립니다.
+서비스와 워커는 RabbitMQ topic exchange `trace.events` 하나로 이벤트 6종을 주고받습니다(11/2 이벤트 1.1에서 `trace.checkpoint.started` 추가). 부스의 탐지 결과만 예외로, Jetson이 gateway를 거쳐 capture-server에 REST로 올립니다.
 
 | 라우팅 키 | 발행 | 소비 (큐) | 언제 | 핵심 필드 |
 | --- | --- | --- | --- | --- |
 | `trace.capture.uploaded` | capture-server | inspect-worker (`trace.inspect.requested`), rental-server (`trace.rental.checkpoints`) | 촬영 세트 업로드 완료(출처별 필수 면, SCR1 선택) | captureSetId, source(BOOTH·PHONE), needDetection, photos\[photoId, face, light, objectKey, sha256\] |
 | `trace.inspect.completed` | inspect-worker | capture-server (`trace.capture.inspected`) | 정합·탐지·텍스처 완료 | captureSetId, alignments\[photoId, homography, errorPx\], defects\[photoId, class, polygon, confidence\], textureKeys, modelVersion |
-| `trace.checkpoint.graded` | capture-server | report-server (`trace.report.updates`), rental-server (`trace.rental.checkpoints`) | 이전 시점과 비교·등급 완료 | grade, ruleVersion, newDefectIds, unjudgeableFaces |
-| `trace.diagnostics.recorded` | diagnostics-server | report-server (`trace.report.updates`) | 진단 저장·비교 완료 | runId, sha256, flags\[kind, detail\] |
+| `trace.checkpoint.graded` | capture-server | report-server (`trace.report.updates`), rental-server (`trace.rental.checkpoints`) | 이전 시점과 비교·등급 완료 | grade, ruleVersion, newDefectIds, unjudgeableFaces, pins\[defectId, face, x, y, isNew\](1.1, 3D 핀·최대 500) |
+| `trace.diagnostics.recorded` | diagnostics-server | report-server (`trace.report.updates`) | 진단 저장·비교 완료 | runId, sha256, flags\[kind, detail\], maxCapacityPct(1.1, 서버 계산 % 또는 null) |
+| `trace.checkpoint.started` | rental-server | report-server (`trace.report.updates`) | 시점 시작(1.1) | checkpointType, deviceId, serial, modelCode, modelName |
 | `trace.record.sealed` | report-server | web(SSE), auth-server 영수증 메일(trace.auth.receipts), rental-server (`trace.rental.checkpoints`), 검색 색인(선택) | 해시 체인 봉인 | seq, checkpointType, grade, payloadHash, prevHash, signedAt |
 
 공통 규칙

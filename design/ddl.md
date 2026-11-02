@@ -307,6 +307,19 @@ CREATE TABLE report.report_view (
 );
 ```
 
+이벤트 1.1(11/2)에서 report_server `V3__event_1_1_fields.sql`로 더한 것(화면용, 해시 체인 재료는 그대로):
+
+```sql
+ALTER TABLE report.checkpoint_view
+    ADD COLUMN pins jsonb NOT NULL DEFAULT '[]'::jsonb,       -- checkpoint.graded pins
+    ADD COLUMN diag_max_capacity_pct double precision;       -- diagnostics.recorded maxCapacityPct
+ALTER TABLE report.report                                    -- checkpoint.started
+    ADD COLUMN device_id varchar(21),
+    ADD COLUMN serial varchar(64),
+    ADD COLUMN model_code varchar(64),
+    ADD COLUMN model_name varchar(128);
+```
+
 RP1에서 report_server `V2__rp1_chain_and_timeline.sql`로 더한 것(report_view 대신 시점 단위 `checkpoint_view`를 읽기 모델로 씀, report_view는 비워 둠):
 
 ```sql
