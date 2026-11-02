@@ -51,3 +51,4 @@
 | Crowfoot TRACE 워크스페이스에 B·C 초대 | A | 11/3 | 대기 | 토큰은 각자 발급 |
 | 코드 이름 확인 (L1~L4, CAM1·CAM2) | B | 11/3 | 완료 | codes.yaml 0.5.0·booth/README·ddl·booth·ml 값 일치(11/02), 폰 페이지는 코드 생기면 다시 |
 | 대여 관리자에게 사진 보관·삭제 문구 전달 | A | 11/2 | 대기 | |
+| IT Festival 경진대회 제출(신청서·과제설명서·동의서·통장 사본·5분 영상) | 전원 | 11/16 16:00 | 진행 | [contest/checklist.md](../contest/checklist.md), 증거는 [contest/evidence.md](../contest/evidence.md) |
