@@ -77,3 +77,5 @@
 **구현은 Spec Kit으로.** 남은 구현은 GitHub Spec Kit(specify-cli 1.2.5)으로 명세 → 계획 → 작업 → 구현 순서로 진행합니다. 팀원은 Claude 프로젝트(베타)에서 레포마다 세션을 열고 기능 하나씩 끝냅니다. 모든 레포에 같은 헌법([speckit/constitution.md](speckit/constitution.md))을 두고, 요구사항 50개를 기능 27개로 나눈 목록은 [speckit/backlog.md](speckit/backlog.md)에 있습니다. 클라우드 세션에는 Docker가 없어 Testcontainers 테스트는 GitHub Actions에서만 돕니다. 부스 Jetson이 Python 3.10이라 booth 레포의 설치 조건을 3.10으로 낮췄습니다.
 
 **스탠드업은 docs에, Claude가 읽고 쓴다.** 팀원 모두 Claude로 개발하므로 코드 컨벤션([team/conventions.md](team/conventions.md)), 작업 보드([team/board.md](team/board.md)), 날짜별 스탠드업(team/standup/)을 docs에 두고, 모든 레포의 `/trace-standup` 스킬이 세션 시작·끝에 읽고 자기 칸만 고칩니다. 스탠드업은 자주 바뀌어서 docs 레포는 PR 없이 main에 바로 올립니다.
+
+**구현현황은 Google 시트로, Claude가 end 때 체크한다.** 지난 프로젝트처럼 기능별 작동 여부와 구현율을 한눈에 보도록 Google 시트를 둡니다. 작업 상태의 원본은 [team/board.md](team/board.md)이고, 시트는 실제로 동작을 확인한 기능만 체크하는 요약판입니다. 편집 권한은 팀원 계정에만 주고 공개 레포에는 링크를 적지 않습니다. 각자 Google Drive·Sheets 커넥터를 연결하면 `/trace-standup`이 시트를 제목으로 찾아 읽고, 확인받은 뒤 체크합니다.
