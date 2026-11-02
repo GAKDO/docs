@@ -6,10 +6,10 @@
 
 | ID | 레포 | 기능 | 담당 | 마감 | 상태 | 브랜치·PR | 막힌 점 | 갱신 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| C1 | contracts | OpenAPI 5개 | A (B·C 리뷰) | 11/3 | 대기 |  |  | 11/01 |
+| C1 | contracts | OpenAPI 5개 | A (B·C 리뷰) | 11/3 | 진행 | `claude/project-thread-1s3ob8` |  | 11/02 |
 | C2 | contracts | 진단 결과 JSON Schema v1 | A (B 리뷰) | 11/3 | 대기 |  |  | 11/01 |
 | C3 | contracts | 이벤트 스키마 5종 | A | 11/3 | 대기 |  |  | 11/01 |
-| BO1 | booth | 촬영 도구·부스 촬영 | B | 11/4 | 대기 |  |  | 11/01 |
+| BO1 | booth | 촬영 도구·부스 촬영 | B | 11/4 | 진행 |  | 11/2 부스 제작·맥북 촬영 중 | 11/02 |
 | ML3 | ml | Label Studio 연동 | B | 11/4 | 대기 |  |  | 11/01 |
 | AU1 | auth_server | 로그인·JWT·자격 교환 | A | 11/5 | 대기 |  |  | 11/01 |
 | GW1 | gateway | JWT 검증·역할×경로 | A | 11/5 | 대기 |  |  | 11/01 |
@@ -40,7 +40,7 @@
 
 | 할 일 | 담당 | 마감 | 상태 | 메모 |
 | --- | --- | --- | --- | --- |
-| Claude GitHub 앱을 GAKDO 조직에 설치 | A | 11/2 | 대기 | 없으면 세션이 GAKDO 레포에 푸시하지 못함 |
+| Claude GitHub 앱을 GAKDO 조직에 설치 | A | 11/2 | 완료 | 없으면 세션이 GAKDO 레포에 푸시하지 못함 |
 | main·develop 보호 규칙 (PR·CI 필수) | A | 11/2 | 대기 | docs 레포는 스탠드업 때문에 직접 푸시 허용 |
 | 조직 Secret·변수 (GITOPS_TOKEN, SONAR, 알림) | A | 11/3 | 대기 | cicd.md "처음 한 번 설정할 것" |
 | SonarQube 프로젝트 `trace-<레포>`와 토큰 | A | 11/3 | 대기 | |
