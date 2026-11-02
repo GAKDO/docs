@@ -419,4 +419,7 @@ CREATE TABLE auth.pairing_code (
   updated_at     timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX ix_pairing_checkpoint ON auth.pairing_code(checkpoint_id);
+
+-- auth-server V2 (AU1): AGENT JWT의 rentalId 클레임용. NULL 허용으로 더하고 새 코드는 항상 채운다
+ALTER TABLE auth.pairing_code ADD COLUMN rental_id varchar(21);  -- rental.rental.public_id (FK 없음)
 ```
