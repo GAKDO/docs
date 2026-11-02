@@ -6,9 +6,9 @@
 
 | ID | 레포 | 기능 | 담당 | 마감 | 상태 | 브랜치·PR | 막힌 점 | 갱신 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| C1 | contracts | OpenAPI 5개 | A (B·C 리뷰) | 11/3 | 완료 | [PR #1](https://github.com/GAKDO/contracts/pull/1) 머지 |  | 11/02 |
+| C1 | contracts | OpenAPI 5개 | A (B·C 리뷰) | 11/3 | 완료 | [PR #1](https://github.com/GAKDO/contracts/pull/1) 머지, ID→PublicId [PR #6](https://github.com/GAKDO/contracts/pull/6) 머지 |  | 11/02 |
 | C2 | contracts | 진단 결과 JSON Schema v1 | A (B 리뷰) | 11/3 | 완료 | [PR #3](https://github.com/GAKDO/contracts/pull/3) 머지 |  | 11/02 |
-| C3 | contracts | 이벤트 스키마 5종 | A | 11/3 | 완료 | [PR #2](https://github.com/GAKDO/contracts/pull/2) 머지 |  | 11/02 |
+| C3 | contracts | 이벤트 스키마 5종 | A | 11/3 | 완료 | [PR #2](https://github.com/GAKDO/contracts/pull/2) 머지, ID→PublicId [PR #6](https://github.com/GAKDO/contracts/pull/6) 머지 |  | 11/02 |
 | BO1 | booth | 촬영 도구·부스 촬영 | B | 11/4 | 진행 | 머지 [#2](https://github.com/GAKDO/booth/pull/2)·[#3](https://github.com/GAKDO/booth/pull/3)·[#4](https://github.com/GAKDO/booth/pull/4)·[#5](https://github.com/GAKDO/booth/pull/5)(업로드)·[#6](https://github.com/GAKDO/booth/pull/6)(capture/README), 남은 것: Jetson 실기·출고·반납 모드 |  | 11/02 |
 | ML3 | ml | Label Studio 연동 | B | 11/4 | 진행 | 머지 [#1](https://github.com/GAKDO/ml/pull/1)(setup·sync 명령), 남은 것: 클러스터 Label Studio에서 실제 확인(A 배포 뒤) |  | 11/02 |
 | AU1 | auth_server | 로그인·JWT·자격 교환 | A | 11/5 | 진행 | `claude/project-thread-tht1mn` (specs/001-login-jwt-credentials) |  | 11/02 |
