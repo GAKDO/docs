@@ -137,7 +137,8 @@ CREATE TABLE inspection.defect (
   public_id      varchar(21) NOT NULL UNIQUE,  -- 밖에 보이는 ID (NanoID 21자, 앱에서 생성)
   photo_id       bigint NOT NULL REFERENCES capture.photo(id),
   class          varchar(8)  NOT NULL CHECK (class IN ('scratch','dent','crack','stain')),
-  polygon        jsonb       NOT NULL,                -- 표준 좌표 [[x,y], …]
+  photo_polygon  jsonb       NOT NULL,                -- 원본 사진 px [[x,y], …] (탐지한 그 사진, 11/2)
+  polygon        jsonb,                               -- 표준 좌표(contracts/capture/faces.md), 정합 뒤 채움
   length_mm      real,
   area_mm2       real,
   confidence     real        NOT NULL,

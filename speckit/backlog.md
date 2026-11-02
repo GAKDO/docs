@@ -25,13 +25,13 @@
 | 3 | auth_server | AU2 회원가입·인증·재설정·탈퇴 | FR-USR-01·04·05·06 | A | 11/8 | AU1 |
 | 3 | rental_server | RE2 파일럿 등록 | FR-PIL-01 | A | 11/8 | RE1 |
 | 3 | report_server | RP2 검사 진행률 SSE | FR-RPT-04 | A | 11/8 | RP1 |
-| 3 | web | WE2 폰 수령 촬영 | FR-CAP-03·04 | C | 11/8 | CA1 |
+| 3 | web | WE2 폰 수령 촬영 | FR-CAP-03·04, FR-USR-01·05 화면 | C | 11/8 | CA1 |
 | 4 | auth_server | AU3 수령 QR·렌탈 연결·봉인 영수증 | FR-RNT-04, FR-USR-02, FR-INT-03 | A | 11/9 | AU2, RP1 |
 | 4 | capture_server | CA2 검사 결과·시점 비교·등급 | FR-INS-03·04, FR-CAP-04 | A·C | 11/9 | CA1 |
 | 4 | diagnostics_server | DI2 점검 플래그·추이 | FR-DIA-06, FR-PIL-02(데이터) | A | 11/9 | DI1 |
 | 4 | ml | ML2 inspect-worker | FR-INS-01·02, FR-OPS-01, FR-RPT-01(텍스처) | A | 11/9 | ML1, CA1 |
 | 4 | agent | AG2 Windows 진단 에이전트 | FR-DIA-01~05 | B | 11/10 | AG1 |
-| 4 | web | WE3 고객 화면·3D 리포트 | FR-USR-03, FR-RPT-01·02·03 | C | 11/10 | RP1, ML2 |
+| 4 | web | WE3 고객 화면·3D 리포트 | FR-USR-03, FR-RPT-01·02·03, FR-USR-04·06 화면 | C | 11/10 | RP1, ML2 |
 | 4 | web | WE4 검증 페이지·파일럿 대시보드 | FR-INT-02, FR-PIL-02 | C | 11/10 | RP1, DI2 |
 
 NFR-03(비밀값)·NFR-04(trace 접두사)는 헌법 V로 모든 기능에 적용합니다. 11/10 기능 완성, 11/13 코드 프리즈입니다.
@@ -76,7 +76,7 @@ RabbitMQ trace.events로 오가는 이벤트 5종의 JSON Schema(events/*.schema
 
 **AU2 회원가입·이메일 인증·재설정·탈퇴**
 ```
-고객이 이메일·비밀번호·이름과 개인정보 수집 동의로 가입하고, 메일로 받은 6자리 코드로 계정을 활성화한다. 비밀번호를 잊으면 메일 코드로 새 비밀번호를 정하고, 탈퇴하면 이메일·이름을 지우고 렌탈 기록은 익명으로 남긴다(FR-USR-01, 04, 05, 06). 수용 기준: 동의 없이 가입되지 않고 같은 이메일로 두 번 가입되지 않는다. 인증 전 로그인은 403, 코드는 10분 뒤 만료되고 5번 틀리면 새로 받아야 한다. 없는 이메일도 재설정에서 같은 응답을 받고, 재설정하면 그 계정의 리프레시 토큰이 모두 지워진다. 탈퇴 후 DB에 이메일·이름이 남지 않는다. 메일은 팀 Gmail SMTP다.
+고객이 이메일·비밀번호·이름과 개인정보 수집 동의로 가입하고, 메일로 받은 6자리 코드로 계정을 활성화한다. 비밀번호를 잊으면 메일 코드로 새 비밀번호를 정하고, 탈퇴하면 이메일·이름을 지우고 렌탈 기록은 익명으로 남긴다(FR-USR-01, 04, 05, 06). 수용 기준: 동의 없이 가입되지 않고 같은 이메일로 두 번 가입되지 않는다. 인증 전 로그인은 403, 코드는 10분 뒤 만료되고 5번 틀리면 새로 받아야 한다. 없는 이메일도 재설정에서 같은 응답을 받고, 재설정하면 그 계정의 리프레시 토큰이 모두 지워진다. 탈퇴 후 DB에 이메일·이름이 남지 않는다. 메일은 팀 Gmail SMTP다. 데모 고객 계정은 관리자 초기 계정처럼 DEMO_CUSTOMER_EMAIL·DEMO_CUSTOMER_PASSWORD가 있으면 인증 완료 상태로 만든다(11/2 결정, 비밀번호는 클러스터 Secret에만). 메일은 팀 SMTP용 Gmail(앱 비밀번호, 조직 Secret SMTP_PASSWORD).
 ```
 
 **AU3 수령 QR·렌탈 연결·봉인 영수증**
@@ -95,7 +95,7 @@ gateway가 모든 요청의 JWT를 auth-server JWKS로 검증하고, design/rest
 
 **RE1 렌탈·기기·기종·시점**
 ```
-관리자가 기종(제조사·형태·치수·기준 사양)과 기기(시리얼·상태)를 관리하고, 렌탈 건을 만들어 기기를 연결한다. 렌탈은 출고·수령·반납 세 시점을 순서대로 가진다(FR-RNT-01, 02, 03, 05). 수용 기준: 같은 시리얼로 진행 중인 렌탈이 2건 생기지 않는다. 출고 전에 수령 기록을 만들면 거부된다. 모델명으로 3D 트윈 치수를 조회한다. 수리 중·폐기 기기로 렌탈을 만들면 409이고 폐기해도 행은 남는다. 시리얼은 등록 뒤 바꿀 수 없고 변경자(updated_by)를 남긴다. 기기 목록은 기종·상태로 찾는다. 스키마는 design/ddl.md의 rental 절이다.
+관리자가 기종(제조사·형태·치수·기준 사양)과 기기(시리얼·상태)를 관리하고, 렌탈 건을 만들어 기기를 연결한다. 렌탈은 출고·수령·반납 세 시점을 순서대로 가진다(FR-RNT-01, 02, 03, 05). 수용 기준: 같은 시리얼로 진행 중인 렌탈이 2건 생기지 않는다. 출고 전에 수령 기록을 만들면 거부된다. 모델명으로 3D 트윈 치수를 조회한다. 수리 중·폐기 기기로 렌탈을 만들면 409이고 폐기해도 행은 남는다. 시리얼은 등록 뒤 바꿀 수 없고 변경자(updated_by)를 남긴다. 기기 목록은 기종·상태로 찾는다. 스키마는 design/ddl.md의 rental 절이다. (11/2 후속, A) 폐기 기기는 수리 중으로만 되돌린다(RETIRED → ACTIVE는 409 DEVICE_STATUS_TRANSITION_INVALID). 맥북·그램 기종 시드를 V2 마이그레이션으로 넣는다(치수 4개, 11/4까지).
 ```
 
 **RE2 파일럿 등록**
@@ -107,12 +107,12 @@ gateway가 모든 요청의 JWT를 auth-server JWKS로 검증하고, design/rest
 
 **CA1 촬영 세트·사전 서명 URL**
 ```
-부스와 폰이 한 시점의 촬영 세트를 만들고, 사진마다 사전 서명 URL을 받아 MinIO trace-captures에 직접 올린 뒤 면·조명·카메라 코드와 SHA-256을 등록한다. 세트가 다 올라오면 trace.capture.uploaded 이벤트를 낸다(FR-CAP-02, FR-CAP-05). 코드 값은 codes.yaml 0.3.0(조명 L1~L4, 카메라 CAM1·CAM2·PHONE, 출처별 필수 면 face_required)이다. 수용 기준: 게이트웨이 트래픽에 사진 본문이 없다. 내려받은 파일 해시와 저장된 해시가 같다. 세트 출처의 필수 면(codes.yaml capture.face_required, 부스는 TOP·BOT·SF·SB·SL·SR·KB·SCR0 8면)이 빠지면 세트가 완료되지 않는다(409). SCR1은 선택이고 건너뛸 때는 skippedFaces에 사유를 남긴다. 업로드 URL 응답은 사진마다 face·light·camera를 돌려준다(부스는 같은 면·조명을 CAM1·CAM2로 두 장 찍음). 폰의 필수 면은 TOP·BOT·SF·SB·SL·SR·SCR0 7면이다(KB는 찍지 않고 SCR1은 선택, face_required.PHONE, 11/2 C 확인). 폰 SCR1의 조명 코드(ROOM 또는 OFF)는 C가 WE2 명세에서 정한다. 필수 면이 빠지면 409 CAPTURE_FACES_MISSING(빠진 면 목록 포함).
+부스와 폰이 한 시점의 촬영 세트를 만들고, 사진마다 사전 서명 URL을 받아 MinIO trace-captures에 직접 올린 뒤 면·조명·카메라 코드와 SHA-256을 등록한다. 세트가 다 올라오면 trace.capture.uploaded 이벤트를 낸다(FR-CAP-02, FR-CAP-05). 코드 값은 codes.yaml 0.3.0(조명 L1~L4, 카메라 CAM1·CAM2·PHONE, 출처별 필수 면 face_required)이다. 수용 기준: 게이트웨이 트래픽에 사진 본문이 없다. 내려받은 파일 해시와 저장된 해시가 같다. 세트 출처의 필수 면(codes.yaml capture.face_required, 부스는 TOP·BOT·SF·SB·SL·SR·KB·SCR0 8면)이 빠지면 세트가 완료되지 않는다(409). SCR1은 선택이고 건너뛸 때는 skippedFaces에 사유를 남긴다. 업로드 URL 응답은 사진마다 face·light·camera를 돌려준다(부스는 같은 면·조명을 CAM1·CAM2로 두 장 찍음). 폰의 필수 면은 TOP·BOT·SF·SB·SL·SR·SCR0 7면이다(KB는 찍지 않고 SCR1은 선택, face_required.PHONE, 11/2 C 확인). 폰 SCR1의 조명 코드(ROOM 또는 OFF)는 C가 WE2 명세에서 정한다. 필수 면이 빠지면 409 CAPTURE_FACES_MISSING(빠진 면 목록 포함). (11/2 후속, A) 업로드 URL 다시 받기 POST /captures/sets/{setId}/uploads(아직 안 올라간 사진만, 완료 세트는 409 CAPTURE_SET_CLOSED).
 ```
 
 **CA2 검사 결과·시점 비교·등급**
 ```
-부스(Jetson)와 inspect-worker가 낸 흠집 결과를 저장하고, 이전 시점 흠집과 비교해 신규·기존을 판정한 뒤 외관 A~D 등급을 매긴다. 품질 미달 면은 "판정 불가"로 두고 비교에서 뺀다(FR-INS-03, FR-INS-04, FR-CAP-04). 수용 기준: 결과마다 modelVersion과 등급 규칙 버전이 남는다. 판정 불가 면은 등급 계산에 쓰이지 않는다. 오염(stain)은 등급에서 뺀다. 테스트 흠집의 판정 정확도를 기록한다. 스키마는 design/ddl.md의 inspection 절이다.
+부스(Jetson)와 inspect-worker가 낸 흠집 결과를 저장하고, 이전 시점 흠집과 비교해 신규·기존을 판정한 뒤 외관 A~D 등급을 매긴다. 품질 미달 면은 "판정 불가"로 두고 비교에서 뺀다(FR-INS-03, FR-INS-04, FR-CAP-04). 수용 기준: 결과마다 modelVersion과 등급 규칙 버전이 남는다. 판정 불가 면은 등급 계산에 쓰이지 않는다. 오염(stain)은 등급에서 뺀다. 테스트 흠집의 판정 정확도를 기록한다. 스키마는 design/ddl.md의 inspection 절이다. 11/2 나누기: C는 시점 비교 모듈(표준 좌표 거리 짝짓기, 규칙 버전, 테스트 흠집 정확도), A는 결과 저장·판정 불가 면·등급과 연결. 부스 탐지는 (face, light, camera)와 원본 사진 px로 받아 photo_polygon에 두고, trace.inspect.completed의 alignments(호모그래피)로 표준 좌표 polygon을 채운다.
 ```
 
 ### diagnostics_server
@@ -124,7 +124,7 @@ gateway가 모든 요청의 JWT를 auth-server JWKS로 검증하고, design/rest
 
 **DI2 점검 플래그·추이**
 ```
-시점 간 진단을 비교해 점검 플래그(부품 변경·용량 급감·벤치 하락)를 붙이고, 파일럿 기기의 배터리·벤치마크 추이를 InfluxDB trace-pilot에 기록한다(FR-DIA-06, FR-PIL-02 데이터). 수용 기준: 부품 식별자가 바뀌면 COMPONENT_CHANGED가 붙는다. 임계값은 설정으로 두고 파일럿 1차 측정 편차로 정한다. 두 번 측정한 값을 한 번의 조회로 돌려준다.
+시점 간 진단을 비교해 점검 플래그(부품 변경·용량 급감·벤치 하락)를 붙이고, 파일럿 기기의 배터리·벤치마크 추이를 InfluxDB trace-pilot에 기록한다(FR-DIA-06, FR-PIL-02 데이터). 수용 기준: 부품 식별자가 바뀌면 COMPONENT_CHANGED가 붙는다. 임계값은 설정으로 두고 파일럿 1차 측정 편차로 정한다. 두 번 측정한 값을 한 번의 조회로 돌려준다. InfluxDB 이름은 contracts/diagnostics/influx.md를 따른다(alias 태그 없음, 11/2 결정).
 ```
 
 ### report_server
@@ -148,12 +148,12 @@ inspect-worker가 Redis에 올린 검사 진행률을 화면에 SSE로 흘려보
 
 **WE2 폰 수령 촬영**
 ```
-고객이 수령 QR로 들어와 로그인한 뒤, 면마다 윤곽 가이드를 보며 폰으로 촬영하고 블러·반사를 검사해 통과한 사진만 사전 서명 URL로 올린다(FR-CAP-03, FR-CAP-04). 수용 기준: 불량 사진은 재촬영 전까지 제출되지 않는다. 카메라 권한을 거부하면 이유와 다시 허용하는 방법을 보여 준다. HTTPS에서만 동작한다. 필수 면은 codes.yaml capture.face_required.PHONE(TOP·BOT·SF·SB·SL·SR·SCR0 7면, KB는 찍지 않음)이고, SCR1(화면 흰색)은 선택이라 건너뛰면 skippedFaces에 사유를 남긴다. 폰으로 SCR1을 찍을 때 조명 코드(ROOM 또는 OFF)는 이 명세에서 정한다.
+고객이 수령 QR로 들어와 로그인한 뒤, 면마다 윤곽 가이드를 보며 폰으로 촬영하고 블러·반사를 검사해 통과한 사진만 사전 서명 URL로 올린다(FR-CAP-03, FR-CAP-04). 수용 기준: 불량 사진은 재촬영 전까지 제출되지 않는다. 카메라 권한을 거부하면 이유와 다시 허용하는 방법을 보여 준다. HTTPS에서만 동작한다. 필수 면은 codes.yaml capture.face_required.PHONE(TOP·BOT·SF·SB·SL·SR·SCR0 7면, KB는 찍지 않음)이고, SCR1(화면 흰색)은 선택이라 건너뛰면 skippedFaces에 사유를 남긴다. 폰으로 SCR1을 찍을 때 조명 코드는 ROOM이다(WE2 명세에서 정함). 처음 온 고객은 QR 다음에 회원가입·이메일 인증 화면을 거쳐 로그인한다(FR-USR-01·05 화면, 11/2 결정). 업로드 URL이 만료되면 POST /captures/sets/{setId}/uploads로 남은 사진의 URL만 다시 받는다.
 ```
 
 **WE3 고객 화면·3D 리포트**
 ```
-고객이 내 렌탈 목록과 시점별 리포트를 보고, 기종 3D 모델에 9면 사진을 입힌 트윈을 돌려 보며, 흠집 3D 핀과 시점 슬라이더로 변화를 확인한다. 타임라인 리포트에 핀·크롭·등급·내부 상태 비교표를 보여 준다(FR-USR-03, FR-RPT-01, 02, 03). 수용 기준: 다른 고객의 렌탈을 열면 403을 안내한다. 슬라이더를 옮기면 신규 핀이 구분돼 보인다. 팀 밖 3명이 설명 없이 신규 흠집과 배터리 변화를 말한다.
+고객이 내 렌탈 목록과 시점별 리포트를 보고, 기종 3D 모델에 9면 사진을 입힌 트윈을 돌려 보며, 흠집 3D 핀과 시점 슬라이더로 변화를 확인한다. 타임라인 리포트에 핀·크롭·등급·내부 상태 비교표를 보여 준다(FR-USR-03, FR-RPT-01, 02, 03). 수용 기준: 다른 고객의 렌탈을 열면 403을 안내한다. 슬라이더를 옮기면 신규 핀이 구분돼 보인다. 팀 밖 3명이 설명 없이 신규 흠집과 배터리 변화를 말한다. 비밀번호 재설정·탈퇴 화면도 만든다(FR-USR-04·06 화면, 11/2 결정). 3D 텍스처와 핀의 방향은 contracts/capture/faces.md를 따른다.
 ```
 
 **WE4 검증 페이지·파일럿 대시보드**
@@ -177,12 +177,12 @@ AG1과 같은 진단을 Windows에서 한다(FR-DIA-01~05, NFR-02). 배터리 �
 
 **BO1 촬영 도구·부스 촬영**
 ```
-부스 1개(출고·반납·학습 데이터 촬영 공용)에서 위 카메라 2대(CAM1 앞 반, CAM2 뒤 반)로 자세별 면·조명 세트를 버튼 한 번에 찍고, 촬영 목록 순서를 안내하며 파일명을 자동으로 만든다. 학습 데이터 모드는 MinIO trace-raw에, 출고·반납 모드는 capture-server가 준 사전 서명 URL로 올린다. 업로드가 실패하면 로컬에 두고 재시도한다(FR-CAP-01, 02, FR-DAT-01, 02). 조명은 L1(확산)·L2(왼쪽)·L3(뒤)·L4(앞, KB)이고 손으로 바꾸므로 화면이 "L2만 켜세요"처럼 안내한다. 패스 2(옆면 4개·SCR0)는 CAM1을 책상에 세워 면마다 L1·L2 한 장씩, SCR1(화면 흰색)은 조명을 모두 끄고(OFF) 한 장 찍으며 못 찍으면 사유를 받고 건너뛴다. 면별 목록은 booth/README.md의 "촬영 목록 (면 × 조명)". 수용 기준: 한 세트에서 필수 8면 중 빠진 면이 0개(SCR1은 건너뛴 사유가 남음), 파일명 규칙 위반 0건, 네트워크가 끊겼다 돌아와도 누락 0건, 모든 사진에 SHA-256. 참고: GAKDO/docs booth/README.md(11/2 실행 가이드).
+부스 1개(출고·반납·학습 데이터 촬영 공용)에서 위 카메라 2대(CAM1 앞 반, CAM2 뒤 반)로 자세별 면·조명 세트를 버튼 한 번에 찍고, 촬영 목록 순서를 안내하며 파일명을 자동으로 만든다. 학습 데이터 모드는 MinIO trace-raw에, 출고·반납 모드는 capture-server가 준 사전 서명 URL로 올린다. 업로드가 실패하면 로컬에 두고 재시도한다(FR-CAP-01, 02, FR-DAT-01, 02). 조명은 L1(확산)·L2(왼쪽)·L3(뒤)·L4(앞, KB)이고 손으로 바꾸므로 화면이 "L2만 켜세요"처럼 안내한다. 패스 2(옆면 4개·SCR0)는 CAM1을 책상에 세워 면마다 L1·L2 한 장씩, SCR1(화면 흰색)은 조명을 모두 끄고(OFF) 한 장 찍으며 못 찍으면 사유를 받고 건너뛴다. 면별 목록은 booth/README.md의 "촬영 목록 (면 × 조명)". 수용 기준: 한 세트에서 필수 8면 중 빠진 면이 0개(SCR1은 건너뛴 사유가 남음), 파일명 규칙 위반 0건, 네트워크가 끊겼다 돌아와도 누락 0건, 모든 사진에 SHA-256. 참고: GAKDO/docs booth/README.md(11/2 실행 가이드). BOT은 앞 모서리를 들어 뒤로 넘기는 한 방향으로만 뒤집는다(contracts/capture/faces.md). URL이 만료되면 세트를 새로 만들지 않고 POST /captures/sets/{setId}/uploads로 남은 사진만 다시 받는다.
 ```
 
 **BO2 Jetson 흠집 탐지**
 ```
-부스 Jetson Orin Nano에서 YOLO11-seg TensorRT FP16 엔진으로 흠집 4종을 고해상 타일 추론하고, 결과를 gateway를 거쳐 capture-server에 올린다(FR-INS-01 부스 쪽, NFR-01). 엔진은 Jetson에서 직접 빌드한다. 수용 기준: 부스 한 세트 추론이 30초 안에 끝나고(11/6 실측), 결과마다 modelVersion이 남는다.
+부스 Jetson Orin Nano에서 YOLO11-seg TensorRT FP16 엔진으로 흠집 4종을 고해상 타일 추론하고, 결과를 gateway를 거쳐 capture-server에 올린다(FR-INS-01 부스 쪽, NFR-01). 엔진은 Jetson에서 직접 빌드한다. 수용 기준: 부스 한 세트 추론이 30초 안에 끝나고(11/6 실측), 결과마다 modelVersion이 남는다. 탐지 결과는 (face, light, camera)와 원본 사진 px 좌표로 보낸다(Detection.camera 필수, 11/2 결정). 표준 좌표로 펼치지 않는다.
 ```
 
 ### ml
@@ -194,7 +194,7 @@ Label Studio에 제출된 주석만으로 기기 단위로 나눈 데이터셋 �
 
 **ML2 inspect-worker**
 ```
-집 PC(RTX 4070 Ti)의 inspect-worker가 trace.inspect.requested를 받아 폰 사진 흠집을 탐지하고, 면을 표준 좌표로 펼치며(윤곽 4점 + 특징점 보정), 3D 텍스처를 만든다. 집 PC가 켜지면 자동으로 떠서 꺼져 있던 동안 쌓인 작업을 처리한다(FR-INS-01, 02, FR-OPS-01, FR-RPT-01 텍스처). 진행률은 Redis에 올린다. 수용 기준: 폰과 부스 사이 정합 오차를 기록한다. 워커를 끈 채 사진 3장을 올리고 켜면 3장이 모두 처리된다. 테스트 맥북 2대의 mAP를 기록한다.
+집 PC(RTX 4070 Ti)의 inspect-worker가 trace.inspect.requested를 받아 폰 사진 흠집을 탐지하고, 면을 표준 좌표로 펼치며(윤곽 4점 + 특징점 보정), 3D 텍스처를 만든다. 집 PC가 켜지면 자동으로 떠서 꺼져 있던 동안 쌓인 작업을 처리한다(FR-INS-01, 02, FR-OPS-01, FR-RPT-01 텍스처). 진행률은 Redis에 올린다. 수용 기준: 폰과 부스 사이 정합 오차를 기록한다. 워커를 끈 채 사진 3장을 올리고 켜면 3장이 모두 처리된다. 테스트 맥북 2대의 mAP를 기록한다. 부스 사진도 펼쳐 사진별 alignments(호모그래피)를 trace.inspect.completed로 낸다. 면 방향·배율(1 px = 0.25 mm)은 contracts/capture/faces.md.
 ```
 
 **ML3 Label Studio 연동**

@@ -115,3 +115,19 @@
 **컨테이너 이미지는 사라진 Docker Hub 저장소에 기대지 않는다.** `minio/minio`는 Docker Hub에서 받을 수 없게 돼(pull access denied) capture_server CI가 실패했습니다. 시험용 S3는 `mirror.gcr.io/motoserver/moto:5.1.16`(Google 미러)으로 바꿨고, moto가 체크섬 거절을 하지 않는 부분은 학교 MinIO에서 한 번 확인합니다([environment.md](environment.md) "학교 MinIO 한 번 확인"). G1 로컬 Compose의 MinIO는 `quay.io/minio/minio`의 고정 RELEASE 태그를 쓰고, 받지 못하면 gitops pg-backup의 `pgsty/mc`와 같은 곳의 `pgsty/minio`로 바꿉니다. 다른 이미지도 `latest` 대신 고정 태그를 씁니다. 두 레지스트리에서 실제로 받히는지는 세션에서 확인할 수 없어 G1 첫 `compose up`에서 확인합니다. contracts 이벤트 `trace.capture.uploaded`의 objectKey 설명 "trace-raw"는 문구 오류라 trace-captures로 고쳤습니다(contracts PR #7, 문구만). 민서가 "전부 추천대로"로 정했습니다(11/2).
 
 **CI/CD를 블로그와 같게 켰고, 머지는 PR + CI + 승인.** 블로그 CI/CD를 옮길 때 워크플로 파일만 넣고 조직 설정이 비어 있었습니다. 그래서 CodeRabbit은 리뷰하지 않았고, SonarQube는 CI가 초록인 채로 분석을 건너뛰고 있었습니다(점검 스크립트로 확인). 11/2에 CodeRabbit을 GAKDO에 설치하고, SonarQube User Token(이슈·핫스팟 조회까지 되게)과 GITOPS_TOKEN(gitops 쓰기만)을 조직 Secret에 넣어 서버 6개 첫 분석이 성공했습니다. 12개 레포 main·develop에 PR 필수 + 필수 검사 + 승인 1명(contracts 2명)을 걸었고, 관리자(민서)는 규칙에서 뺐습니다. 필수 검사가 문서만 바뀐 PR에서 '대기'로 멈추지 않도록 PR CI의 문서 경로 필터를 뺐습니다(push는 그대로). 자세한 것은 [cicd.md](cicd.md).
+
+**팀 질문 8개는 11/3 계약 고정 전에 정했다.** B·C가 A에게 물은 것을 하나씩 정했고, 계약에 걸리는 것은 contracts PR 하나로 묶었습니다(Detection.camera, URL 다시 받기, 폐기 되돌리기 오류 코드, 면 방향 문서, Influx 이름, 세트 문구). 이미 해결돼 있던 것: gateway CORS credentials는 켜져 있고(GW1), ID는 PublicId로 바뀌었고(contracts PR #6), 학교 Grafana 사용은 10/30 승인 범위입니다.
+
+**부스 탐지는 원본 px + 카메라로 보내고, 펼치기는 워커 한 곳에서.** 부스는 CAM1·CAM2가 같은 면·조명을 찍어 탐지 결과가 어느 사진 것인지 알 수 없었고, 표준 좌표로 보내려면 Jetson도 정합을 해야 했습니다. Detection에 camera(필수)를 넣고 좌표는 원본 사진 px로 받습니다. inspect-worker가 trace.inspect.completed로 사진별 호모그래피를 주면 capture-server가 표준 좌표로 바꿉니다(defect.photo_polygon → polygon). 정합 코드가 두 벌이면 시점 사이 좌표가 어긋나 기존 흠집이 신규로 잡힐 수 있어서입니다.
+
+**업로드 URL은 세트째 다시 만들지 않고 남은 것만 다시 받는다.** 세트는 다 찍은 뒤 SHA-256과 함께 만들어지므로 10분은 업로드 시간인데, 끊겼다 다시 올리기가 10분을 넘으면 세트를 새로 만들어 전부 다시 올리고 옛 세트가 남았습니다. POST /captures/sets/{setId}/uploads가 아직 안 올라간 사진의 URL만 새로 줍니다(부스·폰 공통).
+
+**폐기한 기기는 수리 중으로만 되돌린다.** 폐기 기기가 점검 없이 다시 렌탈로 나가지 않게, RETIRED → ACTIVE는 409 DEVICE_STATUS_TRANSITION_INVALID입니다(codes.yaml 0.6.0). 화면(WE1)은 이미 이렇게 만들었고, rental-server에 규칙을 더합니다.
+
+**면 방향은 계약 문서로 고정한다.** 펼친 이미지의 위·왼쪽이 정해지지 않아 3D에서 뒤집히거나 시점 비교가 어긋날 수 있었습니다. contracts/capture/faces.md에 면별 방향(바깥에서 본 모습, 원점 왼쪽 위)과 배율(1 px = 0.25 mm)을 적었습니다. BOT은 앞 모서리를 들어 뒤로 넘기는 한 방향으로만 뒤집습니다.
+
+**회원 화면은 C, 데모 계정은 A.** 회원가입·이메일 인증 화면은 WE2(QR → 가입·인증 → 촬영 흐름), 비밀번호 재설정·탈퇴 화면은 WE3에 넣습니다. 50개 요구사항은 모두 필수라 빼지 않고, 시연이 메일 발송에 매달리지 않게 인증 완료된 데모 고객 계정을 환경 변수로 만듭니다(AU1 후속). 폰 SCR1 조명은 C가 WE2 명세에서 ROOM으로 정했습니다.
+
+**기종 시드는 마이그레이션으로, CA2는 나눠서.** 기종 등록 화면이 11/6 뒤라 맥북·그램 기종을 rental-server V2 마이그레이션으로 넣습니다(치수 4개, 본체·상판 두께는 B 실측). CA2는 C가 시점 비교 모듈, A가 저장·판정 불가 면·등급과 연결을 맡습니다.
+
+**InfluxDB 이름은 C 제안을 확정, 별칭은 뺀다.** contracts/diagnostics/influx.md(trace_battery, trace_benchmark). 서비스끼리 REST를 부르지 않으므로 alias 태그는 쓰지 않고, 별칭은 Grafana 값 매핑으로 보여 줍니다.

@@ -81,7 +81,8 @@
 | --- | --- | --- | --- | --- | --- |
 | POST | /captures/sets | BOOTH·촬영 | 촬영 세트 생성(rentalId·checkpointId) + 사진별 업로드 URL(PUT, 10분). 응답 uploads는 사진마다 face·light·camera를 돌려줌 | 201 · 403 범위 밖 시점 | FR-CAP-01·05 |
 | POST | /captures/sets/{setId}/complete | BOOTH·촬영 | 해시 확인 후 capture.uploaded 발행. 본문 skippedFaces {면: 사유}는 선택 면(SCR1)만 | 202 · 409 출처별 필수 면 빠짐(부스 8면·폰 7면, SCR1 선택) | FR-CAP-01·02 |
-| POST | /captures/sets/{setId}/detections | BOOTH | Jetson 탐지 결과 저장 | 201 | FR-INS-01 |
+| POST | /captures/sets/{setId}/uploads | BOOTH·촬영 | 아직 안 올라간 사진의 업로드 URL 다시 받기(10분). 본문 photos를 빼면 남은 사진 전부 | 200 · 409 완료된 세트 | FR-CAP-05 |
+| POST | /captures/sets/{setId}/detections | BOOTH | Jetson 탐지 결과 저장. 탐지마다 face·light·camera, 좌표는 원본 사진 px | 201 | FR-INS-01 |
 | GET | /captures/sets/{setId} | ADMIN·촬영 | 세트 상태 | 200 | FR-CAP-01 |
 | GET | /captures/checkpoints/{checkpointId}/inspection | ADMIN·CUSTOMER(본인) | 흠집·신규 판정·등급 | 200 | FR-INS-03·04 |
 | GET | /captures/checkpoints/{checkpointId}/media | ADMIN·CUSTOMER(본인) | 텍스처·크롭 보기 URL(GET, 10분) | 200 | FR-RPT-01 |
