@@ -15,7 +15,7 @@
 | GW1 | gateway | JWT 검증·역할×경로 | A | 11/5 | 완료 | [PR #1](https://github.com/GAKDO/gateway/pull/1) 머지, 남은 것: 클러스터 라우팅 확인·TRACE_WEB_ORIGIN 값 |  | 11/02 |
 | RE1 | rental_server | 렌탈·기기·기종·시점 | A | 11/5 | 완료 | [PR #1](https://github.com/GAKDO/rental_server/pull/1) 머지 |  | 11/02 |
 | CA1 | capture_server | 촬영 세트·사전 서명 URL | A | 11/6 | 완료 | [PR #1](https://github.com/GAKDO/capture_server/pull/1) 머지, 이벤트 설명 [contracts #7](https://github.com/GAKDO/contracts/pull/7). 남은 것: 학교 MinIO 체크섬 거절·CORS 한 번 확인(environment.md) |  | 11/02 |
-| WE1 | web | 로그인·출고·반납·기기 관리 | C | 11/6 | 대기 |  |  | 11/01 |
+| WE1 | web | 로그인·출고·반납·기기 관리 | C | 11/6 | 완료 | web #1·#2·#3·#4·#6·#17 머지(목 서버 기준) | 기종 등록 화면 11/6 뒤(기종 시드 A 11/4), 실서버 확인 대기 | 11/02 |
 | ML1 | ml | 데이터셋 빌더·학습 기록 | A | 11/6 | 리뷰 | 머지 [#2](https://github.com/GAKDO/ml/pull/2)(설정·저장소·기록부)·[#3](https://github.com/GAKDO/ml/pull/3)(빌더)·[#4](https://github.com/GAKDO/ml/pull/4)(학습 기록), 남은 것: 집 PC에서 db init·v001 빌드(11/5 라벨링 뒤)·실제 학습 |  | 11/02 |
 | BO2 | booth | Jetson 흠집 탐지 | B | 11/6 | 진행 | 머지 [#8](https://github.com/GAKDO/booth/pull/8)(타일 추론·중복 제거)·[#12](https://github.com/GAKDO/booth/pull/12)(detect 명령·실측 절차), 남은 것: Jetson 엔진 빌드·30초 실측, 결과 올리기 | 결과 올리기: detections에 camera 없음·좌표 기준 A에게 질문 | 11/02 |
 | AG1 | agent | macOS 진단 에이전트 | B | 11/9 | 진행 | 머지 [#1](https://github.com/GAKDO/agent/pull/1)(수집·검증), [#2](https://github.com/GAKDO/agent/pull/2)(벤치마크·업로드), 남은 것: 팀 노트북 3대 실행·DI1 뒤 저장 확인 |  | 11/02 |
@@ -25,14 +25,14 @@
 | AU2 | auth_server | 회원가입·인증·재설정·탈퇴 | A | 11/8 | 대기 |  |  | 11/01 |
 | RE2 | rental_server | 파일럿 등록 | A | 11/8 | 대기 |  |  | 11/01 |
 | RP2 | report_server | 검사 진행률 SSE | A | 11/8 | 대기 |  |  | 11/01 |
-| WE2 | web | 폰 수령 촬영 | C | 11/8 | 대기 |  |  | 11/01 |
+| WE2 | web | 폰 수령 촬영 | C | 11/8 | 진행 | web #9·#11·#14·#19·#20 머지(QR 발급·촬영·업로드) | 회원가입·이메일 인증 화면 추가(11/2 A 결정), MinIO CORS 실서버 확인 대기 | 11/02 |
 | AU3 | auth_server | 수령 QR·렌탈 연결·봉인 영수증 | A | 11/9 | 대기 |  |  | 11/01 |
 | CA2 | capture_server | 검사 결과·시점 비교·등급 | A·C | 11/9 | 대기 |  |  | 11/01 |
 | DI2 | diagnostics_server | 점검 플래그·추이 | A | 11/9 | 대기 |  |  | 11/01 |
 | ML2 | ml | inspect-worker | A | 11/9 | 대기 |  |  | 11/01 |
 | AG2 | agent | Windows 진단 에이전트 | B | 11/10 | 대기 |  |  | 11/01 |
-| WE3 | web | 고객 화면·3D 리포트 | C | 11/10 | 대기 |  |  | 11/01 |
-| WE4 | web | 검증 페이지·파일럿 대시보드 | C | 11/10 | 대기 |  |  | 11/01 |
+| WE3 | web | 고객 화면·3D 리포트 | C | 11/10 | 진행 | web #10·#12·#13·#15·#16 머지, #18(진행률 SSE) 리뷰 | 비밀번호 재설정·탈퇴 화면 추가(11/2 A 결정), 면 방향 faces.md 맞추기 | 11/02 |
+| WE4 | web | 검증 페이지·파일럿 대시보드 | C | 11/10 | 진행 | web #7(대시보드)·#8(검증 페이지) 머지 | 대시보드 deviceId로 고르기 수정, 학교 Grafana에 올리기(trace 접두사) | 11/02 |
 
 먼저 끝나야 할 것(의존 관계)은 [../speckit/backlog.md](../speckit/backlog.md)의 순서 표에 있습니다.
 
