@@ -79,3 +79,9 @@
 **스탠드업은 docs에, Claude가 읽고 쓴다.** 팀원 모두 Claude로 개발하므로 코드 컨벤션([team/conventions.md](team/conventions.md)), 작업 보드([team/board.md](team/board.md)), 날짜별 스탠드업(team/standup/)을 docs에 두고, 모든 레포의 `/trace-standup` 스킬이 세션 시작·끝에 읽고 자기 칸만 고칩니다. 스탠드업은 자주 바뀌어서 docs 레포는 PR 없이 main에 바로 올립니다.
 
 **구현현황은 Google 시트로, Claude가 end 때 체크한다.** 지난 프로젝트처럼 기능별 작동 여부와 구현율을 한눈에 보도록 Google 시트를 둡니다. 작업 상태의 원본은 [team/board.md](team/board.md)이고, 시트는 실제로 동작을 확인한 기능만 체크하는 요약판입니다. 편집 권한은 팀원 계정에만 주고 공개 레포에는 링크를 적지 않습니다. 각자 Google Drive·Sheets 커넥터를 연결하면 `/trace-standup`이 시트를 제목으로 찾아 읽고, 확인받은 뒤 체크합니다.
+
+## 11/2
+
+**API 계약은 서버별 OpenAPI 5개 + 공통 파일.** C1에서 rest-api-v0의 경로 41개와 ping 5개를 `contracts/openapi/<서버>-server.yaml`로 옮기고, Problem Details·커서 목록·인증 방식은 `openapi/components/common.yaml` 한 곳에 둡니다. 코드 값은 codes.yaml이 원본이고 OpenAPI용 enum(`codes.gen.yaml`)은 스크립트로 만들며, CI가 둘이 어긋나지 않는지 검사합니다. 역할·범위는 operation마다 `x-trace-access`로 적어 gateway 테스트가 그대로 읽습니다.
+
+**오류 code는 codes.yaml에, 목록은 모두 커서.** 화면이 오류 문장을 미리 정할 수 있도록 Problem Details의 `code` 값을 codes.yaml `error_code`로 고정했습니다(예: 렌탈 생성 409를 `RENTAL_OPEN_EXISTS`와 `DEVICE_NOT_ACTIVE`로 구분). rest-api-v0에서 `GET /devices`만 `page`였던 것을 다른 목록처럼 커서로 맞췄습니다. codes.yaml은 0.3.0(값 추가만)입니다.
