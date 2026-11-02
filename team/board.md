@@ -12,7 +12,7 @@
 | BO1 | booth | 촬영 도구·부스 촬영 | B | 11/4 | 진행 | 머지 [#2](https://github.com/GAKDO/booth/pull/2)·[#3](https://github.com/GAKDO/booth/pull/3)·[#4](https://github.com/GAKDO/booth/pull/4)·[#5](https://github.com/GAKDO/booth/pull/5)(업로드)·[#6](https://github.com/GAKDO/booth/pull/6)(capture/README), 남은 것: Jetson 실기·출고·반납 모드 |  | 11/02 |
 | ML3 | ml | Label Studio 연동 | B | 11/4 | 진행 | 머지 [#1](https://github.com/GAKDO/ml/pull/1)(setup·sync 명령), 남은 것: 클러스터 Label Studio에서 실제 확인(A 배포 뒤) |  | 11/02 |
 | AU1 | auth_server | 로그인·JWT·자격 교환 | A | 11/5 | 진행 | `claude/project-thread-tht1mn` (specs/001-login-jwt-credentials) |  | 11/02 |
-| GW1 | gateway | JWT 검증·역할×경로 | A | 11/5 | 진행 | gateway `claude/project-thread-jodnl1` |  | 11/02 |
+| GW1 | gateway | JWT 검증·역할×경로 | A | 11/5 | 리뷰 | [PR #1](https://github.com/GAKDO/gateway/pull/1) CI 대기 |  | 11/02 |
 | RE1 | rental_server | 렌탈·기기·기종·시점 | A | 11/5 | 진행 | `claude/project-thread-je1x8b` |  | 11/02 |
 | CA1 | capture_server | 촬영 세트·사전 서명 URL | A | 11/6 | 대기 |  |  | 11/01 |
 | WE1 | web | 로그인·출고·반납·기기 관리 | C | 11/6 | 대기 |  |  | 11/01 |
