@@ -95,3 +95,7 @@
 **기둥 간격은 빔에 맞춘다.** 도면대로 기둥을 노트북 가운데에서 앞뒤 45cm에 세우면 90cm 빔이 홈에 반밖에 걸리지 않습니다. 빔을 두 홈에 먼저 끼운 채 기둥 간격을 맞춥니다(기둥 안쪽 면 사이 약 88cm).
 
 **진단 결과 JSON은 `diag.v1` 한 파일, 생략해도 키는 남긴다.** C2에서 [design/diagnostics-json-v0.md](design/diagnostics-json-v0.md) 초안을 `contracts/diagnostics/result.schema.json`으로 고정했습니다. 배터리·SSD를 읽지 못하면 키를 빼지 않고 값은 null, `status: SKIPPED`와 `skippedReason`(NO_PERMISSION·UNSUPPORTED·TOOL_ERROR)을 둡니다. 받는 쪽이 늘 같은 형태를 보게 하려는 것입니다. 전원이 연결되지 않으면 벤치마크는 빈 배열과 `benchmarkSkippedReason: NO_AC_POWER`입니다. macOS 배터리 판정은 원문("Good") 대신 NORMAL·SERVICE_RECOMMENDED로 바꿔 보냅니다. 정해진 필드 밖의 키는 모두 거부해 컴퓨터 이름·사용자 이름이 섞여 들어오지 못하게 했고, 업로드 API(`DiagnosticUpload`)는 이 스키마를 그대로 참조합니다. codes.yaml은 0.4.0(진단 값 추가만)입니다.
+
+**이벤트는 이벤트 5종, 봉투는 모두 같다.** C3에서 `trace.events`의 이벤트 5종을 `contracts/events/trace.*.schema.json`으로 고정했습니다. 모든 이벤트에 `schemaVersion`("1.0")·`eventId`(UUIDv7)·`occurredAt`·`rentalId`·`checkpointId`가 들어갑니다. 스키마는 모르는 필드를 거부해 발행하는 쪽의 오타를 막고, 받는 쪽은 모르는 필드를 무시해 필드가 늘어나도(부 버전) 깨지지 않게 합니다. 서비스끼리는 REST를 부르지 않으므로, 받는 쪽이 일하는 데 필요한 필드는 설계서 표보다 더 넣었습니다. 예를 들어 `trace.checkpoint.graded`에 사진 해시 목록을 넣어 report-server가 해시 체인을 만들 수 있게 했습니다. 이렇게 더한 필드는 `events/README.md`에 적었습니다.
+
+**봉투의 rentalId는 요청과 토큰으로 받는다.** 부스 토큰은 부스 단위이고 AGENT 토큰에는 시점만 들어 있어, capture-server와 diagnostics-server가 이벤트에 넣을 rentalId를 얻을 곳이 없었습니다. 그래서 `POST /captures/sets` 요청 본문에 `rentalId`를 넣었습니다. 촬영 JWT로 올릴 때는 토큰의 rentalId와 같아야 합니다. `POST /auth/pairing-codes`도 렌탈과 시점을 함께 받고, AGENT JWT에 rentalId 클레임을 넣습니다. 이벤트를 하나 더 만드는 방법(시점 열림 이벤트)도 있었지만 이벤트 5종 규칙을 지키려고 택하지 않았습니다. 11/3 계약 고정 전에 민서가 정했습니다.

@@ -54,8 +54,8 @@
 | POST | /auth/capture-links | ADMIN | 수령 QR 링크 발급(rentalId, checkpointId) | 201 `{url, expiresAt}` | FR-RNT-04 |
 | POST | /auth/capture-links/exchange | CUSTOMER | QR 토큰 → 촬영 JWT, 렌탈을 내 계정에 연결 | 200 · 409 다른 계정에 연결됨 · 410 만료·사용됨 | FR-AUTH-02, FR-USR-02 |
 | POST | /auth/booth/token | PUBLIC(클라이언트 비밀) | 부스 JWT | 200 · 401 | FR-AUTH-02 |
-| POST | /auth/pairing-codes | ADMIN | 에이전트 페어링 코드 발급(checkpointId) | 201 `{code, expiresAt}` | FR-AUTH-02 |
-| POST | /auth/pairing-codes/exchange | PUBLIC | 코드 → AGENT JWT | 200 · 400 · 410 | FR-AUTH-02 |
+| POST | /auth/pairing-codes | ADMIN | 에이전트 페어링 코드 발급(rentalId, checkpointId) | 201 `{code, expiresAt}` | FR-AUTH-02 |
+| POST | /auth/pairing-codes/exchange | PUBLIC | 코드 → AGENT JWT(rentalId 클레임 포함) | 200 · 400 · 410 | FR-AUTH-02 |
 | GET | /.well-known/jwks.json | gateway(내부) | 공개키 | 200 | FR-AUTH-03 |
 
 ## rental-server — /api/v1
@@ -79,7 +79,7 @@
 
 | 메서드 | 경로 | 역할 | 하는 일 | 주요 응답 | 요구사항 |
 | --- | --- | --- | --- | --- | --- |
-| POST | /captures/sets | BOOTH·촬영 | 촬영 세트 생성 + 사진별 업로드 URL(PUT, 10분). 응답 uploads는 사진마다 face·light·camera를 돌려줌 | 201 · 403 범위 밖 시점 | FR-CAP-01·05 |
+| POST | /captures/sets | BOOTH·촬영 | 촬영 세트 생성(rentalId·checkpointId) + 사진별 업로드 URL(PUT, 10분). 응답 uploads는 사진마다 face·light·camera를 돌려줌 | 201 · 403 범위 밖 시점 | FR-CAP-01·05 |
 | POST | /captures/sets/{setId}/complete | BOOTH·촬영 | 해시 확인 후 capture.uploaded 발행. 본문 skippedFaces {면: 사유}는 선택 면(SCR1)만 | 202 · 409 출처별 필수 면 빠짐(부스 8면, SCR1 선택) | FR-CAP-01·02 |
 | POST | /captures/sets/{setId}/detections | BOOTH | Jetson 탐지 결과 저장 | 201 | FR-INS-01 |
 | GET | /captures/sets/{setId} | ADMIN·촬영 | 세트 상태 | 200 | FR-CAP-01 |
