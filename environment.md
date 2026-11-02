@@ -47,14 +47,7 @@ CI와 세션은 MinIO 이미지를 받을 수 없어 moto로 시험하는데, mo
 
 1. **설정 확인(공용 계정):** 공용 계정은 이 단계에서만 쓴다. `mc alias set school-admin http://storage.java21.net:8000 "$MINIO_ADMIN_USER" "$MINIO_ADMIN_PASSWORD"` → `mc ls school-admin | grep trace-`로 버킷 7개, `mc version info school-admin/trace-raw`가 `versioning is enabled`, `mc anonymous get school-admin/trace-raw`(다른 버킷도)가 `private`인지 본다. 끝나면 `mc alias rm school-admin`.
 2. **앱 키로 접근 확인:** `mc alias set school http://storage.java21.net:8000 "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY"`(trace-server 키) → `mc ls school/trace-captures`는 되고, `mc ls school/trace-raw`는 거절되면 최소 권한이 맞다.
-3. **CORS:** 브라우저(폰 웹앱)에서 올릴 수 있게 `PUT`과 헤더 `Content-Type`·`x-amz-checksum-sha256`을 허용하는지 본다. 사전 요청의 `Access-Control-Allow-Headers`에 두 헤더가 있으면 된다.
-   ```
-   curl -si -X OPTIONS http://storage.java21.net:8000/trace-captures/check.jpg \
-     -H "Origin: https://gakdo.site" -H "Access-Control-Request-Method: PUT" \
-     -H "Access-Control-Request-Headers: content-type,x-amz-checksum-sha256"
-   ```
-   허용하지 않으면 학교 MinIO 관리자에게 이 오리진·헤더를 요청한다(공용 MinIO라 우리가 바꿀 수 없을 수 있음).
-   **주의:** S3 API가 HTTP뿐이라, HTTPS 웹앱(`https://gakdo.site`)에서 `http://` 사전 서명 URL로 PUT하면 브라우저가 혼합 콘텐츠로 막는다. CORS가 맞아도 폰 업로드는 HTTPS로 S3 API를 여는 경로가 정해져야 된다(미정, 11/2).
+3. **폰 업로드 경로:** S3 API가 HTTP뿐이라 HTTPS 웹앱에서 `http://` 사전 서명 URL로 PUT·GET하면 브라우저가 혼합 콘텐츠로 막는다. 그래서 web nginx가 `/trace-captures/`·`/trace-derived/`를 MinIO로 넘기고, capture-server는 사전 서명 URL 앞부분을 web 주소(`MINIO_PUBLIC_BASE`)로 바꿔 돌려준다(11/2 A 결정, 블로그 `/blog-images` 방식). 같은 주소라 MinIO CORS는 필요 없다. 배포 뒤 폰에서 세트 하나를 올려 PUT이 200이고 개발자 도구에 혼합 콘텐츠·CORS 오류가 없는지 본다. nginx가 `Host`를 바꾸면 서명이 깨지므로(403 SignatureDoesNotMatch) 그때는 프록시의 `Host` 헤더 설정부터 본다.
 4. **해시 거절:** capture_server의 통합 시험을 학교 MinIO에 대고 돌린다. 로컬에 Docker가 있어야 한다(PostgreSQL·RabbitMQ 컨테이너).
    ```
    S3_TEST_ENDPOINT=http://storage.java21.net:8000 S3_TEST_VERIFIES_CHECKSUM=true \
