@@ -183,7 +183,7 @@ FR-AUTH-03의 수용 기준입니다. 칸마다 gateway 통합 테스트를 하�
 
 ## 11/3까지
 
-- [ ] 서버별 OpenAPI 3.1 파일 5개를 `contracts/openapi/`에 커밋 (A)
+- [x] 서버별 OpenAPI 3.1 파일 5개를 `contracts/openapi/`에 커밋 (A) — contracts PR #1
 - [ ] 역할 × 경로 표를 gateway 통합 테스트 목록으로 옮기기 (A)
 - [ ] C가 화면별 API 표를 보고 빠진 API 요청 (C)
 - [ ] B가 페어링 교환·진단 업로드 두 개를 확인 (B)
