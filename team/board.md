@@ -27,7 +27,7 @@
 | RP2 | report_server | 검사 진행률 SSE | A | 11/8 | 대기 |  |  | 11/01 |
 | WE2 | web | 폰 수령 촬영 | C | 11/8 | 진행 | web #9·#11·#14·#19·#20·#23·#24(가입·메일 인증)·#27(페어링 코드·URL 다시 받기)·#28 머지 | 폰 해상도 요청(ideal 3840×2160·takePhoto, 축소 없이 4:3 자르기·EXIF 회전·최종 파일 해시), 업로드 nginx 경유 주소 반영 확인, 11/5 실서버 폰 시험 | 11/02 |
 | AU3 | auth_server | 수령 QR·렌탈 연결·봉인 영수증 | A | 11/9 | 대기 |  |  | 11/01 |
-| CA2 | capture_server | 검사 결과·시점 비교·등급 | A·C | 11/9 | 리뷰 | C 비교 모듈 #2·#4, A 부분 [#6](https://github.com/GAKDO/capture_server/pull/6) 머지, 후속 [#7](https://github.com/GAKDO/capture_server/pull/7)(/media) |  | 11/02 |
+| CA2 | capture_server | 검사 결과·시점 비교·등급 | A·C | 11/9 | 완료 | C 비교 모듈 #2·#4, A 부분 [#6](https://github.com/GAKDO/capture_server/pull/6) 머지, 후속 [#7](https://github.com/GAKDO/capture_server/pull/7)(/media) 머지 |  | 11/02 |
 | DI2 | diagnostics_server | 점검 플래그·추이 | A | 11/9 | 대기 |  |  | 11/01 |
 | ML2 | ml | inspect-worker | A | 11/9 | 리뷰 | 간소화: 정합 [#8](https://github.com/GAKDO/ml/pull/8) 머지, 워커 [#9](https://github.com/GAKDO/ml/pull/9). 남은 것: 집 PC 설치·자동 시작, 실제 부스·폰 사진 `align pair` 실측, 폰 탐지 모델(B 답 대기) | `claude/project-thread-gnyohx` | 11/02 |
 | AG2 | agent | Windows 진단 에이전트 | B | 11/10 | 대기 |  |  | 11/01 |
