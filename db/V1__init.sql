@@ -145,6 +145,7 @@ CREATE TABLE inspection.defect_match (
   prev_defect_id  bigint REFERENCES inspection.defect(id),
   status          varchar(8) NOT NULL CHECK (status IN ('NEW','EXISTING')),
   distance_mm     real,
+  rule_version    varchar(32) NOT NULL,
   created_at      timestamptz NOT NULL DEFAULT now(),
   updated_at      timestamptz NOT NULL DEFAULT now()
 );

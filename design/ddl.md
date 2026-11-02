@@ -155,6 +155,7 @@ CREATE TABLE inspection.defect_match (
   prev_defect_id  bigint REFERENCES inspection.defect(id), -- NULL이면 신규
   status          varchar(8) NOT NULL CHECK (status IN ('NEW','EXISTING')),
   distance_mm     real,
+  rule_version    varchar(32) NOT NULL,             -- 비교 규칙 버전(예: view-match-v1, 11/2)
   created_at      timestamptz NOT NULL DEFAULT now(),
   updated_at      timestamptz NOT NULL DEFAULT now()
 );
