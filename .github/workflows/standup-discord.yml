@@ -1,5 +1,6 @@
 # 스탠드업 기록이 main에 올라오면 디스코드 trace방에 새로 적힌 줄을 보낸다.
-# 웹훅 주소는 레포 비밀값 DISCORD_WEBHOOK_URL에만 둔다. 없으면 아무것도 보내지 않는다.
+# 웹훅 주소는 레포 비밀값 DISCORD_STANDUP_WEBHOOK_URL에만 둔다. 없으면 아무것도 보내지 않는다.
+# CI/CD 알림용 DISCORD_WEBHOOK_URL(#ci-<서버>, cicd.md)과 이름을 나눠, 조직 값이 있어도 CI 채널로 새지 않게 한다.
 name: 스탠드업 디스코드 알림
 
 on:
@@ -21,14 +22,14 @@ jobs:
 
       - name: 디스코드로 보내기
         env:
-          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          WEBHOOK: ${{ secrets.DISCORD_STANDUP_WEBHOOK_URL }}
           BEFORE: ${{ github.event.before }}
           AFTER: ${{ github.sha }}
           REPO_URL: ${{ github.server_url }}/${{ github.repository }}
           PUSHER: ${{ github.event.pusher.name }}
         run: |
           if [ -z "$WEBHOOK" ]; then
-            echo "DISCORD_WEBHOOK_URL 비밀값이 없어 건너뜁니다."
+            echo "DISCORD_STANDUP_WEBHOOK_URL 비밀값이 없어 건너뜁니다."
             exit 0
           fi
           # 첫 푸시처럼 이전 커밋이 없으면 직전 커밋과 비교한다.
