@@ -49,5 +49,5 @@
 | GHCR 패키지 공개 | A | 첫 이미지 뒤 | 대기 | |
 | 연기 시험 변수 SMOKE_API_URL·SMOKE_WEB_URL | A | 클러스터 뜬 뒤 | 대기 | |
 | Crowfoot TRACE 워크스페이스에 B·C 초대 | A | 11/3 | 대기 | 토큰은 각자 발급 |
-| 코드 이름 확인 (L1~L4, CAM1·CAM2) | B | 11/3 | 대기 | 촬영 도구·폰 페이지 |
+| 코드 이름 확인 (L1~L4, CAM1·CAM2) | B | 11/3 | 완료 | codes.yaml 0.5.0·booth/README·ddl·booth·ml 값 일치(11/02), 폰 페이지는 코드 생기면 다시 |
 | 대여 관리자에게 사진 보관·삭제 문구 전달 | A | 11/2 | 대기 | |
