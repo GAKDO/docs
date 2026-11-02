@@ -19,7 +19,7 @@
 | MinIO | `trace-captures`·`trace-derived`·`trace-raw`·`trace-labels`·`trace-datasets`·`trace-models`·`trace-backups` | `https://storage.java21.net` | 사진은 사전 서명 URL로 직접 업로드 |
 | RabbitMQ | vhost `/trace` | `s4.java21.net:5672` (관리 화면 15672) | 이벤트 5종, 집 PC 워커도 접속 |
 | Redis | DB 2번(학번 끝자리 규칙), 키 접두사 `trace:` | 학교 Redis 6379 | 클러스터는 내부망 주소(gitops `infra.env`), 집 PC는 외부 주소 |
-| InfluxDB | 버킷 `trace-pilot` | `http://influx.java21.net` | Grafana는 학교 공용 |
+| InfluxDB | 버킷 `trace-pilot` | `http://influx.java21.net` | Grafana는 로컬 Docker(11/2) |
 | Elasticsearch (선택) | 인덱스 `trace-records-*` | `s4.java21.net:9200` (Kibana 5601) | 11/10에 여유가 없으면 제외 |
 | SonarQube | 프로젝트 `trace-<레포>` | `http://s4.java21.net:9000` | CI에서 분석 |
 | Gmail SMTP | 팀 Google 계정 하나 | `smtp.gmail.com:587` | 앱 비밀번호는 Rancher Secret. 이메일 인증·재설정·봉인 영수증 3개가 여기에 달림 |
