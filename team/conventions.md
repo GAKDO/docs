@@ -45,4 +45,4 @@
 - **커밋:** `<종류>(<범위>): <내용>` — feat·fix·refactor·test·docs·chore·ci. 예: `feat(device): 기기 목록 API (FR-RNT-05)`.
 - **PR 하나 = 백로그 기능 하나.** 코드 변경이 400줄을 넘으면 나눈다(`specs/`와 생성 코드는 빼고 셈).
 - **PR 본문:** 백로그 ID(예: RE1), 요구사항 ID, 테스트한 방법, 화면이면 스크린샷.
-- **리뷰·머지:** CodeRabbit이 리뷰하고, 승인과 머지는 팀장(A)이 합니다(11/2). PR을 올린 사람은 직접 머지하지 않고 기다립니다. contracts PR도 같고, B·C는 계약 PR에 리뷰 의견을 남깁니다. A는 [scripts/merge-prs.sh](../scripts/merge-prs.sh)로 필수 검사가 통과한 PR을 한 번에 승인·머지합니다.
+- **리뷰·머지:** 시간이 없어 승인은 받지 않습니다(11/2). PR을 올리고 **필수 검사(CI)가 통과하면 올린 사람이 직접 머지**합니다. 머지 전에 CodeRabbit 리뷰를 읽고 심각한 지적(보안·데이터 손실·계약 위반)은 고칩니다. contracts PR은 B·C에게 알린 뒤 머지합니다. CI가 빨간 PR은 머지하지 않습니다. A는 [scripts/merge-prs.sh](../scripts/merge-prs.sh)로 남은 초록 PR을 한 번에 정리할 수 있습니다.

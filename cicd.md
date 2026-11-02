@@ -96,7 +96,7 @@ flowchart LR
 
 12개 레포 main·develop 공통입니다(11/2).
 
-- PR로만 머지합니다. 아래 필수 검사가 통과하고 1명이 승인해야 합니다. 승인과 머지는 팀장(A)이 합니다([team/conventions.md](team/conventions.md), 11/2). contracts도 1명입니다.
+- PR로만 머지합니다. 아래 필수 검사가 통과하면 **올린 사람이 승인 없이 머지**합니다(필요 승인 0명, [team/conventions.md](team/conventions.md), 11/2). 검사가 빨간 PR은 아무도 머지할 수 없습니다.
 - 강제 push와 브랜치 삭제를 막습니다.
 - 조직 소유자(민서)는 규칙에서 빠져 있습니다(enforce_admins 끔). 헌법·문서 동기화 스크립트는 그대로 직접 올립니다.
 - **승인·머지 도우미:** [scripts/merge-prs.sh](scripts/merge-prs.sh)가 13개 레포의 열린 PR을 모아 필수 검사가 통과한 것만 승인·머지합니다. contracts를 먼저 머지하고, 기능 PR은 squash, release·hotfix → main은 merge commit입니다([CONTRIBUTING.md](https://github.com/GAKDO/gateway/blob/develop/CONTRIBUTING.md)). A가 올린 PR은 자기 승인이 안 돼 검사 통과를 확인한 뒤 관리자 권한으로 머지합니다. 검사가 실패하거나 진행 중인 PR은 건너뜁니다.
