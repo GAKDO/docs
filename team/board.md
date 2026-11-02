@@ -18,7 +18,7 @@
 | WE1 | web | 로그인·출고·반납·기기 관리 | C | 11/6 | 대기 |  |  | 11/01 |
 | ML1 | ml | 데이터셋 빌더·학습 기록 | A | 11/6 | 대기 |  |  | 11/01 |
 | BO2 | booth | Jetson 흠집 탐지 | B | 11/6 | 대기 |  |  | 11/01 |
-| AG1 | agent | macOS 진단 에이전트 | B | 11/9 | 진행 | 머지 [#1](https://github.com/GAKDO/agent/pull/1)(수집·검증), 리뷰 [#2](https://github.com/GAKDO/agent/pull/2)(벤치마크·업로드), 남은 것: 팀 노트북 3대 실행·DI1 뒤 저장 확인 |  | 11/02 |
+| AG1 | agent | macOS 진단 에이전트 | B | 11/9 | 진행 | 머지 [#1](https://github.com/GAKDO/agent/pull/1)(수집·검증), [#2](https://github.com/GAKDO/agent/pull/2)(벤치마크·업로드), 남은 것: 팀 노트북 3대 실행·DI1 뒤 저장 확인 |  | 11/02 |
 | DI1 | diagnostics_server | 진단 수신·저장 | A | 11/7 | 대기 |  |  | 11/01 |
 | RP1 | report_server | 타임라인·해시 체인·검증 API | A | 11/7 | 대기 |  |  | 11/01 |
 | G1 | gitops | 로컬 Compose 폴백 | A | 11/7 | 대기 |  |  | 11/01 |
