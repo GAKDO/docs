@@ -208,3 +208,5 @@ Label Studio가 MinIO trace-raw 원본을 작업으로 가져오고(프록시 �
 ```
 학교 서버에 못 닿을 때 팀 노트북에서 앱 8개와 인프라(PostgreSQL·RabbitMQ·MinIO·Redis)를 Docker Compose로 띄워 세 시점 흐름을 데모한다(NFR-06). 클러스터와 같은 이미지와 같은 환경 변수 이름을 쓴다. 수용 기준: compose up 한 번으로 세 시점 흐름이 동작하고, 앱 파드를 지워도 자동으로 다시 뜬다(NFR-05는 클러스터에서 확인).
 ```
+
+이미지 출처(11/2): MinIO는 Docker Hub `minio/minio`를 받을 수 없으므로 `quay.io/minio/minio`의 고정 RELEASE 태그, 안 되면 `pgsty/minio`. 모든 이미지는 고정 태그(decisions.md 11/2).
