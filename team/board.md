@@ -2,6 +2,21 @@
 
 기능 27개와 운영 할 일의 상태입니다. 각자의 Claude가 `/trace-standup`으로 자기 행만 고칩니다. 상태: `대기` → `진행` → `리뷰` → `완료`, 막히면 `막힘`.
 
+## 11/3 MVP 재조정 (강사님 리뷰, 민서 승인)
+
+11/9까지 trace.java21.net에 최소 MVP를 띄운다. 흐름: 부스 태블릿에서 검사 기다리는 기기 탭 → BOT·TOP × L1·L2·L3 × CAM1·CAM2 = 12장 → Jetson YOLO11-seg 판정 → capture-server 빠른 검사(QUICK) 등급 → web /admin 결과. 계획: 민서의 계획 페이지(비공개), 팀원 메시지 `notices/2026-11-03-mvp-rescope-team-message.md`, 아키텍처·포트 `notices/2026-11-03-architecture-ports.md`(프로젝트 파일).
+
+| 단계 | 기능 |
+| --- | --- |
+| MVP(11/9) | BO1·BO2(빠른 검사 모드 11/5, B), CA1·CA2(QUICK 세트 [capture_server #10](https://github.com/GAKDO/capture_server/pull/10) 머지), C 계약 추가 [contracts #20](https://github.com/GAKDO/contracts/pull/20)(profile·photoDefects·analyzedPhotos·graded 1.2 compared), AU1·GW1·RE1, WE1 + /admin 결과 화면(C), ML1·ML3(집 PC 학습만), G1(Compose 앱 5개 [gitops #14](https://github.com/GAKDO/gitops/pull/14)) |
+| 2단계(11/10~12) | RP1·RP2 해시 체인 재도입 → 반납 비교, WE2 폰 촬영, WE3·WE4, ML2(집 PC 상시 워커 대신 Jetson·학교 서버) |
+| 3단계 | DI1·AG1·Grafana·9면 전체 세트 |
+| 중단 | 클러스터(Rancher·Argo CD·Cloudflare·trace-secrets), AU2 서버·AU3·RE2·DI2·AG2 |
+
+- MVP는 렌탈 하나에 출고 검사 1번(민서 11/3 결정). 봉인(RP1)이 없으면 다음 시점이 409라 반납 비교는 2단계.
+- 조명(11/4 도착): L1 VIJIM VL49(앞 기둥 위, 손으로 켜고 끔), L2·L3 USB LED 바(왼쪽·뒤쪽, 스위치 허브). 놓는 법은 booth capture/README.
+- 기기 선택은 목록 탭(빌린 노트북이라 스티커·QR 안 붙임). QR 카드는 2단계 선택.
+
 ## 기능
 
 | ID | 레포 | 기능 | 담당 | 마감 | 상태 | 브랜치·PR | 막힌 점 | 갱신 |
