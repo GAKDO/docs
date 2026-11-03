@@ -6,9 +6,9 @@
 
 | ID | 레포 | 기능 | 담당 | 마감 | 상태 | 브랜치·PR | 막힌 점 | 갱신 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| C1 | contracts | OpenAPI 5개 | A (B·C 리뷰) | 11/3 | 완료 | [PR #1](https://github.com/GAKDO/contracts/pull/1) 머지, ID→PublicId [PR #6](https://github.com/GAKDO/contracts/pull/6) 머지 |  | 11/02 |
-| C2 | contracts | 진단 결과 JSON Schema v1 | A (B 리뷰) | 11/3 | 완료 | [PR #3](https://github.com/GAKDO/contracts/pull/3) 머지 |  | 11/02 |
-| C3 | contracts | 이벤트 스키마 5종 | A | 11/3 | 완료 | [PR #2](https://github.com/GAKDO/contracts/pull/2) 머지, ID→PublicId [PR #6](https://github.com/GAKDO/contracts/pull/6) 머지 |  | 11/02 |
+| C1 | contracts | OpenAPI 5개 | A (B·C 리뷰) | 11/3 | 완료 | [PR #1](https://github.com/GAKDO/contracts/pull/1) 머지, ID→PublicId [PR #6](https://github.com/GAKDO/contracts/pull/6) 머지, **1.0.0 고정** [#16](https://github.com/GAKDO/contracts/pull/16) main·태그 v1.0.0 |  | 11/03 |
+| C2 | contracts | 진단 결과 JSON Schema v1 | A (B 리뷰) | 11/3 | 완료 | [PR #3](https://github.com/GAKDO/contracts/pull/3) 머지, **1.0.0 고정** [#16](https://github.com/GAKDO/contracts/pull/16) main·태그 v1.0.0 |  | 11/03 |
+| C3 | contracts | 이벤트 스키마 5종 | A | 11/3 | 완료 | [PR #2](https://github.com/GAKDO/contracts/pull/2) 머지, ID→PublicId [PR #6](https://github.com/GAKDO/contracts/pull/6) 머지, **1.0.0 고정** [#16](https://github.com/GAKDO/contracts/pull/16) main·태그 v1.0.0 |  | 11/03 |
 | BO1 | booth | 촬영 도구·부스 촬영 | B | 11/4 | 진행 | 머지 #2~#7·#9~#11·[#14](https://github.com/GAKDO/booth/pull/14)(URL 다시 받기·계약 0.6.0)·#13·#15·#16(Jetson 설치·MinIO 문서), jetson2 설치·trace-raw 접속·C920 두 대 확인. 남은 것: 거치대 장착 뒤 앞·뒤 매핑·카메라 고정값, REG01 시험 촬영, CA1 실제 연결 |  | 11/02 |
 | ML3 | ml | Label Studio 연동 | B | 11/4 | 진행 | 머지 [#1](https://github.com/GAKDO/ml/pull/1)(setup·sync 명령)·[#6](https://github.com/GAKDO/ml/pull/6)·[#7](https://github.com/GAKDO/ml/pull/7)(스토리지 설정값·trace-labelstudio 키), 남은 것: 클러스터 Label Studio에서 실제 확인 |  | 11/02 |
 | AU1 | auth_server | 로그인·JWT·자격 교환 | A | 11/5 | 완료 | [PR #1](https://github.com/GAKDO/auth_server/pull/1) 머지(QR 발급·렌탈 연결 포함), 설정 키 [gitops #1](https://github.com/GAKDO/gitops/pull/1) |  | 11/02 |
