@@ -32,7 +32,7 @@
 - 위치: A 계정 `~/gitops/compose`. `.env`는 `./init-env.sh`로 만들었습니다. 빈 계정·비밀 값을 무작위로 채우고, 이미 있는 값은 바꾸지 않습니다. `.env`는 서버에만 있습니다.
 - 앱 이미지는 GHCR 비공개라 `docker login ghcr.io`를 한 번 했습니다. `read:packages` 토큰을 쓰고, 30일 이상 유효하게 둡니다.
 - 포트: web `8315`(0.0.0.0, 유일한 입구), RabbitMQ `127.0.0.1:5672`, TRACE MinIO `127.0.0.1:19000`(콘솔 19001). 이 서버의 9000·9001은 학교 MinIO(`storage.java21.net:8000`)와 다른 MinIO가 쓰고 있어서 `MINIO_HOST_PORT=19000`으로 옮겼습니다(gitops #13).
-- `PUBLIC_BASE_URL`은 지금 `http://10.116.64.12:8315`입니다. 폰 카메라는 HTTPS에서만 되므로 강사님 nginx(`https://trace.java21.net`)가 연결되면 바꾼 뒤 `docker compose up -d`를 다시 실행합니다.
+- `PUBLIC_BASE_URL`은 `https://gakdo.site`입니다(11/3 민서 결정. trace.java21.net은 DNS에 없어 쓰지 않음). 강사님 nginx(s2-nginx)가 gakdo.site(Cloudflare DNS 전용 A 레코드)를 받아 10.116.64.12:8315로 넘깁니다. 값을 바꾸면 `docker compose up -d`를 다시 실행합니다.
 - 집 PC inspect-worker는 SSH 터널로 붙습니다. 포트는 열지 않습니다: `ssh -N -p 8822 -L 5672:127.0.0.1:5672 -L 9000:127.0.0.1:19000 <계정>@s2.java21.net`. 집 PC에서는 `localhost:5672`·`localhost:9000`이 됩니다.
 - 갱신: `git pull && docker compose pull && docker compose up -d`. 모든 서비스가 `restart: unless-stopped`입니다.
 

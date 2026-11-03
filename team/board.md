@@ -4,7 +4,7 @@
 
 ## 11/3 MVP 재조정 (강사님 리뷰, 민서 승인)
 
-11/9까지 trace.java21.net에 최소 MVP를 띄운다. 흐름: 부스 태블릿에서 검사 기다리는 기기 탭 → BOT·TOP × L1·L2·L3 × CAM1·CAM2 = 12장 → Jetson YOLO11-seg 판정 → capture-server 빠른 검사(QUICK) 등급 → web /admin 결과. 계획: 민서의 계획 페이지(비공개), 팀원 메시지 `notices/2026-11-03-mvp-rescope-team-message.md`, 아키텍처·포트 `notices/2026-11-03-architecture-ports.md`(프로젝트 파일).
+11/9까지 https://gakdo.site(강사님 nginx → 학교 서버 8315)에 최소 MVP를 띄운다. 흐름: 부스 태블릿에서 검사 기다리는 기기 탭 → BOT·TOP × L1·L2·L3 × CAM1·CAM2 = 12장 → Jetson YOLO11-seg 판정 → capture-server 빠른 검사(QUICK) 등급 → web /admin 결과. 계획: 민서의 계획 페이지(비공개), 팀원 메시지 `notices/2026-11-03-mvp-rescope-team-message.md`, 아키텍처·포트 `notices/2026-11-03-architecture-ports.md`(프로젝트 파일).
 
 | 단계 | 기능 |
 | --- | --- |
