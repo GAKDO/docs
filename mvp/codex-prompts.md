@@ -10,8 +10,7 @@
 
 [그룹과 색]
 - ① 부스 사진 (MVP) — 초록(#2f9e5b 테두리, #e3f6ea 채움), 실선: "booth 앱 · Jetson Orin Nano · 부스 운영 웹 서버 :8320", "capture-server :8080", "부스 태블릿 브라우저"
-- ② 폰 사진 (2단계) — 주황(#d9822b), 점선 테두리: "web 폰 화면 /capture", "inspect-worker"
-- ③ 사진 무관 — 파랑(#3b6fd8): "web nginx :8315 (유일한 입구)", "gateway :8080", "auth-server :8080", "rental-server :8080". 점선: "report-server (2단계)", "diagnostics-server + agent (3단계)"
+- ③ 사진 무관 — 파랑(#3b6fd8): "web nginx :8315 (유일한 입구)", "gateway :8080", "auth-server :8080", "rental-server :8080"
 - 공통 인프라 (학교 서버 10.116.64.12 · Docker Compose) — 회색: "PostgreSQL :5432", "RabbitMQ :5672", "MinIO :9000 (trace-captures)", "Redis :6379"
 - 밖 — 흰 상자 검은 테두리: "관리자 브라우저", "강사님 nginx gakdo.site :443", "집 PC RTX 4070 Ti — 학습만", "학교 MinIO storage.java21.net:8000"
 
@@ -28,10 +27,9 @@ capture-server → RabbitMQ "trace.capture.uploaded · trace.checkpoint.graded"
 RabbitMQ → rental-server "시점 상태 갱신"
 booth 앱 ⇢ 학교 MinIO "학습 사진" (점선)
 학교 MinIO ⇢ 집 PC (점선), 집 PC → booth 앱 "model.onnx → TensorRT 엔진"
-gateway ⇢ report-server, diagnostics-server (점선)
 
-[배치] 왼쪽 위 밖(브라우저·nginx), 왼쪽 아래 ① 부스, 가운데 ③ 서버들, 오른쪽 위 ② 폰(점선), 아래 띠 공통 인프라, 왼쪽 아래 구석 집 PC·학교 MinIO.
-오른쪽 아래에 범례: 실선 = MVP(11/9), 점선 = 2·3단계. 제목: "TRACE 최소 MVP 아키텍처 (https://gakdo.site)".
+[배치] 왼쪽 위 밖(브라우저·nginx), 왼쪽 아래 ① 부스, 가운데·오른쪽 ③ 서버들, 아래 띠 공통 인프라, 왼쪽 아래 구석 집 PC·학교 MinIO.
+MVP(11/9)에 실제로 뜨는 것만 그린다. 폰 촬영·report-server·diagnostics-server는 넣지 마. 범례: 실선 = 서비스 호출, 점선 = 학습 데이터 경로. 제목: "TRACE 최소 MVP 아키텍처 (https://gakdo.site)".
 ```
 
 ## 프롬프트 2. 포트 표 슬라이드
@@ -63,7 +61,7 @@ C (관리자 화면): web /admin — 로그인, 기기·렌탈·출고 시점, �
 
 | 확인 | 맞는 값 |
 |---|---|
-| 서비스 이름 | web, gateway, auth-server, rental-server, capture-server, booth 앱, report-server, diagnostics-server, inspect-worker |
+| 서비스 이름 | web, gateway, auth-server, rental-server, capture-server, booth 앱 |
 | 포트 | 443, 8315, 8080, 5432, 5672, 6379, 9000(호스트 19000), 8320, 8000 |
 | 주소 | https://gakdo.site, 10.116.64.12, storage.java21.net:8000 |
-| 없어야 할 것 | Rancher, Argo CD, Cloudflare Tunnel, Grafana, InfluxDB, trace.java21.net |
+| 없어야 할 것 | 폰 촬영·inspect-worker·report-server·diagnostics-server(MVP 밖), Rancher, Argo CD, Cloudflare Tunnel, Grafana, InfluxDB, trace.java21.net |

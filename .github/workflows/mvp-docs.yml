@@ -47,7 +47,7 @@ jobs:
         with:
           node-version: 22
 
-      - name: Redoc 빌드 (MVP 통합 + 서버별 5개)
+      - name: Redoc 빌드 (MVP 통합 + 서버별 3개)
         run: api-docs/build.sh _contracts _site
 
       - name: Mermaid 그림 문법 검사·SVG 만들기

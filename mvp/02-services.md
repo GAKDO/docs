@@ -1,26 +1,22 @@
 # 2. 서비스 단위 아키텍처
 
-서비스마다 **레포 · 컨테이너 · 포트 · 저장소 · 받는 API · 내보내는 이벤트 · 담당**을 같은 틀로 적었습니다. 그림 색은 [1. 전체 아키텍처](01-architecture.md)와 같습니다(초록 = 부스 사진, 주황 = 폰 사진, 파랑 = 사진 무관, 회색 = 인프라).
+MVP에서 뜨는 서비스마다 요약 표에는 **레포 · 어디서 · 포트 · 저장소 · 담당**을, 서비스별 절에는 그림과 함께 하는 일 · 받는 API · 이벤트 · 환경 변수를 적었습니다. 그림 색은 [1. MVP 아키텍처](01-architecture.md)와 같습니다(초록 = 부스 사진, 파랑 = 사진 무관, 회색 = 인프라).
 
-API 한 줄 설명과 요청·응답은 [3. 기능별 API 명세](03-api-by-feature.md)에, 필드 단위 원본은 contracts OpenAPI와 [자동 생성 API 문서](https://gakdo.github.io/docs/)에 있습니다.
+기능마다 어떤 순서로 이 서비스들을 거치는지는 [3. 기능별 흐름](03-features.md)에, 필드 단위 원본은 contracts OpenAPI와 [자동 생성 API 문서](https://gakdo.github.io/docs/)에 있습니다.
 
 ## 한눈에 보기
 
-| 서비스 | 레포 | 그룹 | 컨테이너 포트 | 저장소 | 단계 | 담당 |
-|---|---|---|---|---|---|---|
-| web (nginx + React) | GAKDO/web | ③ 사진 무관 (`/capture`는 ②) | 8080 → 호스트 8315 | 없음 | MVP (`/admin`) | C |
-| gateway | GAKDO/gateway | ③ | 8080 | Redis `trace:` | MVP | A |
-| auth-server | GAKDO/auth_server | ③ | 8080 | PostgreSQL `auth`, Redis | MVP | A |
-| rental-server | GAKDO/rental_server | ③ | 8080 | PostgreSQL `rental` | MVP | A |
-| capture-server | GAKDO/capture_server | ① 부스 사진 | 8080 | PostgreSQL `capture`·`inspection`, MinIO `trace-captures` | MVP | A |
-| booth 앱 (부스 운영 웹 서버 + 촬영·탐지) | GAKDO/booth | ① | Jetson 8320 (부스 공유기만) | Jetson 로컬 큐 | MVP | B |
-| 학습 (집 PC) | GAKDO/ml | 밖 | 없음 | 학교 MinIO `trace-raw`·`labels`·`models` | MVP(학습만) | A (라벨링 연동 ML3은 B) |
-| report-server | GAKDO/report_server | ③ | 8080 | PostgreSQL `report`, Redis | 2단계 | A (SSE 화면은 C) |
-| inspect-worker | GAKDO/ml | ② 폰 사진 | 없음(큐 소비) | MinIO `trace-derived` | 2단계 | A |
-| diagnostics-server | GAKDO/diagnostics_server | ③ | 8080 | PostgreSQL `diagnostics` | 3단계 | A |
-| agent | GAKDO/agent | ③ | 없음(노트북에서 실행) | 없음 | 3단계 | B |
-| contracts | GAKDO/contracts | 전체 | — | OpenAPI·JSON Schema·codes.yaml | 1.0.0 고정, 추가만 | A (B·C 리뷰) |
-| gitops | GAKDO/gitops | 인프라 | — | `compose/docker-compose.yml` | MVP | A |
+| 서비스 | 레포 | 어디서 | 포트 | 저장소 | 담당 |
+|---|---|---|---|---|---|
+| web (nginx + React 관리자 화면) | GAKDO/web | 학교 서버 Compose | 8080 → 호스트 8315 | 없음 | C |
+| gateway | GAKDO/gateway | 학교 서버 Compose | 8080 | Redis (키 접두사 `trace:`) | A |
+| auth-server | GAKDO/auth_server | 학교 서버 Compose | 8080 | PostgreSQL `auth` | A |
+| rental-server | GAKDO/rental_server | 학교 서버 Compose | 8080 | PostgreSQL `rental` | A |
+| capture-server | GAKDO/capture_server | 학교 서버 Compose | 8080 | PostgreSQL `capture`·`inspection`, MinIO `trace-captures` | A |
+| booth 앱 (부스 화면 + 촬영 + 탐지) | GAKDO/booth | Jetson Orin Nano | 8320 (부스 공유기만) | Jetson 로컬 저장·큐 | B |
+| 학습 | GAKDO/ml | 집 PC | 없음 | 학교 MinIO `trace-raw`·`models` | A (라벨링 연동은 B) |
+| 인프라 4개 | GAKDO/gitops | 학교 서버 Compose | 5432 · 5672 · 9000 · 6379 | — | A |
+| 계약 | GAKDO/contracts | — | — | OpenAPI · 이벤트 스키마 · codes.yaml | A (B·C 리뷰) |
 
 공통 규칙: Spring 서버는 모두 Java 21 · Spring Boot 3.5.7, RFC 9457 Problem Details 오류, 이벤트는 RabbitMQ topic exchange `trace.events`, 외부 ID는 NanoID 21자(`PublicId`). 비밀은 학교 서버 `compose/.env`에만 있고 이름만 적습니다.
 
@@ -41,7 +37,8 @@ flowchart LR
 | 항목 | 값 |
 |---|---|
 | 하는 일 | 관리자 로그인, 기기·기종 등록, 렌탈 열기·출고 시점 시작, 검사 결과(사진 12장 격자 + 흠집 폴리곤 + 등급) 보기 |
-| 기능 ID | WE1(MVP). WE2 폰 촬영·WE3 3D 리포트·WE4 검증 페이지는 2단계, 메뉴에서 숨김 |
+| 기능 ID | WE1 |
+| 화면 | `/admin/login`, `/admin/models`, `/admin/devices`, `/admin/rentals`, `/admin/rentals/:rentalId`, `/admin/inspections`, `/admin/inspections/:rentalId/:checkpointId` |
 | 부르는 API | auth `login`·`refresh`·`logout`·`me`, rental 기기·기종·렌탈·시점, capture `inspection`·`media` |
 | 토큰 | 액세스 JWT는 메모리에만, 리프레시는 HttpOnly 쿠키 |
 | 환경 변수 | `API_UPSTREAM`, `MINIO_UPSTREAM` |
@@ -56,18 +53,16 @@ flowchart LR
   gw -->|"/api/v1/auth/**"| a["auth-server :8080"]:::nophoto
   gw -->|"/api/v1/rentals/** · /devices/** · /device-models/** · /pilot/**"| r["rental-server :8080"]:::nophoto
   gw -->|"/api/v1/captures/**"| c["capture-server :8080"]:::nophoto
-  gw -.->|"/api/v1/reports/** · /verify/** (2단계)"| rp["report-server"]:::nophoto
-  gw -.->|"/api/v1/diagnostics/** (3단계)"| d["diagnostics-server"]:::nophoto
   gw -->|"JWKS /.well-known/jwks.json"| a
   gw --- redis[("Redis :6379<br/>키 접두사 trace:")]:::infra
 ```
 
 | 항목 | 값 |
 |---|---|
-| 하는 일 | 모든 `/api/v1/**`의 유일한 입구. auth-server JWKS로 JWT 서명 검증, 역할(ADMIN·CUSTOMER·BOOTH·AGENT) × 경로 표로 막기, 로그인·페어링 교환은 Redis 요청 제한 |
+| 하는 일 | 모든 `/api/v1/**`의 유일한 입구. auth-server JWKS로 JWT 서명 검증, 역할(MVP는 ADMIN·BOOTH) × 경로 표로 막기, 로그인(`POST /api/v1/auth/login`)은 Redis로 IP당 1분 10번 요청 제한 |
 | 기능 ID | GW1 |
 | 받는 API | 자체 API 없음(라우팅). JWKS는 밖으로 열지 않음 |
-| 환경 변수 | `AUTH_SERVER_URL`, `RENTAL_SERVER_URL`, `CAPTURE_SERVER_URL`, `REPORT_SERVER_URL`, `DIAGNOSTICS_SERVER_URL`, `REDIS_PASSWORD` |
+| 환경 변수 | `AUTH_SERVER_URL`, `RENTAL_SERVER_URL`, `CAPTURE_SERVER_URL`, `REDIS_PASSWORD` |
 
 ## 2-3. auth-server — A
 
@@ -76,17 +71,15 @@ flowchart LR
   classDef nophoto fill:#e6efff,stroke:#3b6fd8,stroke-width:2px,color:#123
   classDef infra fill:#eef0f3,stroke:#6b7480,color:#222
   gw["gateway"]:::nophoto --> a["auth-server :8080<br/>로그인 · 부스 토큰 · JWKS<br/>JWT RS256 (Nimbus)"]:::nophoto
-  a --> pg[("PostgreSQL 스키마 auth<br/>account · client_credential<br/>capture_link · pairing_code …")]:::infra
-  a --- r[("Redis<br/>페어링 실패 한도")]:::infra
+  a --> pg[("PostgreSQL 스키마 auth<br/>account · client_credential")]:::infra
 ```
 
 | 항목 | 값 |
 |---|---|
-| 하는 일 | 관리자·고객 로그인(액세스 15분 + 리프레시 7일 쿠키), 부스 client_id·secret → BOOTH JWT(1시간), JWT 공개키(JWKS) |
-| 기능 ID | AU1(MVP). AU2 가입·인증 메일, AU3 수령 QR·봉인 영수증은 중단 또는 2단계 |
+| 하는 일 | 관리자 로그인(액세스 JWT 15분 + 리프레시 쿠키 7일), 부스 client_id·secret → BOOTH JWT(1시간), JWT 공개키(JWKS) |
+| 기능 ID | AU1 |
 | MVP API | `login`, `refreshToken`, `logout`, `getMe`, `issueBoothToken`, `getJwks`(내부) |
-| 2·3단계 API | `createCaptureLink`·`exchangeCaptureLink`(2단계 폰), `createPairingCode`·`exchangePairingCode`(3단계 진단), 가입·재설정·탈퇴(AU2, 중단) |
-| 환경 변수 | `JWT_PRIVATE_KEY`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `BOOTH_CLIENT_ID`, `BOOTH_CLIENT_SECRET`, `DB_USERNAME`, `DB_PASSWORD` |
+| 환경 변수 | `JWT_PRIVATE_KEY`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`(처음 뜰 때 관리자 계정 생성), `BOOTH_CLIENT_ID`, `BOOTH_CLIENT_SECRET`, `DB_USERNAME`, `DB_PASSWORD` |
 
 ## 2-4. rental-server — A
 
@@ -96,16 +89,14 @@ flowchart LR
   classDef infra fill:#eef0f3,stroke:#6b7480,color:#222
   gw["gateway"]:::nophoto --> r["rental-server :8080<br/>기기 · 기종 · 렌탈 · 시점"]:::nophoto
   r --> pg[("PostgreSQL 스키마 rental<br/>device_model · device · rental · checkpoint")]:::infra
-  r -->|"발행 trace.checkpoint.started"| mq["RabbitMQ trace.events"]:::infra
-  mq -->|"구독 trace.capture.uploaded · trace.checkpoint.graded · trace.record.sealed<br/>큐 trace.rental.checkpoints (DLQ 있음)"| r
+  mq["RabbitMQ trace.events"]:::infra -->|"구독 trace.capture.uploaded · trace.checkpoint.graded<br/>큐 trace.rental.checkpoints (DLQ 있음)"| r
 ```
 
 | 항목 | 값 |
 |---|---|
-| 하는 일 | 기기 등록·검색, 기종(치수) 관리, 렌탈 열기, 시점 OUT → RCV → RET 순서 강제, 이벤트로 시점 상태(UPLOADED → GRADED → SEALED) 갱신. 렌탈·시점 짝이 맞지 않는 이벤트는 DLQ |
-| 기능 ID | RE1(MVP). RE2 파일럿 등록은 중단 |
+| 하는 일 | 기기 등록·검색, 기종(치수) 관리, 렌탈 열기, MVP는 렌탈당 출고(OUT) 시점 하나(수령 RCV·반납 RET는 MVP 밖), 이벤트로 시점 상태(OPEN → CAPTURED → GRADED) 갱신. 렌탈·시점 짝이 맞지 않는 이벤트는 DLQ |
+| 기능 ID | RE1 |
 | MVP API | `listRentals`(ADMIN 전체 · BOOTH는 OPEN만), `createRental`, `getRental`, `startCheckpoint`, `createDevice`, `listDevices`, `updateDevice`, `listDeviceModels`, `getDeviceModel`, `upsertDeviceModel` |
-| 2단계 API | `closeRental`(반납 시점 봉인 뒤) |
 | 시드 | 기종 `MBA13-M2`(V2). 그램·델은 실측 뒤 추가 |
 
 ## 2-5. capture-server — A (① 부스 사진)
@@ -119,13 +110,13 @@ flowchart LR
   c --> pg[("PostgreSQL 스키마 capture · inspection<br/>capture_set · photo · defect · grade_result")]:::infra
   c -->|"AWS SDK v2 S3 Presigner<br/>PUT 10분 · GET 10분"| s3[("MinIO 버킷 trace-captures")]:::infra
   c -->|"발행 trace.capture.uploaded · trace.checkpoint.graded"| mq["RabbitMQ trace.events"]:::infra
-  mq -.->|"구독 trace.inspect.completed (2단계, inspect-worker)"| c
 ```
 
 | 항목 | 값 |
 |---|---|
 | 하는 일 | 사진마다 면·조명·카메라·SHA-256을 받아 사전 서명 PUT URL 발급, 완료 때 해시 확인, 부스 탐지(원본 사진 px 폴리곤) 저장, **QUICK 세트는 정합 없이 부스 탐지로 등급**(A = 문제 없음, B~D = 문제 있음), 관리자 화면용 사진 보기 URL |
-| 기능 ID | CA1 세트·URL, CA2 검사 결과·등급(MVP는 QUICK만, 시점 비교는 2단계) |
+| 기능 ID | CA1 세트·URL, CA2 검사 결과·등급(QUICK) |
+| 등급 규칙 | grade-rules-v1: 균열 1개 이상 또는 찍힘 3개 이상 D, 찍힘 1~2개 또는 긁힘 5개 이상 C, 긁힘 1~4개 B, 흠집 없음 A. 같은 면·같은 카메라에서 조명만 다른 사진의 흠집은 20 px 안이면 하나로 셈 |
 | MVP API | `createCaptureSet`, `reissueUploadUrls`, `completeCaptureSet`, `saveBoothDetections`, `getCaptureSet`, `getCheckpointInspection`, `getCheckpointMedia` |
 | 코드 값 | `capture.profile` = FULL·QUICK, `capture.face_required_quick.BOOTH` = TOP·BOT (contracts #20) |
 | 환경 변수 | `MINIO_PUBLIC_BASE`(= `PUBLIC_BASE_URL` = `https://gakdo.site`), `MINIO_ACCESS_KEY`, `MINIO_SECRET_KEY` |
@@ -200,15 +191,3 @@ flowchart LR
 |---|---|
 | 하는 일 | 부스 학습 사진 라벨링 → 데이터셋 → 학습 → ONNX. 집 PC는 학습만 하고 상시 서비스를 띄우지 않음 |
 | 기능 ID | ML1 데이터셋·학습 기록(A), ML3 Label Studio 연동(B) |
-
----
-
-## 2-8. 2·3단계 서비스 (점선, 코드는 develop에 있음)
-
-| 서비스 | 단계 | 하는 일 | 받는 API | 이벤트 |
-|---|---|---|---|---|
-| report-server | 2단계 (11/10~) | 시점 기록을 해시 체인으로 봉인(Ed25519 서명), 타임라인, 공개 검증, 진행률 SSE | `getRentalTimeline`, `streamRentalProgress`, `getRentalChain`, `sealCheckpointManually`, `listManualSeals`, `verifyRecord`, `searchReports` | 구독 graded·diagnostics.recorded, 발행 `trace.record.sealed` |
-| inspect-worker (ml) | 2단계 | 폰 사진 정합·흠집 탐지·표준 좌표 변환 | 없음 | 구독 `trace.capture.uploaded`, 발행 `trace.inspect.completed` |
-| web `/capture`·리포트·검증 | 2단계 | 폰 수령 촬영(WE2), 3D 리포트(WE3), 검증 페이지(WE4) | — | — |
-| diagnostics-server | 3단계 | 진단 JSON 검증(diag.v1)·이전 시점 비교·점검 플래그 | `uploadDiagnosticRun`, `getCheckpointDiagnostics` | 발행 `trace.diagnostics.recorded` |
-| agent | 3단계 | macOS·Windows 배터리·SSD·부품 읽기, 페어링 코드로 업로드 | — | — |

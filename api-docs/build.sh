@@ -22,8 +22,8 @@ $REDOCLY join "$OPENAPI/auth-server.yaml" "$OPENAPI/rental-server.yaml" "$OPENAP
 $REDOCLY build-docs "$HERE/_build/mvp.yaml" -o "$OUT/api/mvp.html" --title "TRACE MVP API (contracts $COMMIT)"
 cp "$HERE/_build/mvp.yaml" "$OUT/api/mvp.yaml"
 
-# 2) 서버별 전체 (2·3단계 경로 포함)
-for f in auth-server rental-server capture-server report-server diagnostics-server; do
+# 2) MVP 서버 3개 전체 경로
+for f in auth-server rental-server capture-server; do
   $REDOCLY build-docs "$OPENAPI/$f.yaml" -o "$OUT/api/$f.html" --title "TRACE $f API (contracts $COMMIT)"
 done
 
