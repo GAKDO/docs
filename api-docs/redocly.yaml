@@ -1,0 +1,43 @@
+# contracts OpenAPI → Redoc 문서 (build.sh가 읽는다). 계약 원본은 GAKDO/contracts, 여기서는 고치지 않는다.
+# mvp: build.sh가 auth·rental·capture 3개를 합친 _build/joined.yaml에서 MVP operationId만 남긴다(mvp/03-api-by-feature.md와 같은 목록).
+extends:
+  - recommended
+apis:
+  mvp:
+    root: _build/joined.yaml
+    decorators:
+      filter-in:
+        property: operationId
+        value:
+          # F0 배포 확인
+          - authPing
+          - rentalPing
+          - capturePing
+          # F1 관리자 로그인
+          - login
+          - refreshToken
+          - logout
+          - getMe
+          # F2 기종·기기
+          - listDeviceModels
+          - getDeviceModel
+          - upsertDeviceModel
+          - createDevice
+          - listDevices
+          - updateDevice
+          # F3·F4 렌탈·시점·부스 기기 목록
+          - createRental
+          - listRentals
+          - getRental
+          - startCheckpoint
+          - issueBoothToken
+          # F5·F6 부스 세트·탐지
+          - createCaptureSet
+          - reissueUploadUrls
+          - completeCaptureSet
+          - getCaptureSet
+          - saveBoothDetections
+          # F7 결과 보기
+          - getCheckpointInspection
+          - getCheckpointMedia
+      remove-unused-components: on
