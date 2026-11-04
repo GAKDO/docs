@@ -16,17 +16,27 @@
 
 ## 11/4 현재 상태 (강사님 리뷰용)
 
+리뷰 날짜는 아직 정해지지 않았습니다(11/4 또는 11/5). 진행 순서·명령은 레포 밖 TRACE 프로젝트 공유 폴더(Claude 프로젝트 파일)의 `notices/2026-11-04-mvp-review-runbook.md`에 있습니다(GitHub에는 없음). 기준 시각 11/4 17시(KST).
+
 | 항목 | 상태 |
 |---|---|
-| 학교 서버 배포 | https://gakdo.site 개통. web `0e58744`, auth `9079927`, rental `b002d94`, capture `a97fe3b` (모두 develop 최신, ping ok) |
-| 관리자 화면 | https://gakdo.site/admin 로그인 · 기기 등록 · 렌탈 열기 · 결과 조회. 시험 렌탈 TEST-0001이 출고 촬영 대기 |
-| 부스 | booth develop에 빠른 검사(기기 탭 → 12장 → 판정 → 업로드) · 오염만이면 문제 없음(#28). 맥에서 부스 화면과 대기 기기 목록 확인 |
+| 학교 서버 배포 | https://gakdo.site 개통. web·gateway·auth·rental·capture는 develop 이미지. 11/4 **report-server 다시 켬**(출고 시점이 봉인 SEALED까지 가게, `--profile full`로 report만). diagnostics-server는 꺼 둠 |
+| 관리자 화면 | https://gakdo.site/admin 로그인 · 기기 등록 · 렌탈 열기 · 결과 조회. 기종 목록에 기준 사양 열·검색·정렬, 기종 등록에 GPU(선택)([web #52](https://github.com/GAKDO/web/pull/52), [contracts #24](https://github.com/GAKDO/contracts/pull/24), [rental_server #12](https://github.com/GAKDO/rental_server/pull/12)·[#13](https://github.com/GAKDO/rental_server/pull/13)). 렌탈 상세에 '부스에 넣을 ID'와 복사 버튼([web #53](https://github.com/GAKDO/web/pull/53)) |
+| 부스 | 빠른 검사(기기 탭 → 12장 → 판정 → 업로드), 오염만이면 문제 없음([booth #28](https://github.com/GAKDO/booth/pull/28)). 화면을 단계형으로 다시 짬(기기 고르기 → 시리얼 확인 → 바닥면 → 뒤집기 → 상판 → 판정, [#29](https://github.com/GAKDO/booth/pull/29)), 판정 사진 큰 화면·실시간 캠 크기·gakdo.site 스타일([#30](https://github.com/GAKDO/booth/pull/30)). Playwright 화면 하네스가 CI에서 돎 |
+| 시험 데이터 | 시험 렌탈 지우기 API와 `trace.checkpoint.purged`([contracts #25](https://github.com/GAKDO/contracts/pull/25), [rental_server #14](https://github.com/GAKDO/rental_server/pull/14)), 받는 쪽 [capture_server #14](https://github.com/GAKDO/capture_server/pull/14)·[report_server #6](https://github.com/GAKDO/report_server/pull/6)·[diagnostics_server #6](https://github.com/GAKDO/diagnostics_server/pull/6). 카메라 없이 촬영 완료·판정 상태를 만드는 TEST-0002 스크립트(같은 프로젝트 공유 폴더의 `booth-ui/make_test_0002.py`, GitHub에는 없음) |
 | 시연 사진 | 카메라·조명 설치 전이라 **가짜 카메라 사진**으로 흐름만 보여 줌 |
+
+**진행 중 (11/4 17시 기준 PR 열림)**
+
+- 이벤트 역직렬화 버그: 다른 서버가 붙인 `__TypeId__` 헤더 때문에 리스너가 시점 이벤트를 버리던 문제. [rental_server #16](https://github.com/GAKDO/rental_server/pull/16)·[capture_server #15](https://github.com/GAKDO/capture_server/pull/15)·[report_server #7](https://github.com/GAKDO/report_server/pull/7). 머지·재배포 뒤 TEST-0002를 다시 만들어 봉인까지 확인
+- 부스 1회용 6자리 코드: 계약 [contracts #26](https://github.com/GAKDO/contracts/pull/26) 머지, 서버 [rental_server #15](https://github.com/GAKDO/rental_server/pull/15)·관리자 화면 [web #54](https://github.com/GAKDO/web/pull/54) 열림
+- 부스 출고·반납 칸 ID 안내, 반납은 아직 못 쓴다는 안내: [booth #31](https://github.com/GAKDO/booth/pull/31) 열림
 
 **아직 없는 것 (MVP 밖·남은 일)**
 
 - 고객이 직접 렌탈을 여는 화면: 없음. 렌탈은 관리자가 /admin에서 엽니다(사용자·폰 화면은 2단계).
-- report-server(해시 체인·리포트)·diagnostics-server(진단): 배포에서 꺼 둠. 반납 비교는 11/10 재도입 때.
+- report-server는 봉인용으로만 켰고 리포트·해시 체인 화면은 2단계. diagnostics-server(진단)는 꺼 둠. 반납 비교는 11/10 재도입 때.
+- 기종 목록의 진단 등급·벤치마크 열: 11/10 이후 diagnostics 재도입 때([design/model-list-grades.md](../design/model-list-grades.md), docs #8).
 - 기종: MBA13-M2만 시드. LG 그램·델은 부스 완성 뒤 실측해 추가.
 - 실제 부스 사진·학습 모델: 조명·카메라 설치 뒤 촬영 → 집 PC 학습 → Jetson 엔진.
 

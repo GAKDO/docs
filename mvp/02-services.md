@@ -96,7 +96,7 @@ flowchart LR
 
 | 항목 | 값 |
 |---|---|
-| 하는 일 | 기기 등록·검색, 기종(치수) 관리, 렌탈 열기, MVP는 렌탈당 출고(OUT) 시점 하나(수령 RCV·반납 RET는 MVP 밖), 이벤트로 시점 상태(OPEN → CAPTURED → GRADED) 갱신. 렌탈·시점 짝이 맞지 않는 이벤트는 DLQ |
+| 하는 일 | 기기 등록·검색, 기종(치수) 관리, 렌탈 열기, MVP는 렌탈당 출고(OUT) 시점 하나(수령 RCV·반납 RET는 MVP 밖), 이벤트로 시점 상태(OPEN → CAPTURED → GRADED → SEALED) 갱신(SEALED는 11/4 다시 켠 report-server의 `trace.record.sealed`). 렌탈·시점 짝이 맞지 않는 이벤트는 DLQ |
 | 기능 ID | RE1 |
 | MVP API | `listRentals`(ADMIN 전체 · BOOTH는 OPEN만), `createRental`, `getRental`, `startCheckpoint`, `createDevice`, `listDevices`, `updateDevice`, `listDeviceModels`, `getDeviceModel`, `upsertDeviceModel` |
 | 시드 | 기종 `MBA13-M2`(V2). 그램·델은 실측 뒤 추가 |
