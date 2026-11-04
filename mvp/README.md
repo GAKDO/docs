@@ -16,7 +16,7 @@
 
 ## 11/4 현재 상태 (강사님 리뷰용)
 
-리뷰 날짜는 아직 정해지지 않았습니다(11/4 또는 11/5). 진행 순서·명령은 레포 밖 TRACE 프로젝트 공유 폴더(Claude 프로젝트 파일)의 `notices/2026-11-04-mvp-review-runbook.md`에 있습니다(GitHub에는 없음). 기준 시각 11/4 17시(KST).
+리뷰 날짜는 아직 정해지지 않았습니다(11/4 또는 11/5). 진행 순서·명령은 레포 밖 TRACE 프로젝트 공유 폴더(Claude 프로젝트 파일)의 `notices/2026-11-04-mvp-review-runbook.md`에 있습니다(GitHub에는 없음). 기준 시각 11/4 17시 40분(KST).
 
 | 항목 | 상태 |
 |---|---|
@@ -26,11 +26,18 @@
 | 시험 데이터 | 시험 렌탈 지우기 API와 `trace.checkpoint.purged`([contracts #25](https://github.com/GAKDO/contracts/pull/25), [rental_server #14](https://github.com/GAKDO/rental_server/pull/14)), 받는 쪽 [capture_server #14](https://github.com/GAKDO/capture_server/pull/14)·[report_server #6](https://github.com/GAKDO/report_server/pull/6)·[diagnostics_server #6](https://github.com/GAKDO/diagnostics_server/pull/6). 카메라 없이 촬영 완료·판정 상태를 만드는 TEST-0002 스크립트(같은 프로젝트 공유 폴더의 `booth-ui/make_test_0002.py`, GitHub에는 없음) |
 | 시연 사진 | 카메라·조명 설치 전이라 **가짜 카메라 사진**으로 흐름만 보여 줌 |
 
-**진행 중 (11/4 17시 기준 PR 열림)**
+**11/4 17시 이후 반영 (모두 머지)**
 
-- 이벤트 역직렬화 버그: 다른 서버가 붙인 `__TypeId__` 헤더 때문에 리스너가 시점 이벤트를 버리던 문제. [rental_server #16](https://github.com/GAKDO/rental_server/pull/16)·[capture_server #15](https://github.com/GAKDO/capture_server/pull/15)·[report_server #7](https://github.com/GAKDO/report_server/pull/7). 머지·재배포 뒤 TEST-0002를 다시 만들어 봉인까지 확인
-- 부스 1회용 6자리 코드: 계약 [contracts #26](https://github.com/GAKDO/contracts/pull/26) 머지, 서버 [rental_server #15](https://github.com/GAKDO/rental_server/pull/15)·관리자 화면 [web #54](https://github.com/GAKDO/web/pull/54) 열림
-- 부스 출고·반납 칸 ID 안내, 반납은 아직 못 쓴다는 안내: [booth #31](https://github.com/GAKDO/booth/pull/31) 열림
+- 이벤트 역직렬화 버그: 다른 서버가 붙인 `__TypeId__` 헤더 때문에 리스너가 시점 이벤트를 버리던 문제를 고침([rental_server #16](https://github.com/GAKDO/rental_server/pull/16)·[capture_server #15](https://github.com/GAKDO/capture_server/pull/15)·[report_server #7](https://github.com/GAKDO/report_server/pull/7)). 학교 서버에서 TEST-0002를 다시 만들어 **출고 시점 봉인(SEALED)까지 확인**
+- 부스 1회용 6자리 코드: 관리자가 렌탈 상세에서 발급([web #54](https://github.com/GAKDO/web/pull/54)) → 부스 출고 탭에 넣으면 기기·렌탈·시점 ID가 채워짐([booth #32](https://github.com/GAKDO/booth/pull/32)). 계약 [contracts #26](https://github.com/GAKDO/contracts/pull/26), 서버 [rental_server #15](https://github.com/GAKDO/rental_server/pull/15), 접근 규칙 [gateway #8](https://github.com/GAKDO/gateway/pull/8)(시험 렌탈 지우기 경로 포함)
+- 부스 출고·반납 칸 ID 안내, 반납은 아직 못 쓴다는 안내: [booth #31](https://github.com/GAKDO/booth/pull/31)
+- web은 C 담당이라 앞으로 web PR은 머지 전에 C에게 먼저 알립니다
+
+**수령·반납은 왜 안 보이나**
+
+- 서버에는 구현돼 있습니다. rental은 출고 → 수령 → 반납 순서로만 열고 앞 시점이 SEALED가 아니면 409, report는 해시 체인 순서대로만 봉인합니다.
+- 관리자 화면에서만 숨겨 둔 상태입니다. web `Dockerfile`의 `VITE_ARCHIVED_FEATURES`에 `laterCheckpoints`(수령·반납 시작·렌탈 종료 버튼)와 `phoneCapture`(수령 QR)가 들어 있습니다.
+- 숨김만 풀어도 수령은 바로 끝까지 가지 않습니다. capture가 촬영 출처로 시점 종류를 정해서 수령은 폰 촬영(전체 검사, 워커 정합 필요) 경로에 묶여 있고, 워커는 지금 학교 서버에서 돌지 않습니다. 세 시점 시연은 폰 수령 경로를 다시 켜는 11/10 이후 일입니다.
 
 **아직 없는 것 (MVP 밖·남은 일)**
 
