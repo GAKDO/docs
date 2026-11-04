@@ -1,5 +1,7 @@
 # 3. 기능별 흐름 (MVP)
 
+> 그림으로 쉽게 보기: [MVP 안내서 · 기능별 흐름](https://gakdo.github.io/docs/guide/#features)
+
 [1. MVP 아키텍처](01-architecture.md)의 구성도를 기준으로, MVP 기능을 **일어나는 순서대로** 하나씩 설명합니다. 기능마다 목적, 담당, 시작 조건, 단계(누가 → 어디로 → 무엇이 바뀌는지), 실패하면 어떻게 되는지를 적었습니다.
 
 - 서버 API(`/api/v1/...`) 주소 앞부분은 `https://gakdo.site` 입니다. 부스 화면의 로컬 API(`/api/rentals/waiting`, `/api/sessions/...` 등, F5·F6·F8·F11)는 Jetson 안의 `http://<Jetson IP>:8320` 이고 서버로 가지 않습니다. 요청은 강사님 nginx → web nginx(8315) → gateway(8080) → 각 서버 순서로 갑니다(아래 단계에서는 gateway 통과를 생략).
@@ -199,7 +201,7 @@ sequenceDiagram
 
 - **목표 시간**: 버튼부터 판정까지 15초 안쪽, 기준 30초(11/6 실측).
 - **부스 판정과 서버 등급의 관계**: 같은 탐지 결과를 쓴다. 부스 화면은 "있음/없음"만 바로 보여 주고, A~D 등급은 F9에서 서버가 매긴다.
-- **오염만 잡힌 경우 (지금 코드 기준)**: 부스는 종류와 상관없이 하나라도 잡히면 "문제 있음"(booth `detect/runner.py`), 서버는 오염을 등급에서 빼서 **A(문제 없음)**. 두 화면이 다르게 보일 수 있어 맞출지 정해야 함(아래 [정할 것](#정할-것)).
+- **판정 규칙**: 긁힘·찍힘·균열이 하나라도 있으면 "문제 있음". 오염만 잡히면 폴리곤은 그리되 "문제 없음"으로, 서버 등급 A와 같습니다(11/4 결정, booth #28).
 
 ## F9. 탐지 결과 저장·등급
 
@@ -277,8 +279,8 @@ sequenceDiagram
 | `trace.capture.uploaded` | capture-server | rental-server → 시점 CAPTURED | F7 |
 | `trace.checkpoint.graded` | capture-server | rental-server → 시점 GRADED | F9 |
 
-## 정할 것
+## 정한 것
 
-| 항목 | 지금 | 제안 |
+| 항목 | 결정 | 반영 |
 |---|---|---|
-| 오염(stain)만 잡혔을 때 부스 판정 | 부스 "문제 있음", 서버 등급 A | 부스도 오염을 빼고 판정해 서버와 맞춤(booth 수정, B) |
+| 오염(stain)만 잡혔을 때 부스 판정 | 부스도 오염을 빼고 "문제 없음"(서버 등급 A와 같게), 11/4 민서 | booth #28 (B 리뷰 뒤 머지) |

@@ -1,5 +1,7 @@
 # 2. 서비스 단위 아키텍처
 
+> 그림으로 쉽게 보기: [MVP 안내서 · 서비스별](https://gakdo.github.io/docs/guide/#services)
+
 MVP에서 뜨는 서비스마다 요약 표에는 **레포 · 어디서 · 포트 · 저장소 · 담당**을, 서비스별 절에는 그림과 함께 하는 일 · 받는 API · 이벤트 · 환경 변수를 적었습니다. 그림 색은 [1. MVP 아키텍처](01-architecture.md)와 같습니다(초록 = 부스 사진, 파랑 = 사진 무관, 회색 = 인프라).
 
 기능마다 어떤 순서로 이 서비스들을 거치는지는 [3. 기능별 흐름](03-features.md)에, 필드 단위 원본은 contracts OpenAPI와 [자동 생성 API 문서](https://gakdo.github.io/docs/)에 있습니다.
