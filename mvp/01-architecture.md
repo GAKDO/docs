@@ -6,6 +6,13 @@ MVP 한 줄: 관리자가 웹에서 기기를 등록하고 출고 검사를 시�
 
 ## 1-1. 구성도
 
+![TRACE MVP 아키텍처](../guide/trace-mvp-architecture.png)
+
+> 위 그림은 [MVP 안내서](https://gakdo.github.io/docs/guide/)의 그림입니다(원본 `guide/data.mjs`, 어두운 배경판 [PNG](../guide/trace-mvp-architecture-dark.png)). 처음 보는 분은 안내서에서 서비스별 설명과 기능별 흐름을 그림과 함께 보면 쉽습니다. 아래 Mermaid 그림은 같은 내용의 글자판입니다.
+
+<details>
+<summary>Mermaid 글자판 열기</summary>
+
 | 색 | 묶음 | 들어가는 것 |
 |---|---|---|
 | 초록 | 부스 사진 | 부스 태블릿, booth 앱(Jetson), capture-server |
@@ -68,6 +75,8 @@ flowchart TB
   schoolMinio -.-> homePc
   homePc -.->|"model.onnx"| boothApp
 ```
+
+</details>
 
 읽는 법
 

@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TRACE MVP 안내서</title>
+<meta name="description" content="TRACE 최소 MVP(11/9)의 구조, 서비스, 기능 흐름을 처음 보는 사람도 알 수 있게 풀어 쓴 안내서">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="guide.css">
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="#hero"><span class="logo">T</span> TRACE MVP 안내서</a>
+    <nav>
+      <a href="#story">한눈에</a><a href="#arch">전체 구조</a><a href="#services">서비스</a><a href="#features">기능 흐름</a><a href="#states">상태</a><a href="#words">낱말</a><a class="api" href="../api/mvp.html">API 문서</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section id="hero" class="hero">
+    <p class="eyebrow">11/9 MVP · https://gakdo.site</p>
+    <h1>빌려주는 노트북의 상태를<br><em>사진 12장과 AI</em>로 기록합니다</h1>
+    <p class="lead">관리자가 웹에서 출고 검사를 열면, 부스가 노트북 아래·위를 조명 3개 × 카메라 2대로 찍고, 부스 안 AI가 흠집을 찾아 바로 "문제 있음/없음"을 띄웁니다. 서버는 등급 A~D를 저장하고, 관리자는 웹에서 결과를 봅니다.</p>
+    <div class="stats">
+      <div><b>12장</b><span>2면 × 조명 3 × 카메라 2</span></div>
+      <div><b>15초</b><span>버튼부터 판정까지 목표</span></div>
+      <div><b>A~D</b><span>A = 문제 없음</span></div>
+      <div><b>서비스 5개</b><span>+ 부스 앱 + 인프라 4개</span></div>
+    </div>
+  </section>
+
+  <section id="story">
+    <h2 class="sec">검사 한 건은 이렇게 흘러갑니다</h2>
+    <p class="sec-sub">아래 번호는 전체 구조 그림의 동그라미 번호와 같습니다.</p>
+    <div class="story" id="storyList"></div>
+  </section>
+
+  <section id="arch">
+    <h2 class="sec">전체 구조</h2>
+    <p class="sec-sub">MVP에서 실제로 뜨는 것만 그렸습니다. 상자 하나가 프로그램(서비스) 하나입니다.</p>
+    <figure class="arch-card">
+      <figcaption class="arch-title"><b>TRACE MVP 아키텍처</b><span>렌탈 하나에 출고 검사 1번 · 사진 12장 → Jetson 판정 → capture-server 등급 → 관리자 화면</span></figcaption>
+      <div class="legend" id="legend"></div>
+      <div class="arch-wrap" id="archMain"></div>
+      <p class="arch-dl">크게 보기: <a href="trace-mvp-architecture.png">PNG (밝은 배경)</a> · <a href="trace-mvp-architecture-dark.png">PNG (어두운 배경)</a> · 발표 자료에 그대로 넣어도 됩니다.</p>
+    </figure>
+    <div class="howto">
+      <div><h3>밖에서 들어오는 길은 하나</h3><p>관리자 화면, 부스의 API 호출, 부스의 사진 올리기가 모두 <b>gakdo.site 정문(443)</b> → <b>web nginx(8315)</b>를 지납니다.</p></div>
+      <div><h3>부스 화면은 Jetson이 띄웁니다</h3><p>태블릿은 부스 와이파이 안에서 Jetson에만 붙고, 서버와 이야기하는 것은 Jetson의 booth 앱뿐입니다.</p></div>
+      <div><h3>사진은 서버를 거치지 않습니다</h3><p>capture-server가 준 10분짜리 주소로 사진이 <b>MinIO(사진 창고)</b>에 바로 들어갑니다.</p></div>
+      <div><h3>점선은 학습 경로</h3><p>모델을 만들 때만 쓰는 길입니다. 집 PC는 학습만 하고 서비스로 띄우지 않습니다.</p></div>
+    </div>
+  </section>
+
+  <section id="services">
+    <h2 class="sec">서비스별로 보기</h2>
+    <p class="sec-sub">무슨 일을 하는지, 어디서 돌아가는지, 어느 기능에 쓰이는지. 작은 그림에서 진하게 보이는 곳이 그 서비스와 바로 연결된 곳입니다.</p>
+    <div class="svc-grid" id="svcList"></div>
+  </section>
+
+  <section id="features">
+    <h2 class="sec">기능별 흐름 (F1 ~ F11)</h2>
+    <p class="sec-sub">일어나는 순서대로입니다. 단계마다 <span class="chip k-outside">누가</span> → <span class="chip k-server">어디로</span> 보내는지와, 그때 쓰는 API를 적었습니다. API 이름을 누르면 API 문서로 갑니다.</p>
+    <div class="fnav" id="fnav"></div>
+    <div id="featList"></div>
+  </section>
+
+  <section id="states">
+    <h2 class="sec">검사 한 건 동안 바뀌는 상태</h2>
+    <p class="sec-sub">서버에 저장되는 값입니다. 화살표 위의 F 번호가 그 상태를 바꾸는 기능입니다.</p>
+    <div class="states" id="stateList"></div>
+  </section>
+
+  <section id="words">
+    <h2 class="sec">처음 보는 낱말</h2>
+    <dl class="words" id="wordList"></dl>
+  </section>
+
+  <section id="links" class="links">
+    <a href="../api/mvp.html"><b>API 문서</b><span>API 25개마다 하는 일 · 누가 부르나 · 어느 기능</span></a>
+    <a href="https://github.com/GAKDO/docs/tree/main/mvp"><b>MVP 문서 (GitHub)</b><span>아키텍처 · 서비스 · 기능 흐름 · A·B·C 담당</span></a>
+    <a href="https://github.com/GAKDO/docs/blob/main/mvp/04-roles.md"><b>A · B · C 담당</b><span>사람별 · 기능별 담당과 11/9까지 일정</span></a>
+  </section>
+  <p class="foot">원본: 계약은 GAKDO/contracts, 포트는 gitops compose, 부스 로컬 API는 booth specs. 이 쪽의 글은 <code>guide/data.mjs</code> 한 곳에서 고칩니다.</p>
+</main>
+
+<script type="module" src="app.mjs"></script>
+</body>
+</html>

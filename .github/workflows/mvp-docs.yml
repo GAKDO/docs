@@ -8,15 +8,19 @@ on:
   pull_request:
     paths:
       - "mvp/**"
+      - "guide/**"
       - "api-docs/**"
       - "scripts/render-mvp-figures.sh"
+      - "scripts/render-guide.*"
       - ".github/workflows/mvp-docs.yml"
   push:
     branches: [main]
     paths:
       - "mvp/**"
+      - "guide/**"
       - "api-docs/**"
       - "scripts/render-mvp-figures.sh"
+      - "scripts/render-guide.*"
       - ".github/workflows/mvp-docs.yml"
   schedule:
     - cron: "0 0 * * *"   # 매일 09:00 KST, contracts develop 변경을 따라간다
@@ -47,7 +51,10 @@ jobs:
         with:
           node-version: 22
 
-      - name: Redoc 빌드 (MVP 통합 + 서버별 3개)
+      - name: 안내서 데이터 문법 검사
+        run: node --check guide/data.mjs && node --check guide/app.mjs && node --check api-docs/enrich.mjs
+
+      - name: Redoc 빌드 (MVP 쉬운 설명판 + 서버별 3개) · 안내서 복사
         run: api-docs/build.sh _contracts _site
 
       - name: Mermaid 그림 문법 검사·SVG 만들기

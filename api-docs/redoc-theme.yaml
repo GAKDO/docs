@@ -1,0 +1,30 @@
+# Redoc 2 화면 설정 (build.sh가 build-docs --config로 준다). 안내서(guide/)와 같은 색
+# build-docs만 @redocly/cli 1.x(Redoc 2)를 쓴다: 2.x(Redoc 3)는 주소가 /f5처럼 바뀌어
+# GitHub Pages에서 새로고침하면 404가 나고 #operation/<id> 링크가 안 된다.
+theme:
+  openapi:
+    hideDownloadButtons: false
+    expandResponses: "200,201,202"
+    pathInMiddlePanel: true
+    sortTagsAlphabetically: false
+    jsonSampleExpandLevel: 2
+    theme:
+      colors:
+        primary:
+          main: "#4f46e5"
+        success:
+          main: "#059669"
+      typography:
+        fontSize: "15px"
+        lineHeight: "1.65em"
+        fontFamily: '"Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif'
+        headings:
+          fontFamily: '"Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif'
+          fontWeight: "700"
+        code:
+          fontFamily: 'ui-monospace, "SF Mono", Menlo, Consolas, monospace'
+      sidebar:
+        backgroundColor: "#f5f6fa"
+        width: "300px"
+      rightPanel:
+        backgroundColor: "#0f172a"
