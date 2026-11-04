@@ -41,7 +41,7 @@ flowchart LR
 | 저장 위치 | 상태 순서 | 바꾸는 기능 |
 |---|---|---|
 | rental `rental.status` | OPEN | F4 |
-| rental `checkpoint.status` (OUT) | OPEN → CAPTURED → GRADED | F4 → F7 → F9 |
+| rental `checkpoint.status` (OUT) | OPEN → CAPTURED → GRADED → SEALED | F4 → F7 → F9 → report-server 봉인(`trace.record.sealed`) |
 | capture `capture_set.status` | UPLOADING → UPLOADED → GRADED | F7 → F7 → F9 |
 | inspection `grade_result.grade` | 없음 → A·B·C·D | F9 |
 
