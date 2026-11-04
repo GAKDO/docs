@@ -45,7 +45,7 @@
 | 질문 | 답 |
 |---|---|
 | 부스 화면은 누가 만드나? | **B.** web 레포가 아니라 booth 레포의 `trace-booth serve`(Jetson :8320)가 화면과 로컬 API를 같이 띄웁니다. → [2-6](02-services.md#2-6-booth-앱-jetson-안의-부스-운영-웹-서버--b--부스-사진) |
-| 관리자 결과 화면은? | **C.** 데이터는 capture-server의 `media`·`inspection`(A) |
+| 관리자 결과 화면은? | **C.** 렌탈·시점 정보는 rental-server, 사진·검사 결과는 capture-server의 `media`·`inspection`(A) |
 | 등급은 누가 정하나? | **A.** capture-server가 부스 탐지로 A~D. 부스 화면의 "문제 있음/없음"은 같은 탐지로 B가 바로 보여 주는 값 |
 | 모델은? | 학습(ONNX)은 **A**, Jetson 엔진 빌드·속도 실측은 **B** |
 | API 필드가 더 필요하면? | contracts에 추가 PR(A). 코드에서 먼저 바꾸지 않음 |

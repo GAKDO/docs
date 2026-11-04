@@ -1,6 +1,6 @@
 # 2. 서비스 단위 아키텍처
 
-MVP에서 뜨는 서비스마다 **레포 · 컨테이너 · 포트 · 저장소 · 받는 API · 이벤트 · 담당**을 같은 틀로 적었습니다. 그림 색은 [1. MVP 아키텍처](01-architecture.md)와 같습니다(초록 = 부스 사진, 파랑 = 사진 무관, 회색 = 인프라).
+MVP에서 뜨는 서비스마다 요약 표에는 **레포 · 어디서 · 포트 · 저장소 · 담당**을, 서비스별 절에는 그림과 함께 하는 일 · 받는 API · 이벤트 · 환경 변수를 적었습니다. 그림 색은 [1. MVP 아키텍처](01-architecture.md)와 같습니다(초록 = 부스 사진, 파랑 = 사진 무관, 회색 = 인프라).
 
 기능마다 어떤 순서로 이 서비스들을 거치는지는 [3. 기능별 흐름](03-features.md)에, 필드 단위 원본은 contracts OpenAPI와 [자동 생성 API 문서](https://gakdo.github.io/docs/)에 있습니다.
 
@@ -59,7 +59,7 @@ flowchart LR
 
 | 항목 | 값 |
 |---|---|
-| 하는 일 | 모든 `/api/v1/**`의 유일한 입구. auth-server JWKS로 JWT 서명 검증, 역할(MVP는 ADMIN·BOOTH) × 경로 표로 막기, 로그인·페어링 교환은 Redis 요청 제한 |
+| 하는 일 | 모든 `/api/v1/**`의 유일한 입구. auth-server JWKS로 JWT 서명 검증, 역할(MVP는 ADMIN·BOOTH) × 경로 표로 막기, 로그인(`POST /api/v1/auth/login`)은 Redis로 IP당 1분 10번 요청 제한 |
 | 기능 ID | GW1 |
 | 받는 API | 자체 API 없음(라우팅). JWKS는 밖으로 열지 않음 |
 | 환경 변수 | `AUTH_SERVER_URL`, `RENTAL_SERVER_URL`, `CAPTURE_SERVER_URL`, `REDIS_PASSWORD` |
@@ -94,7 +94,7 @@ flowchart LR
 
 | 항목 | 값 |
 |---|---|
-| 하는 일 | 기기 등록·검색, 기종(치수) 관리, 렌탈 열기, 시점 OUT → RCV → RET 순서 강제, 이벤트로 시점 상태(OPEN → CAPTURED → GRADED) 갱신. 렌탈·시점 짝이 맞지 않는 이벤트는 DLQ |
+| 하는 일 | 기기 등록·검색, 기종(치수) 관리, 렌탈 열기, MVP는 렌탈당 출고(OUT) 시점 하나(수령 RCV·반납 RET는 MVP 밖), 이벤트로 시점 상태(OPEN → CAPTURED → GRADED) 갱신. 렌탈·시점 짝이 맞지 않는 이벤트는 DLQ |
 | 기능 ID | RE1 |
 | MVP API | `listRentals`(ADMIN 전체 · BOOTH는 OPEN만), `createRental`, `getRental`, `startCheckpoint`, `createDevice`, `listDevices`, `updateDevice`, `listDeviceModels`, `getDeviceModel`, `upsertDeviceModel` |
 | 시드 | 기종 `MBA13-M2`(V2). 그램·델은 실측 뒤 추가 |
