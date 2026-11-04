@@ -1,5 +1,7 @@
 # 아키텍처 한눈에 보기
 
+> 11/3 최소 MVP로 바뀐 지금 구성(Compose · gakdo.site)은 [mvp/01-architecture.md](mvp/01-architecture.md)에 있습니다. 아래는 10/31 클러스터 기준 원래 설계입니다.
+
 앱과 DB는 학교 클러스터에, GPU 일은 Jetson·집 PC에, 파일·큐는 학교 공유 인프라에 둡니다. 자세한 표와 근거는 [design/mvp-design.md](design/mvp-design.md)의 "아키텍처"·"서버 구성과 연결"·"확장성" 섹션에 있습니다.
 
 ## 구성도

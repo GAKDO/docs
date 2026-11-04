@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TRACE API 문서</title>
+<style>
+  :root { --bg:#ffffff; --fg:#1b1f24; --muted:#5b6470; --line:#d9dee5; --booth:#2f9e5b; --nophoto:#3b6fd8; --later:#8a94a3; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#14181d; --fg:#e7ebf0; --muted:#9aa5b3; --line:#2b333d; } }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.6 system-ui, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; }
+  main { max-width:860px; margin:0 auto; padding:32px 16px 64px; }
+  h1 { font-size:1.6rem; margin:0 0 4px; }
+  p.meta { color:var(--muted); margin:0 0 24px; font-size:.9rem; }
+  a { color:var(--nophoto); }
+  .card { border:1px solid var(--line); border-left:6px solid var(--nophoto); border-radius:8px; padding:14px 16px; margin:12px 0; }
+  .card.mvp { border-left-color:var(--booth); }
+  .card.later { border-left-color:var(--later); }
+  .card h2 { font-size:1.1rem; margin:0 0 4px; }
+  .card p { margin:0; color:var(--muted); }
+  table { border-collapse:collapse; width:100%; margin-top:8px; font-size:.95rem; }
+  td, th { border-bottom:1px solid var(--line); padding:6px 4px; text-align:left; }
+</style>
+</head>
+<body>
+<main>
+  <h1>TRACE API 문서</h1>
+  <p class="meta">GAKDO/contracts develop <code>__CONTRACTS_COMMIT__</code>에서 자동 생성 · __BUILT_AT__ · 실제 주소 https://gakdo.site</p>
+
+  <div class="card mvp">
+    <h2><a href="api/mvp.html">MVP 통합 API (25개)</a></h2>
+    <p>11/3 최소 MVP에서 쓰는 auth·rental·capture 경로만 모은 한 쪽. 기능별 설명은 <a href="https://github.com/GAKDO/docs/blob/main/mvp/03-api-by-feature.md">3. 기능별 API 명세</a>. <a href="api/mvp.yaml">OpenAPI YAML</a></p>
+  </div>
+
+  <table>
+    <tr><th>서버</th><th>단계</th><th>담당</th></tr>
+    <tr><td><a href="api/auth-server.html">auth-server</a></td><td>MVP</td><td>A</td></tr>
+    <tr><td><a href="api/rental-server.html">rental-server</a></td><td>MVP</td><td>A</td></tr>
+    <tr><td><a href="api/capture-server.html">capture-server</a></td><td>MVP</td><td>A</td></tr>
+    <tr><td><a href="api/report-server.html">report-server</a></td><td>2단계</td><td>A</td></tr>
+    <tr><td><a href="api/diagnostics-server.html">diagnostics-server</a></td><td>3단계</td><td>A</td></tr>
+  </table>
+
+  <div class="card">
+    <h2><a href="https://github.com/GAKDO/docs/tree/main/mvp">MVP 문서 (아키텍처·서비스·분담)</a></h2>
+    <p>전체 아키텍처 · 서비스 단위 아키텍처 · 기능별 API · A/B/C 임무 분담</p>
+  </div>
+  <div class="card later">
+    <h2><a href="figures/">그림 (SVG)</a></h2>
+    <p>mvp/ 문서의 Mermaid 그림을 SVG로 뽑은 것</p>
+  </div>
+</main>
+</body>
+</html>

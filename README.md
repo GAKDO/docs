@@ -8,6 +8,7 @@ TRACE는 노트북 렌탈의 **출고·수령·반납 세 시점**에 외관(흠
 
 | 문서 | 내용 | 먼저 볼 사람 |
 |---|---|---|
+| [mvp/](mvp/README.md) | **11/3 최소 MVP 기준(지금 배포)**: 전체·서비스 단위 아키텍처, 기능별 API 명세, A/B/C 임무 분담, [자동 생성 API 문서](https://gakdo.github.io/docs/) | 전원 |
 | [architecture.md](architecture.md) | 한눈에 보는 구성도, 배포 흐름, 포트, 레포 12개 | 전원 |
 | [decisions.md](decisions.md) | 10/30~10/31에 정한 것과 그 이유 (강사님 리뷰 포함) | 전원 |
 | [cicd.md](cicd.md) | 블로그에서 가져온 CI/CD, 레포별 워크플로, 처음 설정할 Secret·변수 | A |

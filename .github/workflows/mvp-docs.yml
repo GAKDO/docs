@@ -1,0 +1,82 @@
+# MVP 문서 검사·배포
+# - PR: contracts OpenAPI → Redoc 빌드와 mvp/ Mermaid 그림 문법 검사만 한다
+# - main 푸시·매일 09:00 KST·수동: 같은 빌드 뒤 GitHub Pages(https://gakdo.github.io/docs/)에 올린다
+#   처음 한 번 레포 Settings → Pages → Source를 "GitHub Actions"로 둔다
+name: MVP 문서·API 문서
+
+on:
+  pull_request:
+    paths:
+      - "mvp/**"
+      - "api-docs/**"
+      - "scripts/render-mvp-figures.sh"
+      - ".github/workflows/mvp-docs.yml"
+  push:
+    branches: [main]
+    paths:
+      - "mvp/**"
+      - "api-docs/**"
+      - "scripts/render-mvp-figures.sh"
+      - ".github/workflows/mvp-docs.yml"
+  schedule:
+    - cron: "0 0 * * *"   # 매일 09:00 KST, contracts develop 변경을 따라간다
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mvp-docs-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: API 문서·그림 빌드
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: contracts develop 받기
+        uses: actions/checkout@v4
+        with:
+          repository: GAKDO/contracts
+          ref: develop
+          path: _contracts
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Redoc 빌드 (MVP 통합 + 서버별 5개)
+        run: api-docs/build.sh _contracts _site
+
+      - name: Mermaid 그림 문법 검사·SVG 만들기
+        run: scripts/render-mvp-figures.sh _site/figures
+
+      - name: 그림 목록 쪽
+        run: |
+          {
+            echo '<!doctype html><meta charset="utf-8"><title>TRACE MVP 그림</title><h1>TRACE MVP 그림</h1><ul>'
+            for f in _site/figures/*.svg; do n=$(basename "$f"); echo "<li><a href=\"$n\">$n</a></li>"; done
+            echo '</ul>'
+          } > _site/figures/index.html
+
+      - uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'pull_request'
+        with:
+          path: _site
+
+  deploy:
+    name: GitHub Pages 배포
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
