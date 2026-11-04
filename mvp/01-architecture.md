@@ -8,22 +8,22 @@
 | 그룹 | 색 | 선 | 들어가는 것 |
 |---|---|---|---|
 | ① 부스 사진 (MVP) | 초록 | 실선 | booth 앱(Jetson 안 부스 운영 웹 서버 :8320 + 촬영·탐지), capture-server, MinIO `trace-captures` |
-| ② 폰 사진 (2단계) | 주황 | 점선 | web 폰 화면 `/capture`, inspect-worker |
-| ③ 사진 무관 | 파랑 | MVP 실선, 2·3단계 점선 | web 관리자 `/admin`, gateway, auth-server, rental-server / report-server(2단계), diagnostics-server·agent(3단계) |
+| ② 폰 사진 | 주황 | 점선 | **MVP에 없음.** 2단계에 web 폰 화면 `/capture`, inspect-worker (1-5 그림) |
+| ③ 사진 무관 | 파랑 | 실선 | web 관리자 `/admin`, gateway, auth-server, rental-server (report-server·diagnostics-server·agent는 1-5 그림) |
 | 공통 인프라 | 회색 | 실선 | PostgreSQL, RabbitMQ, MinIO, Redis (학교 서버 10.116.64.12, Docker Compose) |
 | 밖 | 흰색 | 실선 | 관리자 브라우저, 강사님 nginx(s2-nginx), 집 PC(학습만), 학교 MinIO(학습 데이터) |
 
 뺀 것: Rancher, Argo CD, Cloudflare Tunnel(DNS만 씀), Grafana, InfluxDB, 집 PC 상시 워커.
 
-## 1-1. 전체 구성도
+## 1-1. 전체 구성도 (MVP에서 실제로 뜨는 것만)
+
+11/9까지 학교 서버와 Jetson에서 실제로 돌아가는 구성요소만 그렸습니다. 2·3단계에서 붙는 것은 [1-5](#1-5-다음-단계에-붙는-것-mvp-밖)에 따로 있습니다.
 
 ```mermaid
 %%{init: {"flowchart": {"wrappingWidth": 320, "curve": "basis"}}}%%
 flowchart TB
   classDef booth fill:#e3f6ea,stroke:#2f9e5b,stroke-width:2px,color:#123
-  classDef phone fill:#fff1e0,stroke:#d9822b,stroke-width:2px,stroke-dasharray:6 4,color:#321
   classDef nophoto fill:#e6efff,stroke:#3b6fd8,stroke-width:2px,color:#123
-  classDef later fill:#f3f6fc,stroke:#3b6fd8,stroke-width:1px,stroke-dasharray:6 4,color:#456
   classDef infra fill:#eef0f3,stroke:#6b7480,stroke-width:1.5px,color:#222
   classDef outside fill:#ffffff,stroke:#333,stroke-width:1px,color:#111
 
@@ -36,18 +36,11 @@ flowchart TB
     capture["capture-server :8080<br/>세트·사전 서명 URL·탐지·등급<br/>DB 스키마 capture·inspection"]:::booth
   end
 
-  subgraph G2["② 폰 사진 — 2단계 (11/10~)"]
-    phoneUi["web 폰 화면 /capture<br/>getUserMedia(HTTPS)"]:::phone
-    inspectWorker["inspect-worker (GAKDO/ml)<br/>정합·폰 사진 흠집 탐지"]:::phone
-  end
-
   subgraph G3["③ 사진 무관"]
     web["web nginx :8315 (유일한 입구)<br/>/admin 화면 · /api/ → gateway<br/>/trace-captures/ → MinIO"]:::nophoto
     gateway["gateway :8080<br/>JWT(JWKS) · 역할×경로 · 요청 제한"]:::nophoto
     auth["auth-server :8080<br/>관리자 로그인 · 부스 토큰 · JWKS<br/>DB 스키마 auth"]:::nophoto
     rental["rental-server :8080<br/>기기·기종·렌탈·시점<br/>DB 스키마 rental"]:::nophoto
-    report["report-server (2단계)<br/>타임라인·해시 체인·SSE"]:::later
-    diag["diagnostics-server + agent (3단계)<br/>배터리·SSD·부품"]:::later
   end
 
   subgraph INF["공통 인프라 — 학교 서버 10.116.64.12 · Docker Compose"]
@@ -61,7 +54,6 @@ flowchart TB
   schoolMinio[("학교 MinIO storage.java21.net:8000<br/>trace-raw · labels · models")]:::outside
 
   style G1 fill:#f4fbf6,stroke:#2f9e5b,stroke-width:2px
-  style G2 fill:#fff8ef,stroke:#d9822b,stroke-width:2px,stroke-dasharray:6 4
   style G3 fill:#f4f8ff,stroke:#3b6fd8,stroke-width:2px
   style INF fill:#f6f7f9,stroke:#6b7480,stroke-width:1.5px
 
@@ -89,10 +81,6 @@ flowchart TB
   schoolMinio -.-> homePc
   homePc -->|"model.onnx → Jetson에서 엔진 빌드"| boothApp
 
-  phoneUi -.-> ngx
-  inspectWorker -.-> mq
-  gateway -.-> report
-  gateway -.-> diag
 ```
 
 읽는 법
@@ -168,3 +156,31 @@ contracts OpenAPI의 `servers`에 남은 `localhost:8314`는 클러스터 시절
 | 3단계 | 시간 남으면 | diagnostics-server + agent, Grafana, 9면 × 4조명 전체 세트 | 점선 |
 
 2·3단계 코드는 develop에 그대로 있고, Compose 기본 기동과 그림에서만 뺐습니다(`docker compose --profile full up -d`로 켬).
+
+## 1-5. 다음 단계에 붙는 것 (MVP 밖)
+
+MVP 그림(1-1)에는 없고, 11/10 이후 붙이는 것입니다. 점선은 아직 배포하지 않았다는 뜻입니다(코드는 develop에 있음).
+
+```mermaid
+flowchart LR
+  classDef nophoto fill:#e6efff,stroke:#3b6fd8,stroke-width:2px,color:#123
+  classDef phone fill:#fff1e0,stroke:#d9822b,stroke-width:2px,stroke-dasharray:6 4,color:#321
+  classDef later fill:#f3f6fc,stroke:#3b6fd8,stroke-width:1px,stroke-dasharray:6 4,color:#456
+  classDef infra fill:#eef0f3,stroke:#6b7480,color:#222
+
+  mvp["MVP (1-1 그림)<br/>gateway · auth · rental · capture"]:::nophoto
+  mq["RabbitMQ trace.events"]:::infra
+  subgraph S2["2단계 (11/10~12)"]
+    report["report-server<br/>해시 체인 · 타임라인 · SSE"]:::later
+    phoneUi["② web 폰 화면 /capture<br/>수령 촬영 (QR 링크)"]:::phone
+    worker["② inspect-worker<br/>폰 사진 정합 · 흠집"]:::phone
+  end
+  subgraph S3["3단계 (시간 남으면)"]
+    diag["diagnostics-server + agent<br/>배터리 · SSD · 부품"]:::later
+  end
+  mvp -.->|"/api/v1/reports/** · /verify/**"| report
+  phoneUi -.->|"/api/v1/captures (CUSTOMER 촬영 JWT)"| mvp
+  worker -.->|"trace.inspect.completed"| mq
+  mq -.->|"trace.checkpoint.graded"| report
+  mvp -.->|"/api/v1/diagnostics/**"| diag
+```
