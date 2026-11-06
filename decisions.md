@@ -163,3 +163,7 @@
 **클러스터를 멈춘 동안 집 PC는 로컬 DB·SSH 터널·로컬 Label Studio로 일한다.** 11/2 밤 민서 결정. 클러스터 작업이 멈춰 `kubectl port-forward`를 쓸 수 없으니, ML 기록부(`ml` 스키마)는 집 PC 로컬 PostgreSQL(Docker `trace-ml-pg`, 계정 `trace_ml`)에 둡니다. inspect-worker는 학교 서버 Compose의 RabbitMQ·MinIO에 SSH 터널로 붙어 포트를 밖에 열지 않습니다. 11/5 라벨링은 학습 PC와 같은 민서 집 PC의 로컬 Label Studio(Docker 1.19.0)에서 하고, 사진은 학교 MinIO `trace-raw`에서 읽고 주석은 `trace-labels`에 씁니다. 집 PC 파일은 모두 `D:\trace` 아래에 둡니다(저장소·가상환경·캐시·모델·Docker 디스크). 학교 서버에는 9000·9001을 쓰는 MinIO가 이미 있어 TRACE Compose MinIO는 호스트 19000으로 옮겼습니다(gitops #13, `*_HOST_PORT`). 학습용 `trace-trainer` 키는 학교 MinIO 콘솔에서 Access Key로 만들고 `trainer-policy.json`으로 권한을 좁혔습니다(raw·labels 읽기, datasets·models 쓰기, 삭제 없음). 클러스터를 다시 쓰면 기록부는 port-forward로 되돌립니다(ml PR #11·#12).
 
 **페어링 전역 실패 차단은 시연까지 유지하고, 11/10 이후 IP별 차단 + 전체 급증 알림으로 바꾼다.** 11/4 민서 결정(추천안). 1.0.0에서 넣은 "모든 클라이언트 합쳐 1분 30번 넘게 틀리면 1분 동안 모든 페어링 429"는 공격자가 일부러 틀려서 정상 페어링을 1분씩 멈출 수 있다(CWE-645). 진단 에이전트(AG1·DI1)는 3단계라 MVP·시연에는 영향이 없고, 살아 있는 코드가 적고 5분 1회용이라 맞힐 확률도 거의 없어 그대로 둔다. 진단 에이전트를 다시 넣을 때 auth_server만 고친다: 실패는 IP별로 세어 그 IP만 막고, 전체 실패 급증은 막지 않고 알린다(OAuth 기기 인증 RFC 8628 관행). 계약은 바뀌지 않는다(429·Retry-After 그대로).
+
+## 11/6
+
+**물건 일반화는 설계로 답하고 프리즈 전에는 코드를 바꾸지 않는다.** 강사님 브리핑 피드백("어떤 물건이든 학습만 시키면 렌탈")에 대한 민서 결정입니다. 봉인·등급·영수증은 이미 물건과 무관하고, 노트북에 묶인 곳은 촬영 목록·탐지 모델·기종 정보(`form_factor`)뿐이라 확장은 값 추가와 학습으로 됩니다. 11/13 프리즈 전에는 [design/asset-extensibility.md](design/asset-extensibility.md)를 과제설명서·발표에만 반영합니다.
