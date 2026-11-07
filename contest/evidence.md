@@ -35,7 +35,7 @@
 
 | ID | 그림 | 바탕 | 상태 |
 |---|---|---|---|
-| F1 | 아키텍처 한 장(11/3 MVP 재조정판, C 작성) | /mnt 공지 architecture-ports(11/3) | 초안 PNG [figures/F1-mvp-architecture.png](figures/F1-mvp-architecture.png)·[전체판](figures/F1-mvp-architecture-full.png). 11/7 확정 전 수정 3건(rental↔RabbitMQ, gateway→Redis 선, 4단계 경로), 편집 원본 파일 대기 |
+| F1 | 아키텍처 한 장(11/3 MVP 재조정판, C 작성) | 프로젝트 파일 notices/2026-11-03-architecture-ports.md | 확정 PNG [figures/F1-mvp-architecture.png](figures/F1-mvp-architecture.png)·[전체판](figures/F1-mvp-architecture-full.png), 편집 원본 [svg](figures/F1-mvp-architecture.svg)·[html](figures/F1-mvp-architecture.html). 11/4 A 리뷰 3건·도메인 gakdo.site 반영(docs #3). 11/6 이후 다시 켠 report·diagnostics는 과제설명서 쓸 때 반영 여부 결정 |
 | F2 | 세 시점 흐름(출고→수령→반납, 비교 짝) | 시연 시나리오 | 대기 |
 | F3 | 해시 체인·검증 구조 | RP1 설계 | 원본(mermaid) [figures/F3-hash-chain.md](figures/F3-hash-chain.md), PNG 대기 |
 | F4 | 9면 정합 개념(원본 사진 → 표준 면) | contracts/capture/faces.md | 대기 |
