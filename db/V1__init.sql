@@ -248,7 +248,7 @@ CREATE TABLE diagnostics.inspection_flag (
   checkpoint_id  varchar(21) NOT NULL,
   run_id         bigint NOT NULL REFERENCES diagnostics.diagnostic_run(id),
   base_run_id    bigint NOT NULL REFERENCES diagnostics.diagnostic_run(id),
-  kind           varchar(24) NOT NULL CHECK (kind IN ('COMPONENT_CHANGED','CAPACITY_DROP','BENCH_DROP')),
+  kind           varchar(24) NOT NULL CHECK (kind IN ('COMPONENT_CHANGED','CAPACITY_DROP','BENCH_DROP','ACTIVATION_LOCK_ON','DISK_ENCRYPTION_ON','DISK_HEALTH_WARNING')),
   detail         jsonb       NOT NULL,
   created_at     timestamptz NOT NULL DEFAULT now(),
   updated_at     timestamptz NOT NULL DEFAULT now()
