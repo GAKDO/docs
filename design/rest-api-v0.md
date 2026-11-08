@@ -2,7 +2,7 @@
 
 모든 요청은 gateway 한 곳으로 들어오고, gateway가 JWT를 검증한 뒤 경로 앞부분으로 서버를 고릅니다. 화면은 C가, 서버 API는 A가 만들고, 진단 에이전트(B)는 페어링 교환과 진단 업로드만, 부스 Jetson(B)은 부스 토큰·렌탈 목록·부스 코드·촬영 세트·탐지만 부릅니다.
 
-> **원본은 contracts입니다.** 11/3 계약 고정 때 이 표를 서버별 OpenAPI 3.1 파일 5개(`contracts/openapi/*.yaml`)로 옮겼고, 지금은 계약이 원본이고 이 문서는 요약입니다. 아래 표는 **2026-11-08 contracts develop(`3c94134`)** 의 경로·`x-trace-access`(역할·범위)와 맞췄습니다. 둘이 다르면 계약이 맞습니다. 서버 코드·gateway 규칙과의 대조는 맨 아래 [구현 대조](#구현-대조-118)에 있습니다.
+> **원본은 contracts입니다.** 11/3 계약 고정 때 이 표를 서버별 OpenAPI 3.1 파일 5개(`contracts/openapi/*.yaml`)로 옮겼고, 지금은 계약이 원본이고 이 문서는 요약입니다. 아래 표는 **2026-11-08 contracts develop(`3c94134`)** 의 경로·`x-trace-access`(역할·범위)와 맞췄고, 그 뒤 추가된 공개 catalog 경로 4개(contracts #33, `4dbcdef`)는 표에 "(11/8 추가)"로 따로 더했습니다(아래 구현 대조의 54개에는 들어 있지 않음). 둘이 다르면 계약이 맞습니다. 서버 코드·gateway 규칙과의 대조는 맨 아래 [구현 대조](#구현-대조-118)에 있습니다.
 
 ## 공통 규칙
 
@@ -11,7 +11,7 @@
 - **형식:** JSON camelCase, 시각은 ISO 8601 + 오프셋, ID는 `publicId`(NanoID 21자, 예: `IPv6mcQOlTkKj6mOecAQt`)이고 DB 기본 키(bigint)는 내보내지 않습니다.
 - **오류:** RFC 9457 Problem Details(`application/problem+json`)에 `code`를 더합니다. Spring Boot 3의 ProblemDetail을 그대로 씁니다.
 - **목록:** `?limit=20&cursor=...` → `{ "items": [], "nextCursor": "..." }`
-- **요청 제한:** 계약은 가입·이메일 코드 확인·재발송·로그인·페어링 교환에 429(IP당 분당 10회, `RATE_LIMITED`)를 둡니다. 지금 gateway(Redis, 키 `trace:`)가 실제로 세는 것은 **로그인과 페어링 교환 두 경로뿐**이고, 재발송은 auth-server가 60초에 1번(`RESEND_TOO_SOON`), 부스 코드 교환은 rental-server가 모든 부스 합쳐 틀린 코드 1분 30번을 넘으면 1분 동안 429를 냅니다. 가입·코드 확인의 IP 제한은 아직 없습니다(구현 대조 참고).
+- **요청 제한:** 계약은 가입·이메일 코드 확인·재발송·로그인·페어링 교환에 429(IP당 분당 10회, `RATE_LIMITED`)를 둡니다. gateway(Redis, 키 `trace:`)는 로그인·페어링 교환에 더해 11/8 gateway #11부터 가입·이메일 코드 확인·재발송도 IP로 셉니다. 공개 catalog 경로 세 개는 IP당 합산 분당 300회입니다(gateway #14). 그 밖에 재발송은 auth-server가 60초에 1번(`RESEND_TOO_SOON`), 부스 코드 교환은 rental-server가 모든 부스 합쳐 틀린 코드 1분 30번을 넘으면 1분 동안 429를 냅니다.
 - **중복 요청:** 촬영 완료와 진단 업로드는 `Idempotency-Key` 헤더로 한 번만 처리합니다.
 - **배포 확인:** 서버마다 `GET /api/v1/<auth|rentals|captures|diagnostics|reports>/ping`이 인증 없이 `commit`을 돌려줍니다.
 - **서버로 넘기는 헤더:** `X-User-Id`·`X-Role`·`X-Scope`는 gateway만 넣고, 밖에서 온 같은 이름의 헤더는 지웁니다.
@@ -170,7 +170,7 @@ FR-AUTH-03의 수용 기준입니다. gateway는 이 표를 손으로 옮기지 
 | 관리자 사람 검수 | captures/reviews(대기 목록) → captures/checkpoints/{id}/inspection(후보) → captures/checkpoints/{id}/media(사진 URL) → /reviews(결정 저장) → /reviews/complete |
 | 검증 페이지 (공개) | verify/{token} |
 | 보유 노트북 목록 (공개 `/devices`, 11/8) | catalog/devices → captures/catalog?checkpointIds= · diagnostics/catalog?checkpointIds=(100개씩 나눠) |
-| 보유 노트북 상세 (공개 `/devices/:id`, 11/8) | catalog/devices(그 기기) → captures/catalog/checkpoints/{id}(3D 핀·사진) · device-models 치수는 화면 내장 기종 모델 |
+| 보유 노트북 상세 (공개 `/devices/:id`, 11/8) | catalog/devices → captures/catalog?checkpointIds= · diagnostics/catalog?checkpointIds=(100개씩 나눠) → captures/catalog/checkpoints/{checkpointId}(그 기기에서 흠집 요약이 있는 최근 시점, 3D 핀·사진) · 치수는 catalog/devices의 dimensions |
 
 ## 핵심 요청·응답 예시
 
@@ -230,7 +230,7 @@ contracts develop(`3c94134`)의 경로 54개(ping 5개, 내부 JWKS 포함)를 �
 
 | 구분 | 경로 | 계약 | 서버 | gateway | 메모 |
 | --- | --- | --- | --- | --- | --- |
-| 계약에 있는데 서버에 없음 | GET /api/v1/reports/search | ✓ (ADMIN, FR-RPT-05 선택) | ◐ report_server #9(11/8)에서 컨트롤러 추가(ADMIN) | ✓ 규칙·라우트 있음 | #9가 배포되기 전에는 gateway 통과 뒤 404. Elasticsearch 연동은 없음. web도 부르지 않음 |
+| 계약에 있는데 서버에 없음(11/8 해결) | GET /api/v1/reports/search | ✓ (ADMIN, FR-RPT-05 선택) | ✓ report_server #9(11/8 머지, ADMIN, PostgreSQL 검색) | ✓ 규칙·라우트 있음 | 남은 것: Elasticsearch 색인과 web 화면(부르지 않음) |
 | 서버에 있는데 계약에 없음 | — | | | | 없음(서버 경로 53개가 모두 계약에 있음) |
 | gateway 규칙 없음 | GET /.well-known/jwks.json | ✓ `x-trace-internal` | ✓ auth-server | 라우트·규칙 없음 | 의도대로(gateway가 안에서만 읽음) |
 | 역할 차이 | POST /api/v1/auth/refresh | ADMIN·CUSTOMER(리프레시 쿠키) | ✓ | 공개(토큰 검사 없음) | 의도대로(액세스 토큰이 만료된 뒤 부르므로 쿠키를 auth-server가 확인) |

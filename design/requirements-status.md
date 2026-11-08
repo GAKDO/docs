@@ -13,7 +13,7 @@
 | ⏸ 숨김·꺼짐 | 1 | FR-PIL-01(API는 있고 web 파일럿 화면만 숨김) |
 | ✅ 구현됨 | 43 | 아래 표 (11/8 밤 갱신: FR-AUTH-03은 gateway #11로 ✅, FR-RPT-05는 report_server #9 머지로 ◐. FR-CAP-03·04, FR-RNT-04 폰 수령 촬영은 11/8 web #85로 다시 켬) |
 
-문서에만 있는 것: FR-RPT-05는 contracts `GET /api/v1/reports/search`와 gateway 규칙까지 있고, report-server 컨트롤러는 report_server #9(11/8)로 머지됐습니다(Elasticsearch는 없음, 화면 없음). FR-RPT-06(recon-worker, `trace.recon.*` 이벤트)은 계약·코드 모두 없습니다. InfluxDB `trace-pilot` 기록(DI2 "추이", 설계서 "추이는 InfluxDB에도")과 Elasticsearch 색인도 코드가 없습니다(11/3 중단, InfluxDB는 11/8 diagnostics_server #9로 넣었다가 #10으로 되돌림 — 쓰지 않음).
+FR-RPT-05 검색 API(`GET /api/v1/reports/search`)는 계약·gateway·report-server(report_server #9, 11/8 머지)까지 구현됐고, 남은 것은 Elasticsearch 색인과 web 화면입니다. 문서에만 있는 것: FR-RPT-06(recon-worker, `trace.recon.*` 이벤트)은 계약·코드 모두 없습니다. InfluxDB `trace-pilot` 기록(DI2 "추이", 설계서 "추이는 InfluxDB에도")과 Elasticsearch 색인도 코드가 없습니다(11/3 중단, InfluxDB는 11/8 diagnostics_server #9로 넣었다가 #10으로 되돌림 — 쓰지 않음).
 
 요구사항 밖 11/8 추가: 공개 보유 노트북 목록·3D 흠집 상세(`/devices`, contracts #33, FR-RNT-05·FR-DIA-06에 공개 경로로 붙임), 사람 검수(FR-INS-03), 수령 QR 하나로 계정 연결(FR-RNT-04, web #91).
 
