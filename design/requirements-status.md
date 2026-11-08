@@ -8,12 +8,14 @@
 
 | 상태 | 개수 | 요구사항 |
 | --- | --- | --- |
-| ✗ 코드 없음 | 2 | FR-RPT-05(기록 검색, 선택), FR-RPT-06(3DGS, 실험) — 둘 다 최소 요구사항 표 밖 |
-| ◐ 일부만 | 7 | FR-CAP-01, FR-INS-02, FR-INT-02, FR-PIL-02, FR-AUTH-03(요청 제한), NFR-01(실측 대기), NFR-05(클러스터 중단) |
+| ✗ 코드 없음 | 1 | FR-RPT-06(3DGS, 실험) — 최소 요구사항 표 밖 |
+| ◐ 일부만 | 7 | FR-CAP-01, FR-INS-02, FR-INT-02, FR-PIL-02, FR-RPT-05(검색 API만, 화면 없음), NFR-01(실측 대기), NFR-05(클러스터 중단) |
 | ⏸ 숨김·꺼짐 | 1 | FR-PIL-01(API는 있고 web 파일럿 화면만 숨김) |
-| ✅ 구현됨 | 42 | 아래 표 (FR-CAP-03·04, FR-RNT-04 폰 수령 촬영은 11/8 web #85로 다시 켬) |
+| ✅ 구현됨 | 43 | 아래 표 (11/8 밤 갱신: FR-AUTH-03은 gateway #11로 ✅, FR-RPT-05는 report_server #9 머지로 ◐. FR-CAP-03·04, FR-RNT-04 폰 수령 촬영은 11/8 web #85로 다시 켬) |
 
-문서에만 있는 것: FR-RPT-05는 contracts `GET /api/v1/reports/search`와 gateway 규칙까지 있고, report-server 컨트롤러는 report_server #9(11/8)에서 추가합니다(Elasticsearch는 없음). FR-RPT-06(recon-worker, `trace.recon.*` 이벤트)은 계약·코드 모두 없습니다. InfluxDB `trace-pilot` 기록(DI2 "추이", 설계서 "추이는 InfluxDB에도")과 Elasticsearch 색인도 코드가 없습니다(11/3 중단).
+FR-RPT-05 검색 API(`GET /api/v1/reports/search`)는 계약·gateway·report-server(report_server #9, 11/8 머지)까지 구현됐고, 남은 것은 Elasticsearch 색인과 web 화면입니다. 문서에만 있는 것: FR-RPT-06(recon-worker, `trace.recon.*` 이벤트)은 계약·코드 모두 없습니다. InfluxDB `trace-pilot` 기록(DI2 "추이", 설계서 "추이는 InfluxDB에도")과 Elasticsearch 색인도 코드가 없습니다(11/3 중단, InfluxDB는 11/8 diagnostics_server #9로 넣었다가 #10으로 되돌림 — 쓰지 않음).
+
+요구사항 밖 11/8 추가: 공개 보유 노트북 목록·3D 흠집 상세(`/devices`, contracts #33, FR-RNT-05·FR-DIA-06에 공개 경로로 붙임), 사람 검수(FR-INS-03), 수령 QR 하나로 계정 연결(FR-RNT-04, web #91).
 
 ## 요구사항별
 
@@ -26,7 +28,7 @@
 | FR-RNT-05 | 기기 목록·상태 | ✅ | rental_server `rental/device/`, web `features/devices/` | |
 | FR-AUTH-01 | 로그인·JWT 15분·리프레시 7일 | ✅ | auth_server `auth/account/api/AuthController.java`, `auth/token/` | |
 | FR-AUTH-02 | 부스·고객·에이전트 자격 교환 | ✅ | auth_server `auth/booth/`, `auth/capture/`, `auth/pairing/` | |
-| FR-AUTH-03 | gateway JWT 검증·역할×경로 | ◐ | gateway `access/` + `resources/access-policy.yaml`(계약에서 생성), 테스트 `RoleRouteMatrixIntegrationTest` | 역할×경로는 계약과 일치. 계약의 429(IP 분당 10회) 중 가입·이메일 코드 확인은 gateway에 제한 없음 |
+| FR-AUTH-03 | gateway JWT 검증·역할×경로 | ✅ | gateway `access/` + `resources/access-policy.yaml`(계약에서 생성), 테스트 `RoleRouteMatrixIntegrationTest`, `ratelimit/` | 역할×경로는 계약과 일치. 가입·이메일 코드 확인 IP 분당 10회는 gateway #11(11/8)로 추가. 공개 catalog 경로는 IP당 합산 분당 300회(gateway #14) |
 | FR-USR-01 | 가입·동의 | ✅ | auth_server `auth/account/api/AccountController.java`, web `features/signup/` | |
 | FR-USR-02 | QR로 렌탈 계정 연결 | ✅ | auth_server `auth/capture/` exchange → `rental_access` | |
 | FR-USR-03 | 내 렌탈·리포트 | ✅ | rental_server `listRentals`(rentals 클레임), web `features/report/components/MyRentalsPage.tsx`·`ReportPage.tsx` | |
@@ -49,7 +51,7 @@
 | FR-RPT-02 | 3D 핀·시점 슬라이더 | ✅ | web `features/report/components/PinList.tsx`·`CheckpointSlider.tsx` | |
 | FR-RPT-03 | 타임라인 리포트·비교표 | ✅ | report_server `record/api/ReportController.java`, web `CompareTable.tsx` | |
 | FR-RPT-04 | 진행률 SSE | ✅ | report_server `progress/`, ml `inspect/runner.py`(Redis 발행) | |
-| FR-RPT-05 | 기록 검색(선택) | ✗ | contracts `report-server.yaml`, gateway `access-policy.yaml` | report-server 컨트롤러는 report_server #9(11/8)에서 추가(ADMIN). Elasticsearch 없음 |
+| FR-RPT-05 | 기록 검색(선택) | ◐ | contracts `report-server.yaml`, gateway `access-policy.yaml`, report_server #9(머지) | ADMIN 검색 API는 있음(PostgreSQL). Elasticsearch·web 화면은 없음 |
 | FR-RPT-06 | 3DGS 실물 스캔(실험) | ✗ | 없음 | recon-worker 없음 |
 | FR-INT-01 | 해시 체인 | ✅ | report_server `record/` (Ed25519, `record_chain`) | |
 | FR-INT-02 | 리포트에 검증 QR | ◐ | web `features/verify/`, `ReportPage.tsx`의 검증 링크 버튼 | 리포트에 QR 그림은 없고 링크만 |
