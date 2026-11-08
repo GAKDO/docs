@@ -86,6 +86,9 @@
 | GET | /captures/sets/{setId} | ADMIN·촬영 | 세트 상태 | 200 | FR-CAP-01 |
 | GET | /captures/checkpoints/{checkpointId}/inspection | ADMIN·CUSTOMER(본인) | 흠집·신규 판정·등급 | 200 | FR-INS-03·04 |
 | GET | /captures/checkpoints/{checkpointId}/media | ADMIN·CUSTOMER(본인) | 텍스처·크롭 보기 URL(GET, 10분) | 200 | FR-RPT-01 |
+| GET | /captures/reviews?status=PENDING&limit=20 | ADMIN | 사람 검수 대기(PENDING)·끝난(CONFIRMED) 시점 목록. 시점마다 후보 수·남은 수 | 200 · 400 status=DISMISSED | FR-INS-03 |
+| POST | /captures/checkpoints/{checkpointId}/reviews | ADMIN | AI 후보 결정 저장. items[]{defectId, decision CONFIRMED·DISMISSED·PENDING, reason(DISMISSED만)} | 200 검사 결과 · 409 REVIEW_CLOSED | FR-INS-03 |
+| POST | /captures/checkpoints/{checkpointId}/reviews/complete | ADMIN | 검수 완료 → 확정분만으로 등급·봉인. Idempotency-Key 필수 | 200 · 409 REVIEW_PENDING_REMAINS(pending)·REVIEW_NOT_READY·REVIEW_CLOSED | FR-INS-03·04 |
 
 ## diagnostics-server — /api/v1/diagnostics
 
@@ -123,6 +126,7 @@ FR-AUTH-03의 수용 기준입니다. 칸마다 gateway 통합 테스트를 하�
 | 촬영 세트 생성·완료 | ✗ | ✗ | ✗ | 그 시점만 | 자기 부스 | ✗ |
 | 탐지 결과 올리기 | ✗ | ✗ | ✗ | ✗ | ✓ | ✗ |
 | 검사 결과·사진 URL 읽기 | ✗ | ✓ | 본인 | ✗ | ✗ | ✗ |
+| 흠집 후보 검수(대기 목록·결정·완료) | ✗ | ✓ | ✗ | ✗ | ✗ | ✗ |
 | 진단 올리기 | ✗ | ✗ | ✗ | ✗ | ✗ | 그 시점만 |
 | 진단 결과 읽기 | ✗ | ✓ | 본인 | ✗ | ✗ | ✗ |
 | 리포트·진행률 | ✗ | ✓ | 본인 | 진행률만 | ✗ | ✗ |
@@ -141,6 +145,7 @@ FR-AUTH-03의 수용 기준입니다. 칸마다 gateway 통합 테스트를 하�
 | 탈퇴 | DELETE auth/me |
 | 관리자 렌탈 관리 | rentals(목록·생성) · devices(목록·등록·수정) · device-models(목록) · rentals/{id}/checkpoints · capture-links(QR 표시) · pairing-codes |
 | 관리자 리포트 | reports/rentals/{id} · /chain · captures/checkpoints/{id}/inspection · diagnostics/checkpoints/{id} |
+| 관리자 사람 검수 | captures/reviews(대기 목록) → captures/checkpoints/{id}/inspection → /reviews(결정 저장) → /reviews/complete |
 | 검증 페이지 (공개) | verify/{token} |
 
 ## 핵심 요청·응답 예시
