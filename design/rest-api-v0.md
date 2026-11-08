@@ -2,7 +2,7 @@
 
 모든 요청은 gateway 한 곳으로 들어오고, gateway가 JWT를 검증한 뒤 경로 앞부분으로 서버를 고릅니다. 화면은 C가, 서버 API는 A가 만들고, 진단 에이전트(B)는 페어링 교환과 진단 업로드만, 부스 Jetson(B)은 부스 토큰·렌탈 목록·부스 코드·촬영 세트·탐지만 부릅니다.
 
-> **원본은 contracts입니다.** 11/3 계약 고정 때 이 표를 서버별 OpenAPI 3.1 파일 5개(`contracts/openapi/*.yaml`)로 옮겼고, 지금은 계약이 원본이고 이 문서는 요약입니다. 아래 표는 **2026-11-08 contracts develop(`3c94134`)** 의 경로·`x-trace-access`(역할·범위)와 맞췄고, 그 뒤 추가된 공개 catalog 경로 4개(contracts #33, `4dbcdef`)는 표에 "(11/8 추가)"로 따로 더했습니다(아래 구현 대조의 54개에는 들어 있지 않음). 둘이 다르면 계약이 맞습니다. 서버 코드·gateway 규칙과의 대조는 맨 아래 [구현 대조](#구현-대조-118)에 있습니다.
+> **원본은 contracts입니다.** 11/3 계약 고정 때 이 표를 서버별 OpenAPI 3.1 파일 5개(`contracts/openapi/*.yaml`)로 옮겼고, 지금은 계약이 원본이고 이 문서는 요약입니다. 아래 표는 **2026-11-08 contracts develop(`3c94134`)** 의 경로·`x-trace-access`(역할·범위)와 맞췄고, 그 뒤 추가된 공개 catalog 경로 4개(contracts #33 `4dbcdef`, 429 설명은 #34 `4c90a62`)는 표에 "(11/8 추가)"로 따로 더했습니다(아래 구현 대조의 54개에는 들어 있지 않음). 둘이 다르면 계약이 맞습니다. 서버 코드·gateway 규칙과의 대조는 맨 아래 [구현 대조](#구현-대조-118)에 있습니다.
 
 ## 공통 규칙
 
@@ -11,7 +11,7 @@
 - **형식:** JSON camelCase, 시각은 ISO 8601 + 오프셋, ID는 `publicId`(NanoID 21자, 예: `IPv6mcQOlTkKj6mOecAQt`)이고 DB 기본 키(bigint)는 내보내지 않습니다.
 - **오류:** RFC 9457 Problem Details(`application/problem+json`)에 `code`를 더합니다. Spring Boot 3의 ProblemDetail을 그대로 씁니다.
 - **목록:** `?limit=20&cursor=...` → `{ "items": [], "nextCursor": "..." }`
-- **요청 제한:** 계약은 가입·이메일 코드 확인·재발송·로그인·페어링 교환에 429(IP당 분당 10회, `RATE_LIMITED`)를 둡니다. gateway(Redis, 키 `trace:`)는 로그인·페어링 교환에 더해 11/8 gateway #11부터 가입·이메일 코드 확인·재발송도 IP로 셉니다. 공개 catalog 경로 세 개는 IP당 합산 분당 300회입니다(gateway #14). 그 밖에 재발송은 auth-server가 60초에 1번(`RESEND_TOO_SOON`), 부스 코드 교환은 rental-server가 모든 부스 합쳐 틀린 코드 1분 30번을 넘으면 1분 동안 429를 냅니다.
+- **요청 제한:** 계약은 가입·이메일 코드 확인·재발송·로그인·페어링 교환에 429(IP당 분당 10회, `RATE_LIMITED`)를 둡니다. gateway(Redis, 키 `trace:`)는 로그인·페어링 교환에 더해 11/8 gateway #11부터 가입·이메일 코드 확인·재발송도 IP로 셉니다. 공개 catalog 경로 네 개(`/catalog/devices`, `/captures/catalog`, `/captures/catalog/checkpoints/{id}`, `/diagnostics/catalog`)는 같은 버킷으로 IP당 합산 분당 300회입니다(gateway #14, 계약 설명은 contracts #34 `4c90a62`에서 맞춤). 그 밖에 재발송은 auth-server가 60초에 1번(`RESEND_TOO_SOON`), 부스 코드 교환은 rental-server가 모든 부스 합쳐 틀린 코드 1분 30번을 넘으면 1분 동안 429를 냅니다.
 - **중복 요청:** 촬영 완료와 진단 업로드는 `Idempotency-Key` 헤더로 한 번만 처리합니다.
 - **배포 확인:** 서버마다 `GET /api/v1/<auth|rentals|captures|diagnostics|reports>/ping`이 인증 없이 `commit`을 돌려줍니다.
 - **서버로 넘기는 헤더:** `X-User-Id`·`X-Role`·`X-Scope`는 gateway만 넣고, 밖에서 온 같은 이름의 헤더는 지웁니다.
