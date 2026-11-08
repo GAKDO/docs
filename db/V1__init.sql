@@ -1,6 +1,8 @@
 -- TRACE PostgreSQL 초기 스키마 (V1). 서비스별 스키마 7개, 테이블 31개. 2026-10-31 기준.
 -- 원본 설명: design/ddl.md · Crowfoot ERD: https://crowfoot.java21.net/workspaces/68/models/688
 -- 실제 배포에서는 각 서버가 자기 스키마 부분만 Flyway V1으로 가져간다(서비스 간 외래 키 금지).
+-- 이 파일은 처음 스키마(V1)다(예외: inspection_flag.kind CHECK는 11/7 값 3개까지 들어 있음). 그 뒤 서버가 Flyway V2 이후로 더한
+-- 표 4개·컬럼·제약(지금 테이블 35개)은 design/ddl.md가 기준이다(11/8 실제 마이그레이션과 비교).
 
 CREATE SCHEMA IF NOT EXISTS rental;
 
