@@ -8,13 +8,15 @@
 |---|---|
 | **[MVP 안내서 (그림판)](https://gakdo.github.io/docs/guide/)** | 처음 보는 사람용. 전체 구조 그림, 서비스별 설명, 기능 F1~F11 흐름을 그림과 함께. 원본 [guide/](../guide/) |
 | [1. MVP 아키텍처](01-architecture.md) | 구성도(색 구분·포트), 검사 한 건 요약 흐름, 포트 목록 |
-| [2. 서비스별 아키텍처](02-services.md) | web · gateway · auth-server · rental-server · capture-server · booth 앱 · 학습마다 레포·포트·저장소·API·이벤트·담당과 그림 |
+| [2. 서비스별 아키텍처](02-services.md) | web · gateway · auth-server · rental-server · capture-server · booth 앱 · 학습 · diagnostics-server · report-server · 진단 에이전트마다 레포·포트·저장소·API·이벤트·담당과 그림, 코드 기준 이벤트 흐름(11/8) |
 | [3. 기능별 흐름](03-features.md) | 기능 F1~F11을 일어나는 순서대로: 목적·담당·단계·API·상태 변화·실패하면 |
 | [4. A·B·C 담당](04-roles.md) | 사람별·기능별 담당, MVP 일정, 헷갈리는 경계 |
 | [API 문서 (자동 생성)](https://gakdo.github.io/docs/api/mvp.html) | contracts OpenAPI에서 MVP API 25개만 뽑고, API마다 하는 일 · 누가 부르나 · 언제 · 어느 기능을 붙인 Redoc 쪽. 만드는 법은 [api-docs/](../api-docs/README.md) |
 | [그림 파일](figures/) | 위 문서의 Mermaid 그림 SVG·PNG(발표용). [Codex 이미지 프롬프트](codex-prompts.md) |
 
 ## 11/4 현재 상태 (강사님 리뷰용)
+
+> 11/4 기록입니다. 그 뒤 바뀐 것(11/8 확인): diagnostics-server는 11/6부터 Compose 기본 기동(진단 에이전트 페어링·업로드 시연), Grafana 대신 관리자 '성능' 화면(`/admin/benchmark`), 부스 태블릿 화면 `/booth`, web `VITE_ARCHIVED_FEATURES`는 `phoneCapture,pilot`만 남음(수령·반납 버튼 `laterCheckpoints`·고객 계정 `account`·리포트 `report`는 다시 보임). 지금 구성은 [1. MVP 아키텍처](01-architecture.md)를 보세요.
 
 리뷰 날짜는 아직 정해지지 않았습니다(11/4 또는 11/5). 진행 순서·명령은 레포 밖 TRACE 프로젝트 공유 폴더(Claude 프로젝트 파일)의 `notices/2026-11-04-mvp-review-runbook.md`에 있습니다(GitHub에는 없음). 기준 시각 11/4 17시 40분(KST).
 

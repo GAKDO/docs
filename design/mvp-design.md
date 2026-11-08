@@ -23,7 +23,7 @@ MVP 완료 기준 (11/10 기능 완성 게이트)
 
 ## 최소 요구사항
 
-MVP 필수 요구사항은 기능 44개, 비기능 6개입니다. 집 PC(RTX 4070 Ti)에서 돌아가는 요구사항은 그 PC를 다룰 수 있는 A가 모두 맡습니다. A는 서버·인프라·집 PC 작업·회원(30개), B는 부스·촬영 도구·라벨링·진단 에이전트(12개), C는 웹·3D 화면·시점 비교·검증 페이지(8개)입니다. 화면은 C가, 서버 API는 A가 만듭니다(회원 가입·로그인 화면도 C). 진단 결과 JSON 형식은 A가 11/3까지 contracts 레포에 확정하고, B는 라벨링이 끝난 11/6부터 에이전트를 만듭니다. 3DGS 실험(recon-worker)도 A가 맡습니다.
+MVP 필수 요구사항은 기능 44개, 비기능 6개입니다. 요구사항마다 실제 구현 위치와 상태(11/8 감사)는 [requirements-status.md](requirements-status.md)에 있습니다. 집 PC(RTX 4070 Ti)에서 돌아가는 요구사항은 그 PC를 다룰 수 있는 A가 모두 맡습니다. A는 서버·인프라·집 PC 작업·회원(30개), B는 부스·촬영 도구·라벨링·진단 에이전트(12개), C는 웹·3D 화면·시점 비교·검증 페이지(8개)입니다. 화면은 C가, 서버 API는 A가 만듭니다(회원 가입·로그인 화면도 C). 진단 결과 JSON 형식은 A가 11/3까지 contracts 레포에 확정하고, B는 라벨링이 끝난 11/6부터 에이전트를 만듭니다. 3DGS 실험(recon-worker)도 A가 맡습니다.
 
 | ID | 도메인 | 요구사항 | 수용 기준 | 담당 | 우선순위 |
 | --- | --- | --- | --- | --- | --- |
@@ -81,6 +81,8 @@ MVP 필수 요구사항은 기능 44개, 비기능 6개입니다. 집 PC(RTX 407
 요구사항 50개는 모두 필수이고, 일정이 밀려도 빼지 않습니다(10/30 결정). 일정 위험이 가장 큰 것은 팀 Gmail 발송에 기대는 3개(FR-USR-05·06, FR-INT-03)라, Gmail 계정을 먼저 준비합니다.
 
 ## 아키텍처
+
+> **11/8 주의:** 이 절과 "서버 구성과 연결"은 10/31 클러스터 설계입니다. 11/3에 클러스터·Argo CD·InfluxDB·Grafana를 멈췄고, 지금은 학교 서버 Docker Compose(https://gakdo.site, 인프라 4종도 같은 Compose 안)로 돌립니다. 11/6부터 파일럿 추이는 Grafana 대신 web 관리자 '성능' 화면입니다. 지금 구성은 [../mvp/01-architecture.md](../mvp/01-architecture.md)·[../mvp/02-services.md](../mvp/02-services.md)가 기준입니다.
 
 학교 클러스터의 `trace` 네임스페이스에는 앱 8개와 PostgreSQL 1개를 올리고, 나머지 데이터는 학교 서버의 공유 인프라에 둡니다. GPU가 필요한 일은 Jetson 1대(부스, 출고·반납·데이터 촬영 공용)와 집 PC 4070 Ti(워커·학습)가 나눠 맡습니다.
 
@@ -226,7 +228,7 @@ JWT로 합니다. 지난 프로젝트처럼 인증·인가는 auth-server로 분
 | 3D 트윈 뷰어 | web | three.js(React Three Fiber), 기종 치수 모델 + 9면 텍스처 + 핀, 시점 슬라이더 | MinIO `trace-derived` | FR-RPT-01, 02 |
 | 인증·인가 | auth-server(발급), gateway(검증) | Spring Security, Nimbus JOSE(RS256 JWT), BCrypt, Spring Cloud Gateway 요청 제한 | PostgreSQL `auth`, Redis(리프레시 토큰) | FR-AUTH-01\~03, NFR-03 |
 | 회원가입·내 렌탈 | auth-server, web | Spring Security, BCrypt, Bean Validation, Spring Mail(인증·재설정 코드), JWT rentals 클레임, React 가입·로그인·내 렌탈 화면 | PostgreSQL auth, Redis(재발송 제한), Gmail SMTP | FR-USR-01\~06 |
-| 파일럿 대시보드 | Grafana (학교 서버) | Flux 쿼리 패널 | InfluxDB `trace-pilot` | FR-PIL-02 |
+| 파일럿 대시보드 | ~~Grafana (학교 서버)~~ → 11/6부터 web 관리자 '성능'(`/admin/benchmark`) | diagnostics-server 조회 API로 기기별 렌탈 전·후 비교 | PostgreSQL `diagnostics` (InfluxDB는 11/3 중단, 쓰기 코드 없음) | FR-PIL-02 |
 | 학습 데이터 촬영 도구 | 노트북·Jetson | 부스 스크립트 v0 공유, boto3, 로컬 보관 후 재시도 | MinIO `trace-raw` | FR-DAT-01, 02 |
 | 라벨링 | label-studio | Label Studio, S3 소스·타깃(프록시 모드), 폴리곤 4클래스 | PostgreSQL `labelstudio`, MinIO `trace-raw`·`trace-labels` | FR-DAT-03 |
 | 데이터셋 빌드·학습 | 집 PC | Python, Ultralytics 학습, manifest(SHA-256), ONNX 내보내기 | MinIO `trace-datasets`·`trace-models`, PostgreSQL `ml` | FR-DAT-04, 05 |
@@ -247,7 +249,7 @@ JWT로 합니다. 지난 프로젝트처럼 인증·인가는 auth-server로 분
 
 ## ERD
 
-PostgreSQL `trace` DB에 서비스별 스키마 7개, 테이블 30개를 둡니다. 실선은 같은 스키마 안의 FK이고, 점선은 서비스 사이를 ID 값으로만 잇는 참조입니다. 컬럼 정의는 테이블 정의 탭의 DDL에 있습니다.
+PostgreSQL `trace` DB에 서비스별 스키마 7개, 테이블 30개를 둡니다(10/31 ERD v1). **11/8 지금은 서버들이 Flyway V2 이후로 표 4개를 더해 35개**이고, 지금 스키마와 Mermaid ERD는 [ddl.md](ddl.md)가 기준입니다. 실선은 같은 스키마 안의 FK이고, 점선은 서비스 사이를 ID 값으로만 잇는 참조입니다. 컬럼 정의는 테이블 정의 탭의 DDL에 있습니다.
 
 &#91;embedded content: TRACE ERD · 스키마 7개, 테이블 30개\]
 
@@ -269,16 +271,17 @@ Crowfoot ERD v1(10/31): [TRACE MVP ERD](https://crowfoot.java21.net/workspaces/6
 
 ## 이벤트 계약
 
-서비스와 워커는 RabbitMQ topic exchange `trace.events` 하나로 이벤트 6종을 주고받습니다(11/2 이벤트 1.1에서 `trace.checkpoint.started` 추가). 부스의 탐지 결과만 예외로, Jetson이 gateway를 거쳐 capture-server에 REST로 올립니다.
+서비스와 워커는 RabbitMQ topic exchange `trace.events` 하나로 이벤트 7종을 주고받습니다(11/2 이벤트 1.1에서 `trace.checkpoint.started`, 11/4 시험 렌탈 지우기 `trace.checkpoint.purged` 추가). 아래 소비(큐)는 11/8 각 서버 코드의 큐 선언·바인딩 기준입니다. 부스의 탐지 결과만 예외로, Jetson이 gateway를 거쳐 capture-server에 REST로 올립니다.
 
 | 라우팅 키 | 발행 | 소비 (큐) | 언제 | 핵심 필드 |
 | --- | --- | --- | --- | --- |
-| `trace.capture.uploaded` | capture-server | inspect-worker (`trace.inspect.requested`), rental-server (`trace.rental.checkpoints`) | 촬영 세트 업로드 완료(출처별 필수 면, SCR1 선택) | captureSetId, source(BOOTH·PHONE), needDetection, photos\[photoId, face, light, objectKey, sha256\] |
-| `trace.inspect.completed` | inspect-worker | capture-server (`trace.capture.inspected`) | 정합·탐지·텍스처 완료 | captureSetId, alignments\[photoId, homography, errorPx\], defects\[photoId, class, polygon, confidence\], textureKeys, modelVersion |
+| `trace.capture.uploaded` | capture-server | inspect-worker (`trace.inspect.requested`), rental-server (`trace.rental.checkpoints`), report-server (`trace.report.updates`) | 촬영 세트 업로드 완료(출처별 필수 면, SCR1 선택) | captureSetId, source(BOOTH·PHONE), needDetection, photos\[photoId, face, light, objectKey, sha256\] |
+| `trace.inspect.completed` | inspect-worker | capture-server (`trace.capture.inspected`), report-server (`trace.report.updates`, 진행률) | 정합·탐지·텍스처 완료 | captureSetId, alignments\[photoId, homography, errorPx\], defects\[photoId, class, polygon, confidence\], textureKeys, modelVersion |
 | `trace.checkpoint.graded` | capture-server | report-server (`trace.report.updates`), rental-server (`trace.rental.checkpoints`) | 이전 시점과 비교·등급 완료 | grade, ruleVersion, newDefectIds, unjudgeableFaces, pins\[defectId, face, x, y, isNew\](1.1, 3D 핀·최대 500) |
 | `trace.diagnostics.recorded` | diagnostics-server | report-server (`trace.report.updates`) | 진단 저장·비교 완료 | runId, sha256, flags\[kind, detail\], maxCapacityPct(1.1, 서버 계산 % 또는 null) |
 | `trace.checkpoint.started` | rental-server | report-server (`trace.report.updates`) | 시점 시작(1.1) | checkpointType, deviceId, serial, modelCode, modelName |
-| `trace.record.sealed` | report-server | web(SSE), auth-server 영수증 메일(trace.auth.receipts), rental-server (`trace.rental.checkpoints`), 검색 색인(선택) | 해시 체인 봉인 | seq, checkpointType, grade, payloadHash, prevHash, signedAt |
+| `trace.record.sealed` | report-server | auth-server 영수증 메일 (`trace.auth.receipts`), rental-server (`trace.rental.checkpoints`). web은 이벤트를 받지 않고 report-server SSE로 봄. 검색 색인은 구현 안 됨 | 해시 체인 봉인 | seq, checkpointType, grade, payloadHash, prevHash, signedAt |
+| `trace.checkpoint.purged` | rental-server (`DELETE /rentals/{id}`, 시험 렌탈만) | capture-server (`trace.capture.purged`), report-server (`trace.report.updates`), diagnostics-server (`trace.diagnostics.purged`) | 시험 렌탈 지우기(11/4) | checkpointType, deviceId, serial(`TEST-`로 시작) |
 
 공통 규칙
 
