@@ -8,7 +8,7 @@
 |---|---|
 | **[MVP 안내서 (그림판)](https://gakdo.github.io/docs/guide/)** | 처음 보는 사람용. 전체 구조 그림, 서비스별 설명, 기능 F1~F11 흐름을 그림과 함께. 원본 [guide/](../guide/) |
 | [1. MVP 아키텍처](01-architecture.md) | 구성도(색 구분·포트), 검사 한 건 요약 흐름, 포트 목록 |
-| [2. 서비스별 아키텍처](02-services.md) | web · gateway · auth-server · rental-server · capture-server · booth 앱 · 학습마다 레포·포트·저장소·API·이벤트·담당과 그림 |
+| [2. 서비스별 아키텍처](02-services.md) | web · gateway · auth-server · rental-server · capture-server · booth 앱 · 학습 · diagnostics-server · report-server · 진단 에이전트마다 레포·포트·저장소·API·이벤트·담당과 그림, 코드 기준 이벤트 흐름(11/8) |
 | [3. 기능별 흐름](03-features.md) | 기능 F1~F11을 일어나는 순서대로: 목적·담당·단계·API·상태 변화·실패하면 |
 | [4. A·B·C 담당](04-roles.md) | 사람별·기능별 담당, MVP 일정, 헷갈리는 경계 |
 | [API 문서 (자동 생성)](https://gakdo.github.io/docs/api/mvp.html) | contracts OpenAPI에서 MVP API 25개만 뽑고, API마다 하는 일 · 누가 부르나 · 언제 · 어느 기능을 붙인 Redoc 쪽. 만드는 법은 [api-docs/](../api-docs/README.md) |
@@ -16,11 +16,13 @@
 
 ## 11/4 현재 상태 (강사님 리뷰용)
 
+> 11/4 기록입니다. 그 뒤 바뀐 것(11/8 확인): diagnostics-server는 11/6부터 Compose 기본 기동(진단 에이전트 페어링·업로드 시연), Grafana 대신 관리자 '성능' 화면(`/admin/benchmark`), 부스 태블릿 화면 `/booth`, web `VITE_ARCHIVED_FEATURES`는 `pilot`만 남음(11/8 web #85로 폰 수령 촬영 `phoneCapture`도 다시 보임. 수령·반납 버튼 `laterCheckpoints`·고객 계정 `account`·리포트 `report`도 다시 보임), report-server는 11/8부터 Compose 기본 기동. 지금 구성은 [1. MVP 아키텍처](01-architecture.md)를 보세요.
+
 리뷰 날짜는 아직 정해지지 않았습니다(11/4 또는 11/5). 진행 순서·명령은 레포 밖 TRACE 프로젝트 공유 폴더(Claude 프로젝트 파일)의 `notices/2026-11-04-mvp-review-runbook.md`에 있습니다(GitHub에는 없음). 기준 시각 11/4 17시 40분(KST).
 
 | 항목 | 상태 |
 |---|---|
-| 학교 서버 배포 | https://gakdo.site 개통. web·gateway·auth·rental·capture는 develop 이미지. 11/4 **report-server 다시 켬**(출고 시점이 봉인 SEALED까지 가게, `--profile full`로 report만). diagnostics-server는 꺼 둠 |
+| 학교 서버 배포 | https://gakdo.site 개통. web·gateway·auth·rental·capture는 develop 이미지. 11/4 **report-server 다시 켬**(출고 시점이 봉인 SEALED까지 가게). 11/6 diagnostics-server, 11/8 report-server·inspect-worker(폰 사진 CPU 검사) 기본 기동 |
 | 관리자 화면 | https://gakdo.site/admin 로그인 · 기기 등록 · 렌탈 열기 · 결과 조회. 기종 목록에 기준 사양 열·검색·정렬, 기종 등록에 GPU(선택)([web #52](https://github.com/GAKDO/web/pull/52), [contracts #24](https://github.com/GAKDO/contracts/pull/24), [rental_server #12](https://github.com/GAKDO/rental_server/pull/12)·[#13](https://github.com/GAKDO/rental_server/pull/13)). 렌탈 상세에 '부스에 넣을 ID'와 복사 버튼([web #53](https://github.com/GAKDO/web/pull/53)) |
 | 부스 | 빠른 검사(기기 탭 → 12장 → 판정 → 업로드), 오염만이면 문제 없음([booth #28](https://github.com/GAKDO/booth/pull/28)). 화면을 단계형으로 다시 짬(기기 고르기 → 시리얼 확인 → 바닥면 → 뒤집기 → 상판 → 판정, [#29](https://github.com/GAKDO/booth/pull/29)), 판정 사진 큰 화면·실시간 캠 크기·gakdo.site 스타일([#30](https://github.com/GAKDO/booth/pull/30)). Playwright 화면 하네스가 CI에서 돎 |
 | 시험 데이터 | 시험 렌탈 지우기 API와 `trace.checkpoint.purged`([contracts #25](https://github.com/GAKDO/contracts/pull/25), [rental_server #14](https://github.com/GAKDO/rental_server/pull/14)), 받는 쪽 [capture_server #14](https://github.com/GAKDO/capture_server/pull/14)·[report_server #6](https://github.com/GAKDO/report_server/pull/6)·[diagnostics_server #6](https://github.com/GAKDO/diagnostics_server/pull/6). 카메라 없이 촬영 완료·판정 상태를 만드는 TEST-0002 스크립트(같은 프로젝트 공유 폴더의 `booth-ui/make_test_0002.py`, GitHub에는 없음) |
