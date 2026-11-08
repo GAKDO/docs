@@ -96,6 +96,9 @@
 | GET | /captures/checkpoints/{checkpointId}/inspection | ADMIN·CUSTOMER(본인) | 흠집·신규 판정·등급 | 200 · 404 | FR-INS-03·04 |
 | GET | /captures/checkpoints/{checkpointId}/media | ADMIN·CUSTOMER(본인) | 사진·텍스처·크롭 보기 URL(GET, 10분) | 200 · 404 | FR-RPT-01 |
 | GET | /captures/benchmarks?source=&limit= | ADMIN | 세트별 처리 시간(탐지·완료→등급·부스 전체)과 모델별 mAP(11/6, 성능 그래프) | 200 | FR-INS-01 |
+| GET | /captures/reviews?status=PENDING&limit=20 | ADMIN | 사람 검수 대기(PENDING)·끝난(CONFIRMED) 시점 목록. 시점마다 후보 수·남은 수 | 200 · 400 status=DISMISSED | FR-INS-03 |
+| POST | /captures/checkpoints/{checkpointId}/reviews | ADMIN | AI 후보 결정 저장. items[]{defectId, decision CONFIRMED·DISMISSED·PENDING, reason(DISMISSED만)} | 200 검사 결과 · 409 REVIEW_CLOSED | FR-INS-03 |
+| POST | /captures/checkpoints/{checkpointId}/reviews/complete | ADMIN | 검수 완료 → 확정분만으로 등급. 200은 등급이 매겨졌다는 뜻이고, 봉인은 report-server가 판정 이벤트를 받은 뒤(진단을 기다릴 수 있음) 따로 하므로 다음 시점 전에는 리포트의 봉인 상태를 확인. Idempotency-Key 필수 | 200 · 409 REVIEW_PENDING_REMAINS(pending)·REVIEW_NOT_READY·REVIEW_CLOSED | FR-INS-03·04 |
 
 필수 면은 세트 출처와 범위로 정합니다: FULL은 codes.yaml `capture.face_required`(부스 8면·폰 7면, SCR1 선택), QUICK(11/3 MVP 부스 빠른 검사)은 `capture.face_required_quick.BOOTH` = TOP·BOT(조명 3 × 카메라 2 = 12장)이고 정합 없이 부스 탐지로 등급을 매깁니다.
 
@@ -137,6 +140,7 @@ FR-AUTH-03의 수용 기준입니다. gateway는 이 표를 손으로 옮기지 
 | 촬영 세트 상태 읽기 | ✗ | ✓ | ✗ | 그 시점만 | ✗ | ✗ |
 | 탐지 결과 올리기 | ✗ | ✗ | ✗ | ✗ | 자기 부스 | ✗ |
 | 검사 결과·사진 URL 읽기 | ✗ | ✓ | 본인 | ✗ | ✗ | ✗ |
+| 흠집 후보 검수(대기 목록·결정·완료) | ✗ | ✓ | ✗ | ✗ | ✗ | ✗ |
 | 진단 올리기 | ✗ | ✗ | ✗ | ✗ | ✗ | 그 시점만 |
 | 진단 결과 읽기 | ✗ | ✓ | 본인 | ✗ | ✗ | ✗ |
 | 리포트·진행률 | ✗ | ✓ | 본인 | 진행률만 | ✗ | ✗ |
@@ -158,6 +162,7 @@ FR-AUTH-03의 수용 기준입니다. gateway는 이 표를 손으로 옮기지 
 | 관리자 성능 (`/admin/benchmark`, 11/6 Grafana 대신) | devices · rentals?deviceId= · diagnostics/checkpoints/{id} (기기별 렌탈 전·후 진단 비교). captures/benchmarks는 11/6 그래프에서 썼다가 web #76부터 부르지 않음 |
 | 부스 태블릿 (`/booth`, ADMIN 로그인) | rentals(OPEN) · device-models · rentals/{id}/booth-code · captures/checkpoints/{id}/inspection |
 | 관리자 리포트 | reports/rentals/{id} · /chain · captures/checkpoints/{id}/inspection · diagnostics/checkpoints/{id} |
+| 관리자 사람 검수 | captures/reviews(대기 목록) → captures/checkpoints/{id}/inspection(후보) → captures/checkpoints/{id}/media(사진 URL) → /reviews(결정 저장) → /reviews/complete |
 | 검증 페이지 (공개) | verify/{token} |
 
 ## 핵심 요청·응답 예시
