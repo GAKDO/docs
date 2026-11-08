@@ -16,7 +16,7 @@
 
 ## 11/4 현재 상태 (강사님 리뷰용)
 
-> 11/4 기록입니다. 그 뒤 바뀐 것(11/8 확인): diagnostics-server는 11/6부터 Compose 기본 기동(진단 에이전트 페어링·업로드 시연), Grafana 대신 관리자 '성능' 화면(`/admin/benchmark`), 부스 태블릿 화면 `/booth`, web `VITE_ARCHIVED_FEATURES`는 `phoneCapture,pilot`만 남음(수령·반납 버튼 `laterCheckpoints`·고객 계정 `account`·리포트 `report`는 다시 보임). 지금 구성은 [1. MVP 아키텍처](01-architecture.md)를 보세요.
+> 11/4 기록입니다. 그 뒤 바뀐 것(11/8 확인): diagnostics-server는 11/6부터 Compose 기본 기동(진단 에이전트 페어링·업로드 시연), Grafana 대신 관리자 '성능' 화면(`/admin/benchmark`), 부스 태블릿 화면 `/booth`, web `VITE_ARCHIVED_FEATURES`는 `pilot`만 남음(11/8 web #85로 폰 수령 촬영 `phoneCapture`도 다시 보임. 수령·반납 버튼 `laterCheckpoints`·고객 계정 `account`·리포트 `report`도 다시 보임), report-server는 11/8부터 Compose 기본 기동. 지금 구성은 [1. MVP 아키텍처](01-architecture.md)를 보세요.
 
 리뷰 날짜는 아직 정해지지 않았습니다(11/4 또는 11/5). 진행 순서·명령은 레포 밖 TRACE 프로젝트 공유 폴더(Claude 프로젝트 파일)의 `notices/2026-11-04-mvp-review-runbook.md`에 있습니다(GitHub에는 없음). 기준 시각 11/4 17시 40분(KST).
 

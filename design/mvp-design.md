@@ -249,7 +249,7 @@ JWT로 합니다. 지난 프로젝트처럼 인증·인가는 auth-server로 분
 
 ## ERD
 
-PostgreSQL `trace` DB에 서비스별 스키마 7개, 테이블 30개를 둡니다(10/31 ERD v1). **11/8 지금은 서버들이 Flyway V2 이후로 표 4개를 더해 35개**이고, 지금 스키마와 Mermaid ERD는 [ddl.md](ddl.md)가 기준입니다. 실선은 같은 스키마 안의 FK이고, 점선은 서비스 사이를 ID 값으로만 잇는 참조입니다. 컬럼 정의는 테이블 정의 탭의 DDL에 있습니다.
+PostgreSQL `trace` DB에 서비스별 스키마 7개를 둡니다. 10/31 ERD v1 그림은 테이블 30개, [db/V1__init.sql](../db/V1__init.sql)은 31개입니다. **11/8 지금은 서버들이 Flyway V2 이후로 V1의 31개에 표 4개를 더해 35개**이고, 지금 스키마와 Mermaid ERD는 [ddl.md](ddl.md)가 기준입니다. 실선은 같은 스키마 안의 FK이고, 점선은 서비스 사이를 ID 값으로만 잇는 참조입니다. 컬럼 정의는 테이블 정의 탭의 DDL에 있습니다.
 
 &#91;embedded content: TRACE ERD · 스키마 7개, 테이블 30개\]
 

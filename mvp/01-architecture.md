@@ -165,7 +165,7 @@ contracts OpenAPI의 `servers`에 남은 `localhost:8314`는 예전 클러스터
 
 Grafana, InfluxDB, Rancher, Argo CD, Cloudflare Tunnel
 
-- 11/8: 폰 수령 촬영을 다시 켰습니다(web `VITE_ARCHIVED_FEATURES=pilot`, 파일럿 화면만 숨김). 폰 사진은 Compose의 **inspect-worker**(CPU ONNX, `ghcr.io/gakdo/inspect-worker`)가 검사합니다. 모델은 학교 서버 `~/gitops/compose/models/`에 `best.onnx`·`model.json`을 넣고 `docker compose restart inspect-worker`로 바꿔 끼웁니다(gitops `compose/models/README.md`).
+- 11/8: 폰 수령 촬영을 다시 켰습니다(web `VITE_ARCHIVED_FEATURES=pilot`, 파일럿 화면만 숨김). 폰 사진은 Compose의 **inspect-worker**(CPU ONNX, `ghcr.io/gakdo/inspect-worker`)가 검사합니다. 모델은 학교 서버 `~/gitops/compose/models/`에 `best.onnx`·`model.json`을 넣고 `docker compose restart inspect-worker`로 바꿔 끼웁니다(gitops `compose/models/README.md`). 폴더가 비어 있으면 흠집 탐지만 건너뛰고 정합·3D 텍스처는 계속 만듭니다(modelVersion `contour-v1`). 그래서 처음 배포할 때도 탐지 모델 파일을 넣어야 폰 사진에 흠집이 나옵니다. 모델을 읽었는지는 `docker compose logs --tail 20 inspect-worker`에서 "폰 탐지 모델" 줄로 확인합니다.
 - 클러스터(Rancher·Argo CD)·InfluxDB·Grafana는 11/3에 멈추고 보관했습니다. 배포는 GitHub Actions가 GHCR 이미지를 만들고, 학교 서버에서 `docker compose pull && up -d`로 올립니다. gitops `overlays/school`은 남아 있지만 쓰지 않습니다.
 - 파일럿 추이는 Grafana 대신 관리자 화면 '성능'(`/admin/benchmark`, 11/6)이 diagnostics-server 조회 API로 보여 줍니다. diagnostics-server에는 InfluxDB 쓰기 코드가 없습니다.
 - report-server·diagnostics-server·진단 에이전트는 11/4·11/6에 다시 켰습니다(위 그림에 있음).

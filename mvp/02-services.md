@@ -44,8 +44,8 @@ flowchart LR
 | 항목 | 값 |
 |---|---|
 | 하는 일 | 관리자 로그인, 기기·기종 등록, 렌탈 열기·출고 시점 시작·부스 코드·페어링 코드 발급, 검사 결과(사진 12장 격자 + 흠집 폴리곤 + 등급)·진단 결과 보기, 성능(기기별 진단 전·후 비교), 부스 태블릿 화면, 고객 가입·내 렌탈·리포트·검증 페이지 |
-| 기능 ID | WE1 (WE3·WE4 일부 다시 보임, WE2 폰 촬영은 숨김) |
-| 화면 | 관리자 `/admin/login`, `/admin/models`, `/admin/devices`(`/:deviceId` 상세), `/admin/rentals`, `/admin/rentals/:rentalId`, `/admin/inspections`, `/admin/inspections/:rentalId/:checkpointId`, `/admin/benchmark`(성능, 11/6 Grafana 대신). 부스 태블릿 `/booth`(ADMIN 로그인, 11/6). 고객 `/`, `/guide`, `/signup`, `/login`, `/my/rentals`, `/my/rentals/:rentalId`(3D 리포트), `/my/account`, `/verify/:verifyToken`. 숨김: `VITE_ARCHIVED_FEATURES=phoneCapture,pilot`(`/capture`·파일럿) |
+| 기능 ID | WE1, WE2(폰 수령 촬영, 11/8 web #85로 다시 켬), WE3·WE4 일부 |
+| 화면 | 관리자 `/admin/login`, `/admin/models`, `/admin/devices`(`/:deviceId` 상세), `/admin/rentals`, `/admin/rentals/:rentalId`, `/admin/inspections`, `/admin/inspections/:rentalId/:checkpointId`, `/admin/benchmark`(성능, 11/6 Grafana 대신). 부스 태블릿 `/booth`(ADMIN 로그인, 11/6). 고객 `/`, `/guide`, `/signup`, `/login`, `/my/rentals`, `/my/rentals/:rentalId`(3D 리포트), `/my/account`, `/verify/:verifyToken`. 숨김: `VITE_ARCHIVED_FEATURES=pilot`(파일럿 화면만. 11/8 web #85로 `phoneCapture`를 빼서 폰 촬영 `/capture`는 다시 보임) |
 | 부르는 API | auth 로그인·가입·내 정보·페어링 코드, rental 기기·기종·렌탈·시점·부스 코드·시험 렌탈 지우기, capture `inspection`·`media`, diagnostics 시점 진단, report 리포트·체인·수동 봉인·검증 |
 | 토큰 | 액세스 JWT는 메모리에만, 리프레시는 HttpOnly 쿠키 |
 | 환경 변수 | `API_UPSTREAM`, `MINIO_UPSTREAM` |
@@ -243,8 +243,8 @@ flowchart LR
 |---|---|
 | 하는 일 | 이벤트로 시점 읽기 모델을 만들고, 등급이 나온 시점을 해시 체인에 이어 Ed25519로 서명(진단을 최대 1분 기다림, `REPORT_SEAL_DIAGNOSTICS_WAIT`), 관리자 수동 봉인, 공개 검증, 진행률 SSE |
 | 기능 ID | RP1, RP2 |
-| API | `getRentalTimeline`, `streamRentalProgress`, `getRentalChain`, `sealCheckpointManually`, `listManualSeals`, `verifyRecord`. 계약의 `searchReports`(FR-RPT-05, 선택)는 구현하지 않음 |
-| 환경 변수 | `CHAIN_SIGNING_KEY`(full 프로필에서 필수), `MINIO_ACCESS_KEY`·`MINIO_SECRET_KEY`, `WEB_PUBLIC_URL`, `DB_*`, `RABBITMQ_*`, `REDIS_*` |
+| API | `getRentalTimeline`, `streamRentalProgress`, `getRentalChain`, `sealCheckpointManually`, `listManualSeals`, `verifyRecord`. 계약의 `searchReports`(FR-RPT-05, 선택, ADMIN)는 report_server #9(11/8)에서 추가 |
+| 환경 변수 | `CHAIN_SIGNING_KEY`(11/8부터 report-server가 Compose 기본 기동이라 기본 기동에도 필수. 비면 report-server가 뜨지 않아 시점 봉인이 멈춤. `./init-env.sh`는 빈 값만 채움), `MINIO_ACCESS_KEY`·`MINIO_SECRET_KEY`, `WEB_PUBLIC_URL`, `DB_*`, `RABBITMQ_*`, `REDIS_*` |
 
 ## 2-10. 진단 에이전트 (렌탈 노트북, GAKDO/agent) — B
 

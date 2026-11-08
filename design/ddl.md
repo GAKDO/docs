@@ -29,7 +29,8 @@ erDiagram
   capture_capture_set ||--|{ capture_photo : "capture_set_id"
   capture_photo ||--o| inspection_face_alignment : "photo_id"
   capture_photo ||--o{ inspection_defect : "photo_id"
-  inspection_defect ||--o| inspection_defect_match : "defect_id · prev_defect_id"
+  inspection_defect ||--o| inspection_defect_match : "defect_id"
+  inspection_defect |o--o{ inspection_defect_match : "prev_defect_id"
   capture_capture_set ||--o{ inspection_face_texture : "capture_set_id"
   capture_capture_set ||--o| inspection_grade_result : "capture_set_id"
 

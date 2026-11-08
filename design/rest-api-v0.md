@@ -59,7 +59,7 @@
 | POST | /auth/capture-links | ADMIN | 수령 QR 링크 발급(rentalId, checkpointId) | 201 `{url, expiresAt}` | FR-RNT-04 |
 | POST | /auth/capture-links/exchange | CUSTOMER | QR 토큰 → 촬영 JWT, 렌탈을 내 계정에 연결 | 200 · 409 다른 계정에 연결됨 · 410 만료·사용됨 | FR-AUTH-02, FR-USR-02 |
 | POST | /auth/booth/token | PUBLIC(클라이언트 비밀) | 부스 JWT | 200 · 401 | FR-AUTH-02 |
-| POST | /auth/pairing-codes | ADMIN | 에이전트 페어링 코드 발급(rentalId, checkpointId) | 201 `{code, expiresAt}` | FR-AUTH-02 |
+| POST | /auth/pairing-codes | ADMIN | 에이전트 페어링 코드 발급(rentalId, checkpointId, deviceSerial — 기기 목록에서 고른 등록 시리얼) | 201 `{code, expiresAt}` | FR-AUTH-02 |
 | POST | /auth/pairing-codes/exchange | PUBLIC | 코드 → AGENT JWT(rentalId·deviceSerial 클레임 포함) | 200 · 400 · 410 · 429 | FR-AUTH-02 |
 | GET | /.well-known/jwks.json | gateway(내부) | 공개키 | 200 | FR-AUTH-03 |
 
@@ -88,10 +88,10 @@
 
 | 메서드 | 경로 | 역할 | 하는 일 | 주요 응답 | 요구사항 |
 | --- | --- | --- | --- | --- | --- |
-| POST | /captures/sets | BOOTH(자기 부스)·촬영 | 촬영 세트 생성(rentalId·checkpointId·source, 선택 device·profile) + 사진별 업로드 URL(PUT, 10분). 응답 uploads는 사진마다 face·light·camera를 돌려줌 | 201 · 403 범위 밖 시점 | FR-CAP-01·05 |
+| POST | /captures/sets | BOOTH(자기 부스)·촬영 | 촬영 세트 생성(rentalId·checkpointId·source, 선택 device·profile) + 사진별 업로드 URL(PUT, 10분). 응답 uploads는 사진마다 face·light·camera를 돌려줌. device(modelCode·dimensions)를 빼면 inspect-worker가 기본 기종 치수로 표준 좌표를 만들므로, 여러 기종을 쓰면 렌탈 기종·치수를 꼭 보냄 | 201 · 403 범위 밖 시점 | FR-CAP-01·05 |
 | POST | /captures/sets/{setId}/uploads | BOOTH·촬영 | 아직 안 올라간 사진의 업로드 URL 다시 받기(10분). 본문 photos를 빼면 남은 사진 전부 | 200 · 404 · 409 완료된 세트 | FR-CAP-05 |
-| POST | /captures/sets/{setId}/complete | BOOTH·촬영 | 해시 확인 후 capture.uploaded 발행(`Idempotency-Key`). 본문 skippedFaces {면: 사유}는 선택 면(SCR1)만 | 202 · 409 필수 면 빠짐 · 422 해시 불일치 | FR-CAP-01·02 |
-| POST | /captures/sets/{setId}/detections | BOOTH(자기 부스) | Jetson 탐지 결과 저장. 탐지마다 face·light·camera, 좌표는 원본 사진 px. 선택 inferenceMs·boothTotalMs(11/6) | 201 · 404 · 409 | FR-INS-01 |
+| POST | /captures/sets/{setId}/complete | BOOTH·촬영 | 해시 확인 후 capture.uploaded 발행(`Idempotency-Key`). 본문 skippedFaces {면: 사유}는 선택 면(SCR1)만 | 202 · 409 필수 면 빠짐·해시 불일치(`CAPTURE_HASH_MISMATCH`)·완료된 세트 · 422 같은 `Idempotency-Key`에 다른 본문 | FR-CAP-01·02 |
+| POST | /captures/sets/{setId}/detections | BOOTH(자기 부스) | Jetson 탐지 결과 저장. 탐지마다 face·light·camera, 좌표는 원본 사진 px. 선택 inferenceMs·boothTotalMs(11/6). QUICK 세트는 `analyzedPhotos`에 TOP·BOT 사진을 흠집 없는 사진까지 모두 담아야 함(빠지면 400) | 201 · 400 · 404 · 409 | FR-INS-01 |
 | GET | /captures/sets/{setId} | ADMIN·촬영 | 세트 상태 | 200 · 404 | FR-CAP-01 |
 | GET | /captures/checkpoints/{checkpointId}/inspection | ADMIN·CUSTOMER(본인) | 흠집·신규 판정·등급 | 200 · 404 | FR-INS-03·04 |
 | GET | /captures/checkpoints/{checkpointId}/media | ADMIN·CUSTOMER(본인) | 사진·텍스처·크롭 보기 URL(GET, 10분) | 200 · 404 | FR-RPT-01 |
@@ -218,7 +218,7 @@ contracts develop(`3c94134`)의 경로 54개(ping 5개, 내부 JWKS 포함)를 �
 
 | 구분 | 경로 | 계약 | 서버 | gateway | 메모 |
 | --- | --- | --- | --- | --- | --- |
-| 계약에 있는데 서버에 없음 | GET /api/v1/reports/search | ✓ (ADMIN, FR-RPT-05 선택) | ✗ report-server에 컨트롤러 없음 | ✓ 규칙·라우트 있음 | 지금 부르면 gateway 통과 뒤 404. Elasticsearch 연동도 없음. web도 부르지 않음 |
+| 계약에 있는데 서버에 없음 | GET /api/v1/reports/search | ✓ (ADMIN, FR-RPT-05 선택) | ◐ report_server #9(11/8)에서 컨트롤러 추가(ADMIN) | ✓ 규칙·라우트 있음 | #9가 배포되기 전에는 gateway 통과 뒤 404. Elasticsearch 연동은 없음. web도 부르지 않음 |
 | 서버에 있는데 계약에 없음 | — | | | | 없음(서버 경로 53개가 모두 계약에 있음) |
 | gateway 규칙 없음 | GET /.well-known/jwks.json | ✓ `x-trace-internal` | ✓ auth-server | 라우트·규칙 없음 | 의도대로(gateway가 안에서만 읽음) |
 | 역할 차이 | POST /api/v1/auth/refresh | ADMIN·CUSTOMER(리프레시 쿠키) | ✓ | 공개(토큰 검사 없음) | 의도대로(액세스 토큰이 만료된 뒤 부르므로 쿠키를 auth-server가 확인) |

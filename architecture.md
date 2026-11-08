@@ -3,7 +3,7 @@
 > **이 문서는 10/31 클러스터 기준 원래 설계이고, 지금 배포와 다릅니다.** 지금 구성(학교 서버 Docker Compose · https://gakdo.site)은 [mvp/01-architecture.md](mvp/01-architecture.md)·[mvp/02-services.md](mvp/02-services.md)가 기준입니다(11/8 갱신).
 >
 > - 11/3: Rancher 클러스터·Argo CD·Cloudflare Tunnel·InfluxDB·Grafana를 멈추고 보관했습니다. 아래 구성도의 "Rancher 클러스터", "Argo CD", "InfluxDB · Grafana", NodePort 8314·8316, 배포 흐름(Argo CD 동기화·자동 롤백)은 지금 쓰지 않습니다.
-> - 지금은 학교 서버(10.116.64.12) 한 대에서 gitops `compose/docker-compose.yml`로 web·gateway·auth·rental·capture·diagnostics(11/6 기본 기동)와 report(`--profile full`, 11/4)를 띄우고, PostgreSQL·RabbitMQ·MinIO·Redis도 같은 Compose 안에 둡니다(학교 공유 인프라가 아님). 밖으로는 web nginx 8315 하나만 열고 강사님 nginx가 gakdo.site 443을 넘겨 줍니다.
+> - 지금은 학교 서버(10.116.64.12) 한 대에서 gitops `compose/docker-compose.yml`로 web·gateway·auth·rental·capture·diagnostics(11/6 기본 기동)·report(11/8 기본 기동, `CHAIN_SIGNING_KEY` 필수)·inspect-worker(11/8, CPU ONNX)를 띄우고, PostgreSQL·RabbitMQ·MinIO·Redis도 같은 Compose 안에 둡니다(학교 공유 인프라가 아님). 밖으로는 web nginx 8315 하나만 열고 강사님 nginx가 gakdo.site 443을 넘겨 줍니다.
 > - 11/6: 파일럿 추이는 Grafana 대신 web 관리자 화면 '성능'(`/admin/benchmark`)으로 봅니다. label-studio는 클러스터가 아니라 집 PC 로컬 Docker에서 돌립니다.
 
 앱과 DB는 학교 클러스터에, GPU 일은 Jetson·집 PC에, 파일·큐는 학교 공유 인프라에 둡니다. 자세한 표와 근거는 [design/mvp-design.md](design/mvp-design.md)의 "아키텍처"·"서버 구성과 연결"·"확장성" 섹션에 있습니다.
