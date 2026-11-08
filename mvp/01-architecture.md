@@ -2,7 +2,7 @@
 
 기준일 2026-11-08(처음 11/4). **학교 서버에서 실제로 뜨는 것만** 그렸습니다. 근거는 gitops `compose/docker-compose.yml`, contracts develop, 각 서버·booth·web develop 코드입니다. 메인 주소는 **https://gakdo.site** 입니다.
 
-> **11/4 뒤 바뀐 것:** 11/3에 클러스터(Rancher·Argo CD)·InfluxDB·Grafana는 멈추고 보관했습니다. 11/4 봉인(SEALED)을 위해 report-server를 `--profile full`로 다시 켰고, 11/6 진단 페어링 시연을 위해 diagnostics-server를 Compose 기본 기동에 넣었습니다(gitops #16, 진단 에이전트 AG1 재도입). 같은 날 Grafana 대신 관리자 화면 **'성능'(`/admin/benchmark`)** 을 쓰기로 했고(지금은 기기별 렌탈 전·후 진단 비교, web #76), 부스 옆 태블릿용 **`/booth` 화면**(ADMIN 로그인)을 web에 더했습니다(web #63).
+> **11/4 뒤 바뀐 것:** 11/3에 클러스터(Rancher·Argo CD)·InfluxDB·Grafana는 멈추고 보관했습니다. 11/4 봉인(SEALED)을 위해 report-server를 다시 켰고(11/8부터 Compose 기본 기동, gitops #18), 11/6 진단 페어링 시연을 위해 diagnostics-server를 Compose 기본 기동에 넣었습니다(gitops #16, 진단 에이전트 AG1 재도입). 같은 날 Grafana 대신 관리자 화면 **'성능'(`/admin/benchmark`)** 을 쓰기로 했고(지금은 기기별 렌탈 전·후 진단 비교, web #76), 부스 옆 태블릿용 **`/booth` 화면**(ADMIN 로그인)을 web에 더했습니다(web #63).
 
 MVP 한 줄: 관리자가 웹에서 기기를 등록하고 출고 검사를 시작하면, 부스(Jetson)가 노트북 아래(BOT)·위(TOP)를 조명 3개 × 카메라 2대 = **12장** 찍고, Jetson의 YOLO11-seg가 흠집 폴리곤을 찾아 바로 "문제 있음/없음"을 띄운 뒤, capture-server가 등급을 저장하고 관리자가 웹에서 결과를 봅니다.
 
@@ -46,7 +46,7 @@ flowchart TB
     rental["rental-server :8080<br/>기종 · 기기 · 렌탈 · 시점"]:::nophoto
     capture["capture-server :8080<br/>촬영 세트 · 사전 서명 URL<br/>탐지 저장 · 등급"]:::booth
     diag["diagnostics-server :8080 (11/6 기본 기동)<br/>진단 검증 · 전후 비교 · 점검 플래그"]:::nophoto
-    report["report-server :8080 (--profile full)<br/>해시 체인 봉인 · 리포트 · 검증 · SSE"]:::nophoto
+    report["report-server :8080 (기본 기동, 11/8)<br/>해시 체인 봉인 · 리포트 · 검증 · SSE"]:::nophoto
     pg[("PostgreSQL :5432<br/>스키마 auth · rental · capture · inspection<br/>diagnostics · report")]:::infra
     mq["RabbitMQ :5672<br/>exchange trace.events"]:::infra
     minio[("MinIO :9000 (호스트 19000)<br/>버킷 trace-captures · trace-derived")]:::infra
@@ -148,7 +148,7 @@ sequenceDiagram
 |---|---|---|---|
 | 443 | gakdo.site (s2-nginx) | 강사님 nginx → 10.116.64.12:8315 | 외부 |
 | 8315 | 학교 서버 | web nginx(컨테이너 8080). `/` 화면, `/api/` → gateway, `/trace-captures/` → MinIO | 학교 내부망 (밖에서는 443으로만) |
-| 8080 | Compose 안 | gateway · auth-server · rental-server · capture-server · diagnostics-server(11/6 기본) · report-server(`--profile full`) | 호스트에 안 엶 |
+| 8080 | Compose 안 | gateway · auth-server · rental-server · capture-server · diagnostics-server(11/6 기본) · report-server(11/8 기본) · inspect-worker(11/8, 포트 없음) | 호스트에 안 엶 |
 | 5432 | Compose 안 | PostgreSQL 16 | 호스트에 안 엶 |
 | 6379 | Compose 안 | Redis | 호스트에 안 엶 |
 | 5672 / 15672 | 학교 서버 | RabbitMQ / 관리 화면 | 127.0.0.1만 |
@@ -163,9 +163,9 @@ contracts OpenAPI의 `servers`에 남은 `localhost:8314`는 예전 클러스터
 
 그림을 깔끔하게 두려고 MVP 그림에서 뺐습니다. 코드는 develop에 남아 있습니다.
 
-폰 촬영, inspect-worker, Grafana, InfluxDB, Rancher, Argo CD, Cloudflare Tunnel
+Grafana, InfluxDB, Rancher, Argo CD, Cloudflare Tunnel
 
-- 폰 촬영과 파일럿 화면은 web `Dockerfile`의 `VITE_ARCHIVED_FEATURES=phoneCapture,pilot`으로 숨겨 둡니다.
+- 11/8: 폰 수령 촬영을 다시 켰습니다(web `VITE_ARCHIVED_FEATURES=pilot`, 파일럿 화면만 숨김). 폰 사진은 Compose의 **inspect-worker**(CPU ONNX, `ghcr.io/gakdo/inspect-worker`)가 검사합니다. 모델은 학교 서버 `~/gitops/compose/models/`에 `best.onnx`·`model.json`을 넣고 `docker compose restart inspect-worker`로 바꿔 끼웁니다(gitops `compose/models/README.md`).
 - 클러스터(Rancher·Argo CD)·InfluxDB·Grafana는 11/3에 멈추고 보관했습니다. 배포는 GitHub Actions가 GHCR 이미지를 만들고, 학교 서버에서 `docker compose pull && up -d`로 올립니다. gitops `overlays/school`은 남아 있지만 쓰지 않습니다.
 - 파일럿 추이는 Grafana 대신 관리자 화면 '성능'(`/admin/benchmark`, 11/6)이 diagnostics-server 조회 API로 보여 줍니다. diagnostics-server에는 InfluxDB 쓰기 코드가 없습니다.
 - report-server·diagnostics-server·진단 에이전트는 11/4·11/6에 다시 켰습니다(위 그림에 있음).

@@ -2,7 +2,7 @@
 
 > 그림으로 쉽게 보기: [MVP 안내서 · 서비스별](https://gakdo.github.io/docs/guide/#services)
 
-> 11/8 갱신: 11/4 report-server(`--profile full`), 11/6 diagnostics-server(기본 기동)·진단 에이전트가 다시 들어와 서비스를 더했고, 맨 아래에 [이벤트 흐름](#이벤트-흐름-118-코드-기준)을 코드 기준으로 정리했습니다.
+> 11/8 갱신: 11/4 report-server(11/8부터 기본 기동), 11/6 diagnostics-server(기본 기동)·진단 에이전트가 다시 들어와 서비스를 더했고, 맨 아래에 [이벤트 흐름](#이벤트-흐름-118-코드-기준)을 코드 기준으로 정리했습니다.
 
 학교 서버에서 뜨는 서비스마다 요약 표에는 **레포 · 어디서 · 포트 · 저장소 · 담당**을, 서비스별 절에는 그림과 함께 하는 일 · 받는 API · 이벤트 · 환경 변수를 적었습니다. 그림 색은 [1. MVP 아키텍처](01-architecture.md)와 같습니다(초록 = 부스 사진, 파랑 = 사진 무관, 회색 = 인프라).
 
@@ -18,7 +18,7 @@
 | rental-server | GAKDO/rental_server | 학교 서버 Compose | 8080 | PostgreSQL `rental` | A |
 | capture-server | GAKDO/capture_server | 학교 서버 Compose | 8080 | PostgreSQL `capture`·`inspection`, MinIO `trace-captures`·`trace-derived` | A |
 | diagnostics-server | GAKDO/diagnostics_server | 학교 서버 Compose (11/6 기본 기동) | 8080 | PostgreSQL `diagnostics` | A |
-| report-server | GAKDO/report_server | 학교 서버 Compose (`--profile full`, 11/4) | 8080 | PostgreSQL `report`, Redis(진행률 구독) | A |
+| report-server | GAKDO/report_server | 학교 서버 Compose (기본 기동, 11/8) | 8080 | PostgreSQL `report`, Redis(진행률 구독) | A |
 | 진단 에이전트 | GAKDO/agent | 렌탈 노트북(macOS·Windows) | 없음 | 없음(올리기 전 화면에 보여 줌) | B |
 | booth 앱 (부스 화면 + 촬영 + 탐지) | GAKDO/booth | Jetson Orin Nano | 8320 (부스 공유기만) | Jetson 로컬 저장·큐 | B |
 | 학습 | GAKDO/ml | 집 PC | 없음 | 학교 MinIO `trace-raw`·`models` | A (라벨링 연동은 B) |
@@ -225,7 +225,7 @@ flowchart LR
 | API | `uploadDiagnosticRun`(AGENT, `Idempotency-Key`), `getCheckpointDiagnostics`(ADMIN·CUSTOMER 본인) |
 | 환경 변수 | `DB_*`, `RABBITMQ_*`, `AUTH_SERVER_URL`. Compose가 넘기는 `INFLUX_TOKEN`은 이 서버가 읽지 않음 |
 
-## 2-9. report-server — A (`--profile full`, 11/4 다시 켬)
+## 2-9. report-server — A (11/4 다시 켬, 11/8 기본 기동·Redis 진행률 구독)
 
 ```mermaid
 flowchart LR
@@ -261,7 +261,7 @@ exchange는 topic `trace.events` 하나, 실패한 메시지는 `trace.dlx` → 
 | 라우팅 키 | 발행 | 받는 큐 (서버) |
 |---|---|---|
 | `trace.checkpoint.started` | rental-server (시점 시작) | `trace.report.updates` (report) |
-| `trace.capture.uploaded` | capture-server (촬영 완료) | `trace.rental.checkpoints` (rental → CAPTURED), `trace.report.updates` (report), `trace.inspect.requested` (ml inspect-worker) |
+| `trace.capture.uploaded` | capture-server (촬영 완료) | `trace.rental.checkpoints` (rental → CAPTURED), `trace.report.updates` (report), `trace.inspect.requested` (ml inspect-worker, 11/8 Compose 기본) |
 | `trace.inspect.completed` | ml inspect-worker | `trace.capture.inspected` (capture), `trace.report.updates` (report, 진행률) |
 | `trace.checkpoint.graded` | capture-server (등급) | `trace.rental.checkpoints` (rental → GRADED), `trace.report.updates` (report → 봉인) |
 | `trace.diagnostics.recorded` | diagnostics-server (진단 저장) | `trace.report.updates` (report, 봉인 재료) |
