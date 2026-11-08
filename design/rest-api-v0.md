@@ -81,6 +81,7 @@
 | PATCH | /devices/{deviceId} | ADMIN | 색상·자산번호·OS·상태 수정. 시리얼·기종은 못 바꿈 | 200 · 404 · 409 진행 중 렌탈이 있는데 수리 중·폐기로 바꿈 | FR-RNT-05 |
 | GET | /device-models | ADMIN | 기종 목록(기기 등록 화면의 선택 목록) | 200 | FR-RNT-03 |
 | GET | /device-models/{modelCode} | ADMIN·CUSTOMER | 3D 트윈 치수 | 200 · 404 | FR-RNT-03 |
+| GET | /catalog/devices | PUBLIC | 공개 보유 기기 목록(11/8, `/devices` 화면). 폐기 빼고 최근 등록 순 최대 200대. 기종·사양·치수·대여 가능 여부·검사 끝난 시점 ID(GRADED·SEALED, 최근 12개). 시리얼·자산번호·대여자·렌탈 ID는 싣지 않음 | 200 · 429 | FR-RNT-05 |
 | PUT | /device-models/{modelCode} | ADMIN | 기종 등록·수정(치수·제조사·형태·기준 사양) | 200 | FR-RNT-03 |
 | POST | /pilot/participants | ADMIN | 파일럿 별칭 등록(alias, deviceId, consentAt) | 201 · 409 | FR-PIL-01 |
 
@@ -96,6 +97,8 @@
 | GET | /captures/checkpoints/{checkpointId}/inspection | ADMIN·CUSTOMER(본인) | 흠집·신규 판정·등급 | 200 · 404 | FR-INS-03·04 |
 | GET | /captures/checkpoints/{checkpointId}/media | ADMIN·CUSTOMER(본인) | 사진·텍스처·크롭 보기 URL(GET, 10분) | 200 · 404 | FR-RPT-01 |
 | GET | /captures/benchmarks?source=&limit= | ADMIN | 세트별 처리 시간(탐지·완료→등급·부스 전체)과 모델별 mAP(11/6, 성능 그래프) | 200 | FR-INS-01 |
+| GET | /captures/catalog?checkpointIds= | PUBLIC | 공개 흠집 요약(11/8). 부스(BOOTH)에서 찍고 등급이 난 세트만, 확정(CONFIRMED) 흠집만 묶음 단위로 셈. ID는 100개씩 | 200 · 400 · 429 | (11/8 추가) |
+| GET | /captures/catalog/checkpoints/{checkpointId} | PUBLIC | 공개 상세: 확정 흠집 폴리곤·면과 그 사진 보기 URL(3D 핀 → 원본 사진) | 200 · 404 · 429 | (11/8 추가) |
 | GET | /captures/reviews?status=PENDING&limit=20 | ADMIN | 사람 검수 대기(PENDING)·끝난(CONFIRMED) 시점 목록. 시점마다 후보 수·남은 수 | 200 · 400 status=DISMISSED | FR-INS-03 |
 | POST | /captures/checkpoints/{checkpointId}/reviews | ADMIN | AI 후보 결정 저장. items[]{defectId, decision CONFIRMED·DISMISSED·PENDING, reason(DISMISSED만)} | 200 검사 결과 · 409 REVIEW_CLOSED | FR-INS-03 |
 | POST | /captures/checkpoints/{checkpointId}/reviews/complete | ADMIN | 검수 완료 → 확정분만으로 등급. 200은 등급이 매겨졌다는 뜻이고, 봉인은 report-server가 판정 이벤트를 받은 뒤(진단을 기다릴 수 있음) 따로 하므로 다음 시점 전에는 리포트의 봉인 상태를 확인. Idempotency-Key 필수 | 200 · 409 REVIEW_PENDING_REMAINS(pending)·REVIEW_NOT_READY·REVIEW_CLOSED | FR-INS-03·04 |
@@ -108,6 +111,7 @@
 | --- | --- | --- | --- | --- | --- |
 | POST | /diagnostics/runs | AGENT | 진단 JSON v0 업로드(checkpointId는 토큰에서) | 201 `{runId, flags}` · 409 이미 올림 · 422 형식·시리얼 불일치 | FR-DIA-05·06 |
 | GET | /diagnostics/checkpoints/{checkpointId} | ADMIN·CUSTOMER(본인) | 진단 요약·이전 시점 비교·플래그 | 200 | FR-DIA-06 |
+| GET | /diagnostics/catalog?checkpointIds= | PUBLIC | 공개 진단 요약(11/8, 배터리·SSD·벤치마크). 부품 식별자·점검 플래그·잠금 상태는 빼고, 진단 없는 시점은 빠짐. ID는 최대 100개 | 200 · 400 · 429 | FR-DIA-06 |
 
 ## report-server — /api/v1/reports, /api/v1/verify
 
@@ -119,7 +123,7 @@
 | GET | /verify/{verifyToken} | PUBLIC | 체인 정상 여부, 시점별 등급·지문·서명 시각 | 200 · 404 | FR-INT-02·03 |
 | POST | /reports/rentals/{rentalId}/checkpoints/{checkpointId}/seal | ADMIN | 관리자 수동 봉인(시연 우회로, 사유 5~300자, 사용 기록 남김) | 201 · 400 · 404 · 409 `RECORD_ALREADY_SEALED`·`CHECKPOINT_ORDER_VIOLATION` | FR-INT-01 |
 | GET | /reports/manual-seals | ADMIN | 수동 봉인 사용 기록(커서) | 200 | FR-INT-01 |
-| GET | /reports/search?q=&limit=&cursor= | ADMIN | 기록 검색(선택). **계약·gateway에만 있고 report-server에 없음**(지금 호출하면 404) | 200 | FR-RPT-05 |
+| GET | /reports/search?q=&limit=&cursor= | ADMIN | 기록 검색(선택). report_server #9(11/8)에서 컨트롤러 추가. Elasticsearch 없이 PostgreSQL로 찾고, web은 아직 부르지 않음 | 200 | FR-RPT-05 |
 
 ## 역할 × 경로 표
 
@@ -147,6 +151,7 @@ FR-AUTH-03의 수용 기준입니다. gateway는 이 표를 손으로 옮기지 
 | 체인 전체·검색, 성능 기록(benchmarks) | ✗ | ✓ | ✗ | ✗ | ✗ | ✗ |
 | 수동 봉인·사용 기록 | ✗ | ✓ | ✗ | ✗ | ✗ | ✗ |
 | 검증 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| 공개 보유 기기 목록·흠집 요약·진단 요약·상세(11/8, catalog 버킷 IP당 합산 분당 300회) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 
 ## 화면별로 부르는 API (C)
 
@@ -164,6 +169,8 @@ FR-AUTH-03의 수용 기준입니다. gateway는 이 표를 손으로 옮기지 
 | 관리자 리포트 | reports/rentals/{id} · /chain · captures/checkpoints/{id}/inspection · diagnostics/checkpoints/{id} |
 | 관리자 사람 검수 | captures/reviews(대기 목록) → captures/checkpoints/{id}/inspection(후보) → captures/checkpoints/{id}/media(사진 URL) → /reviews(결정 저장) → /reviews/complete |
 | 검증 페이지 (공개) | verify/{token} |
+| 보유 노트북 목록 (공개 `/devices`, 11/8) | catalog/devices → captures/catalog?checkpointIds= · diagnostics/catalog?checkpointIds=(100개씩 나눠) |
+| 보유 노트북 상세 (공개 `/devices/:id`, 11/8) | catalog/devices(그 기기) → captures/catalog/checkpoints/{id}(3D 핀·사진) · device-models 치수는 화면 내장 기종 모델 |
 
 ## 핵심 요청·응답 예시
 
@@ -227,7 +234,7 @@ contracts develop(`3c94134`)의 경로 54개(ping 5개, 내부 JWKS 포함)를 �
 | 서버에 있는데 계약에 없음 | — | | | | 없음(서버 경로 53개가 모두 계약에 있음) |
 | gateway 규칙 없음 | GET /.well-known/jwks.json | ✓ `x-trace-internal` | ✓ auth-server | 라우트·규칙 없음 | 의도대로(gateway가 안에서만 읽음) |
 | 역할 차이 | POST /api/v1/auth/refresh | ADMIN·CUSTOMER(리프레시 쿠키) | ✓ | 공개(토큰 검사 없음) | 의도대로(액세스 토큰이 만료된 뒤 부르므로 쿠키를 auth-server가 확인) |
-| 요청 제한 누락 | POST /auth/signup · /auth/email/verify · /auth/email/resend | 429 `RATE_LIMITED`(IP당 분당 10회) | resend만 60초 1회 | login·pairing-codes/exchange에만 `IpRateLimit` | 가입·코드 확인은 IP 제한이 없음 |
+| 요청 제한 | POST /auth/signup · /auth/email/verify · /auth/email/resend | 429 `RATE_LIMITED`(IP당 분당 10회) | resend는 60초 1회도 | ✓ gateway #11(11/8)에서 `IpRateLimit` 추가 | 11/8 해결 |
 | 계약·서버에 있는데 화면이 안 씀 | GET /api/v1/captures/benchmarks | ✓ | ✓ | ✓ ADMIN | web #76에서 성능 화면을 진단 비교로 바꾼 뒤 호출 없음 |
 
-라우트(gateway `application.yml`): `/api/v1/auth/**` → auth-server, `/rentals/**`·`/devices/**`·`/device-models/**`·`/pilot/**` → rental-server, `/captures/**` → capture-server, `/diagnostics/**` → diagnostics-server, `/reports/**`·`/verify/**` → report-server. 규칙이 없는 경로·메서드는 gateway가 서버로 넘기지 않고 404로 돌려줍니다(`AccessDecision.NOT_FOUND`).
+라우트(gateway `application.yml`): `/api/v1/auth/**` → auth-server, `/rentals/**`·`/devices/**`·`/device-models/**`·`/pilot/**` → rental-server, `/api/v1/catalog/devices`·`/captures/catalog/**`·`/diagnostics/catalog` → 각 서버(11/8, order -1, catalog 버킷), `/captures/**` → capture-server, `/diagnostics/**` → diagnostics-server, `/reports/**`·`/verify/**` → report-server. 규칙이 없는 경로·메서드는 gateway가 서버로 넘기지 않고 404로 돌려줍니다(`AccessDecision.NOT_FOUND`).
