@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-label="TRACE 구성도 (최종판)">
+<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="944" viewBox="0 0 1320 944" role="img" aria-label="TRACE 구성도 (최종판)">
     <defs>
       <marker id="hb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="tb"/></marker>
       <marker id="hn" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="tn"/></marker>
@@ -22,9 +22,10 @@ svg text{fill:#17202b} svg .m{fill:#5b6675} svg .mono{font-family:"IBM Plex Mono
 .dash{stroke-dasharray:6 5}
 .tb{fill:#1d8a4e} .tn{fill:#1f63d6} .ti{fill:#6b7480}
 .ibox{fill:none;stroke:#6b7480;stroke-width:1.5}
+.solid{stroke-dasharray:none}
 .step{fill:#17202b} .stept{fill:#ffffff;font-weight:700;font-size:13px}
     </style>
-    <rect width="1200" height="900" fill="#ffffff"/>
+    <rect width="1320" height="944" fill="#ffffff"/>
 
     <!-- 부스 구역 -->
     <rect class="zone" x="16" y="40" width="292" height="450" rx="10"/>
@@ -37,7 +38,7 @@ svg text{fill:#17202b} svg .m{fill:#5b6675} svg .mono{font-family:"IBM Plex Mono
     <rect class="b" x="36" y="190" width="252" height="132" rx="8"/>
     <text x="52" y="216" font-size="16" font-weight="700">booth</text>
     <text x="52" y="238" font-size="12.5">jetson2 · Jetson Orin Nano</text>
-    <text x="52" y="258" font-size="12.5">추론: YOLO11-seg TensorRT (detect/)</text>
+    <text x="52" y="258" font-size="12.5">추론: YOLO11-seg TensorRT (v004)</text>
     <text x="52" y="278" font-size="12.5">흠집 폴리곤 → "문제 있음/없음"</text>
     <text x="52" y="304" font-size="12" class="mono m">부스 화면 :8320 (부스 공유기 안)</text>
 
@@ -62,9 +63,10 @@ svg text{fill:#17202b} svg .m{fill:#5b6675} svg .mono{font-family:"IBM Plex Mono
     <rect class="zone" x="16" y="516" width="292" height="150" rx="10"/>
     <text x="32" y="540" font-size="14" font-weight="700">민서 집 PC</text>
     <rect class="b dash" x="36" y="554" width="252" height="94" rx="8"/>
-    <text x="52" y="580" font-size="16" font-weight="700">ml <tspan font-size="13" font-weight="500">· 학습만 (추론 안 함)</tspan></text>
-    <text x="52" y="602" font-size="12.5">RTX 4070 Ti · 모델 파일만 Jetson으로</text>
-    <text x="52" y="622" font-size="12" class="m">Label Studio · YOLO11-seg → model.onnx</text>
+    <text x="52" y="580" font-size="16" font-weight="700">ml <tspan font-size="13" font-weight="500">· 학습 (RTX 4070 Ti)</tspan></text>
+    <text x="52" y="602" font-size="12.5">Label Studio · YOLO11-seg → v004</text>
+    <text x="52" y="622" font-size="12" class="m">같은 모델 파일 → Jetson · 학교 서버</text>
+    <text x="52" y="639" font-size="12" class="m">(inspect-worker compose/models)</text>
     <path class="ab dash" d="M300 600H318V256H288" marker-end="url(#hb)"/>
 
     <!-- 학교 MinIO (학습 사진 전용) -->
@@ -77,145 +79,171 @@ svg text{fill:#17202b} svg .m{fill:#5b6675} svg .mono{font-family:"IBM Plex Mono
     <path class="ai dash" d="M162 690V648" marker-end="url(#hi)"/>
 
     <!-- 외부 메일 -->
-    <rect class="zone" x="16" y="790" width="292" height="96" rx="10"/>
-    <text x="32" y="812" font-size="14" font-weight="700">외부 메일</text>
-    <rect class="e" x="36" y="822" width="252" height="52" rx="8"/>
-    <text x="52" y="844" font-size="14.5" font-weight="700">Gmail SMTP</text>
-    <text x="52" y="863" font-size="12" class="m">봉인 영수증 메일 → 고객 메일함</text>
+    <rect class="zone" x="16" y="832" width="292" height="96" rx="10"/>
+    <text x="32" y="854" font-size="14" font-weight="700">외부 메일</text>
+    <rect class="e" x="36" y="864" width="252" height="52" rx="8"/>
+    <text x="52" y="886" font-size="14.5" font-weight="700">Gmail SMTP</text>
+    <text x="52" y="905" font-size="12" class="m">봉인 영수증 메일 → 고객 메일함</text>
 
     <!-- 학교 서버 -->
-    <rect class="zone" x="344" y="40" width="568" height="846" rx="10"/>
+    <rect class="zone" x="344" y="40" width="688" height="888" rx="10"/>
     <text x="360" y="64" font-size="14" font-weight="700">학교 서버 s2 · 10.116.64.12 (Docker Compose)</text>
 
-    <rect class="e" x="364" y="80" width="528" height="52" rx="8"/>
+    <rect class="e" x="364" y="80" width="648" height="52" rx="8"/>
     <text x="380" y="103" font-size="14.5" font-weight="700" class="mono">https://gakdo.site</text>
     <text x="380" y="122" font-size="12" class="m">:443 강사님 nginx (s2-nginx.java21.net) → 학교 서버 :8315</text>
 
-    <rect class="n" x="364" y="160" width="528" height="74" rx="8"/>
+    <rect class="n" x="364" y="160" width="648" height="74" rx="8"/>
     <text x="380" y="186" font-size="16" font-weight="700">web <tspan class="mono" font-size="14" font-weight="500">· nginx :8315 (유일한 입구)</tspan></text>
-    <text x="380" y="208" font-size="12.5">/admin 관리자 · 고객 화면 · /verify 공개 검증</text>
-    <text x="380" y="225" font-size="11.5" class="m">/api/ → gateway · /trace-captures/ → MinIO · 폰 촬영 화면은 숨김</text>
-    <path class="an" d="M628 132V160" marker-end="url(#hn)"/>
+    <text x="380" y="208" font-size="12.5">/admin 관리자 · 고객 화면(수령 촬영·3D 리포트) · /devices 공개 목록 · /verify 공개 검증</text>
+    <text x="380" y="225" font-size="11.5" class="m">/api/ → gateway · /trace-captures/ → MinIO</text>
+    <path class="an" d="M688 132V160" marker-end="url(#hn)"/>
 
     <rect class="n" x="364" y="262" width="260" height="58" rx="8"/>
     <text x="380" y="287" font-size="16" font-weight="700">gateway <tspan class="mono" font-size="13" font-weight="500">:8080</tspan></text>
     <text x="380" y="308" font-size="12.5" class="m">JWT 검증 · 라우팅 · 요청 제한</text>
     <path class="an" d="M494 234V262" marker-end="url(#hn)"/>
     <!-- gateway → auth·rental·capture -->
-    <path class="an" d="M494 320V338H448V356" marker-end="url(#hn)"/>
-    <path class="an" d="M494 338H628V356" marker-end="url(#hn)"/>
-    <path class="an" d="M628 338H712A6 6 0 0 1 724 338H808V356" marker-end="url(#hn)"/>
+    <path class="an" d="M494 320V338H464V356" marker-end="url(#hn)"/>
+    <path class="an" d="M494 338H688V356" marker-end="url(#hn)"/>
+    <path class="an" d="M688 338H794A6 6 0 0 1 806 338H912V356" marker-end="url(#hn)"/>
     <!-- gateway → diagnostics·report (왼쪽 레일) -->
-    <path class="an" d="M364 300H350V752H756V734" marker-end="url(#hn)"/>
-    <path class="an" d="M484 752V734" marker-end="url(#hn)"/>
+    <path class="an" d="M364 300H350V764H703V746" marker-end="url(#hn)"/>
+    <path class="an" d="M462 764V746" marker-end="url(#hn)"/>
 
-    <rect class="n" x="364" y="356" width="168" height="96" rx="8"/>
+    <rect class="n" x="364" y="356" width="200" height="96" rx="8"/>
     <text x="378" y="380" font-size="14.5" font-weight="700">auth_server <tspan class="mono m" font-size="12" font-weight="400">:8080</tspan></text>
     <text x="378" y="400" font-size="12">로그인·가입·부스 자격</text>
     <text x="378" y="418" font-size="12">JWT·JWKS·페어링 토큰</text>
-    <text x="378" y="436" font-size="12">봉인 영수증 메일</text>
+    <text x="378" y="436" font-size="12">수령 QR → 렌탈 연결 · 영수증 메일</text>
 
-    <rect class="n" x="544" y="356" width="168" height="96" rx="8"/>
-    <text x="558" y="380" font-size="14.5" font-weight="700">rental_server</text>
-    <text x="558" y="398" font-size="12" class="mono m">:8080</text>
-    <text x="558" y="416" font-size="12">렌탈·기기·시점</text>
-    <text x="558" y="432" font-size="12">검사 대기 기기 목록</text>
+    <rect class="n" x="588" y="356" width="200" height="96" rx="8"/>
+    <text x="602" y="380" font-size="14.5" font-weight="700">rental_server <tspan class="mono m" font-size="12" font-weight="400">:8080</tspan></text>
+    <text x="602" y="400" font-size="12">렌탈·기기·기종·시점</text>
+    <text x="602" y="418" font-size="12">검사 대기 기기 목록</text>
+    <text x="602" y="436" font-size="12">공개 보유 노트북 목록</text>
 
-    <rect class="b" x="724" y="356" width="168" height="96" rx="8"/>
-    <text x="738" y="380" font-size="14.5" font-weight="700">capture_server</text>
-    <text x="738" y="398" font-size="12" class="mono m">:8080</text>
-    <text x="738" y="416" font-size="12">2면 세트·탐지 저장</text>
-    <text x="738" y="432" font-size="12">사전 서명 URL·등급</text>
+    <rect class="b" x="812" y="356" width="200" height="96" rx="8"/>
+    <text x="826" y="380" font-size="14.5" font-weight="700">capture_server <tspan class="mono m" font-size="12" font-weight="400">:8080</tspan></text>
+    <text x="826" y="400" font-size="12">부스·폰 세트 · 탐지 저장</text>
+    <text x="826" y="418" font-size="12">사전 서명 URL · 등급</text>
+    <text x="826" y="436" font-size="12">사람 검수 · 출고↔수령 비교</text>
 
     <!-- 인프라 -->
-    <rect x="358" y="484" width="540" height="82" rx="8" class="ibox"/>
-    <rect class="i" x="364" y="492" width="122" height="66" rx="8"/>
+    <rect x="358" y="484" width="660" height="82" rx="8" class="ibox"/>
+    <rect class="i" x="364" y="492" width="147" height="66" rx="8"/>
     <text x="376" y="516" font-size="13.5" font-weight="700">PostgreSQL</text>
     <text x="376" y="535" font-size="11.5" class="mono m">:5432 내부</text>
     <text x="376" y="550" font-size="11" class="m">스키마 서버별</text>
-    <rect class="i" x="499" y="492" width="122" height="66" rx="8"/>
-    <text x="511" y="516" font-size="13.5" font-weight="700">RabbitMQ</text>
-    <text x="511" y="535" font-size="11.5" class="mono m">127.0.0.1:5672</text>
-    <text x="511" y="550" font-size="11" class="m">trace.events</text>
-    <rect class="i" x="634" y="492" width="122" height="66" rx="8"/>
-    <text x="646" y="516" font-size="13.5" font-weight="700">Redis</text>
-    <text x="646" y="535" font-size="11.5" class="mono m">:6379 내부</text>
-    <text x="646" y="550" font-size="11" class="m">요청 제한·토큰</text>
-    <rect class="ib" x="769" y="492" width="123" height="66" rx="8"/>
-    <text x="781" y="516" font-size="13.5" font-weight="700">MinIO</text>
-    <text x="781" y="535" font-size="11.5" class="mono m">127.0.0.1:19000</text>
-    <text x="781" y="550" font-size="11" class="m">trace-captures</text>
+    <rect class="i" x="531" y="492" width="147" height="66" rx="8"/>
+    <text x="543" y="516" font-size="13.5" font-weight="700">RabbitMQ</text>
+    <text x="543" y="535" font-size="11.5" class="mono m">127.0.0.1:5672</text>
+    <text x="543" y="550" font-size="11" class="m">trace.events</text>
+    <rect class="i" x="698" y="492" width="147" height="66" rx="8"/>
+    <text x="710" y="516" font-size="13.5" font-weight="700">Redis</text>
+    <text x="710" y="535" font-size="11.5" class="mono m">:6379 내부</text>
+    <text x="710" y="550" font-size="11" class="m">요청 제한 · 진행률</text>
+    <rect class="ib" x="865" y="492" width="147" height="66" rx="8"/>
+    <text x="877" y="516" font-size="13.5" font-weight="700">MinIO</text>
+    <text x="877" y="535" font-size="11.5" class="mono m">127.0.0.1:19000</text>
+    <text x="877" y="550" font-size="11" class="m">trace-captures</text>
 
     <!-- 위 줄 앱 ↔ 인프라 -->
-    <path class="ab" d="M808 452V492" marker-end="url(#hb)"/>
-    <path class="ab dash" d="M892 197H904V525H892" marker-end="url(#hb)"/>
-    <text x="924" y="470" font-size="11" class="m" transform="rotate(-90 924 470)">사진 PUT·GET</text>
-    <path class="ai" d="M448 452V492" marker-end="url(#hi)"/>
-    <path class="ai" d="M560 452V472H521A6 6 0 0 0 509 472H472V492" marker-end="url(#hi)"/>
-    <path class="ai" d="M515 492V452" marker-end="url(#hi)"/>
-    <path class="ai" d="M600 452V492" marker-start="url(#hi)" marker-end="url(#hi)"/>
-    <path class="ai" d="M760 452V480H724A6 6 0 0 0 712 480H610V492" marker-end="url(#hi)"/>
-    <path class="ai" d="M624 300H718V492" marker-end="url(#hi)"/>
+    <path class="ab" d="M930 452V492" marker-end="url(#hb)"/>
+    <path class="ab dash" d="M1012 197H1024V525H1012" marker-end="url(#hb)"/>
+    <path class="ai" d="M440 452V492" marker-end="url(#hi)"/>
+    <path class="ai" d="M600 452V472H554A6 6 0 0 0 542 472H490V492" marker-end="url(#hi)"/>
+    <path class="ai" d="M548 492V452" marker-end="url(#hi)"/>
+    <path class="ai" d="M650 452V492" marker-start="url(#hi)" marker-end="url(#hi)"/>
+    <path class="ai" d="M830 452V480H806A6 6 0 0 0 794 480H665V492" marker-start="url(#hi)" marker-end="url(#hi)"/>
+    <path class="ai" d="M624 300H800V492" marker-end="url(#hi)"/>
     <text x="652" y="294" font-size="11" class="m">요청 제한 → Redis</text>
 
-    <!-- 아래 줄: diagnostics·report -->
-    <rect class="n" x="364" y="606" width="240" height="128" rx="8"/>
-    <text x="378" y="630" font-size="14.5" font-weight="700">diagnostics_server <tspan class="mono m" font-size="12" font-weight="400">:8080</tspan></text>
-    <text x="378" y="652" font-size="12">페어링 토큰으로 진단 JSON 받기</text>
-    <text x="378" y="670" font-size="12">배터리·SSD·벤치마크·잠금·디스크</text>
-    <text x="378" y="688" font-size="12">스키마 검증·저장 · 점검 플래그</text>
-    <text x="378" y="712" font-size="11" class="mono m">→ diagnostics.recorded</text>
+    <!-- 아래 줄: diagnostics·report·inspect-worker -->
+    <rect class="n" x="364" y="606" width="196" height="140" rx="8"/>
+    <text x="378" y="630" font-size="14.5" font-weight="700">diagnostics_server</text>
+    <text x="378" y="647" font-size="12" class="mono m">:8080</text>
+    <text x="378" y="667" font-size="12">페어링 토큰으로 진단 JSON</text>
+    <text x="378" y="685" font-size="12">배터리·SSD·벤치마크·</text>
+    <text x="378" y="702" font-size="12">잠금·디스크 → 검증·저장</text>
+    <text x="378" y="720" font-size="12">점검 플래그</text>
+    <text x="378" y="737" font-size="10.5" class="mono m">→ diagnostics.recorded</text>
 
-    <rect class="n" x="620" y="606" width="272" height="128" rx="8"/>
-    <text x="634" y="630" font-size="14.5" font-weight="700">report_server <tspan class="mono m" font-size="12" font-weight="400">:8080</tspan></text>
-    <text x="634" y="652" font-size="12">이벤트 → 타임라인 · 해시 체인 (Ed25519)</text>
-    <text x="634" y="670" font-size="12">시점 봉인 · 공개 검증 /verify</text>
-    <text x="634" y="688" font-size="12">봉인 사진은 MinIO에서 다시 해시</text>
-    <text x="634" y="708" font-size="10.5" class="mono m">← capture.uploaded · checkpoint.graded</text>
-    <text x="634" y="723" font-size="10.5" class="mono m">← diagnostics.recorded  → record.sealed</text>
+    <rect class="n" x="576" y="606" width="254" height="140" rx="8"/>
+    <text x="590" y="630" font-size="14.5" font-weight="700">report_server <tspan class="mono m" font-size="12" font-weight="400">:8080</tspan></text>
+    <text x="590" y="652" font-size="12">이벤트 → 타임라인 · 해시 체인</text>
+    <text x="590" y="670" font-size="12">Ed25519 서명 · 시점 봉인</text>
+    <text x="590" y="688" font-size="12">공개 검증 /verify</text>
+    <text x="590" y="706" font-size="12">봉인 사진은 MinIO에서 다시 해시</text>
+    <text x="590" y="724" font-size="10" class="mono m">← capture.uploaded · checkpoint.graded</text>
+    <text x="590" y="738" font-size="10" class="mono m">← diagnostics.recorded  → record.sealed</text>
+
+    <rect class="p solid" x="846" y="606" width="166" height="140" rx="8"/>
+    <text x="860" y="630" font-size="14.5" font-weight="700">inspect-worker</text>
+    <text x="860" y="647" font-size="12" class="m">ml 레포 · ML2 · CPU</text>
+    <text x="860" y="667" font-size="12">폰 사진 흠집 탐지</text>
+    <text x="860" y="685" font-size="12">YOLO11-seg v004</text>
+    <text x="860" y="703" font-size="12">면 정합 (윤곽 /</text>
+    <text x="860" y="720" font-size="12">SuperPoint+LightGlue)</text>
+    <text x="860" y="737" font-size="10" class="mono m">→ inspect.completed</text>
 
     <path class="ai" d="M420 606V558" marker-end="url(#hi)"/>
-    <path class="ai" d="M540 606V558" marker-end="url(#hi)"/>
-    <path class="ai" d="M600 558V580H680V606" marker-start="url(#hi)" marker-end="url(#hi)"/>
-    <path class="ai" d="M650 606V592H546A6 6 0 0 0 534 592H470V558" marker-end="url(#hi)"/>
-    <path class="ai" d="M830 606V558" marker-end="url(#hi)"/>
+    <path class="ai" d="M545 606V558" marker-end="url(#hi)"/>
+    <path class="ai" d="M610 558V606" marker-start="url(#hi)" marker-end="url(#hi)"/>
+    <path class="ai" d="M640 606V592H551A6 6 0 0 0 539 592H480V558" marker-end="url(#hi)"/>
+    <path class="ai" d="M815 606V578H880V558" marker-end="url(#hi)"/>
+    <path class="ai" d="M870 606V592H821A6 6 0 0 0 809 592H660V558" marker-start="url(#hi)" marker-end="url(#hi)"/>
+    <path class="ai" d="M960 606V558" marker-end="url(#hi)"/>
 
     <!-- auth → Gmail SMTP -->
-    <path class="an" d="M364 412H356A6 6 0 0 0 344 412H330V848H288" marker-end="url(#hn)"/>
+    <path class="an" d="M364 412H356A6 6 0 0 0 344 412H330V890H288" marker-end="url(#hn)"/>
 
-    <text x="364" y="782" font-size="12" class="m">컨테이너 안 앱은 모두 8080 · 학교 서버에서 밖으로 열린 포트는 8315 하나</text>
-    <text x="364" y="801" font-size="12" class="m">회색 칸 = 공통 인프라 (같은 Compose 안, 밖으로 안 열림)</text>
-    <text x="364" y="820" font-size="12" class="m">MinIO 19000은 학교 서버의 다른 MinIO가 9000을 써서 옮긴 것</text>
-    <text x="364" y="839" font-size="12" class="m">회색 선: 앱 → PostgreSQL · 이벤트 ↔ RabbitMQ · gateway → Redis</text>
-    <text x="364" y="858" font-size="12" class="m">RabbitMQ: rental·capture·diagnostics·report가 보내고 report·auth가 받음</text>
-    <text x="364" y="877" font-size="12" class="m">record.sealed → auth가 Gmail로 봉인 영수증 메일</text>
+    <text x="364" y="792" font-size="12" class="m">컨테이너 안 앱은 모두 8080 · 학교 서버에서 밖으로 열린 포트는 8315 하나</text>
+    <text x="364" y="811" font-size="12" class="m">회색 칸 = 공통 인프라 (같은 Compose 안, 밖으로 안 열림) · MinIO 19000은 다른 MinIO가 9000을 써서 옮긴 것</text>
+    <text x="364" y="830" font-size="12" class="m">회색 선: 앱 → PostgreSQL · 이벤트 ↔ RabbitMQ · gateway → Redis · 초록 점선: web nginx → MinIO 사진 PUT·GET</text>
+    <text x="364" y="849" font-size="12" class="m">inspect-worker: 폰 사진 capture.uploaded → 탐지·정합 → inspect.completed → capture_server (진행률은 Redis)</text>
+    <text x="364" y="868" font-size="12" class="m">record.sealed → auth가 Gmail로 봉인 영수증 메일</text>
+    <text x="364" y="887" font-size="12" class="m">부스 Jetson과 학교 서버는 언제나 같은 모델(v004)로 검사</text>
+    <text x="364" y="906" font-size="12" class="m">/devices 공개 목록: 관리자가 확정한 부스 흠집과 진단 요약(배터리·SSD·벤치마크)만</text>
 
     <!-- 관리자 -->
-    <rect class="zone" x="944" y="40" width="240" height="282" rx="10"/>
-    <text x="960" y="64" font-size="14" font-weight="700">관리자 (PC 브라우저)</text>
-    <rect class="n" x="960" y="80" width="208" height="222" rx="8"/>
-    <text x="976" y="106" font-size="16" font-weight="700">web <tspan class="mono" font-size="14" font-weight="500">/admin</tspan></text>
-    <text x="976" y="132" font-size="12.5">기기별 출고 검사 결과</text>
-    <text x="976" y="152" font-size="12.5">사진 12장 (면마다 2×3)</text>
-    <text x="976" y="172" font-size="12.5">흠집 폴리곤 겹쳐 보기</text>
-    <text x="976" y="192" font-size="12.5">판정 · 진단 벤치마크</text>
-    <text x="976" y="220" font-size="12" class="m">등급 A = 문제 없음</text>
-    <text x="976" y="238" font-size="12" class="m">등급 B~D = 문제 있음</text>
-    <text x="976" y="270" font-size="11.5" class="m">375px · 1280px</text>
-    <path class="an" d="M960 106H892" marker-end="url(#hn)"/>
+    <rect class="zone" x="1064" y="40" width="240" height="282" rx="10"/>
+    <text x="1080" y="64" font-size="14" font-weight="700">관리자 (PC 브라우저)</text>
+    <rect class="n" x="1080" y="80" width="208" height="222" rx="8"/>
+    <text x="1096" y="106" font-size="16" font-weight="700">web <tspan class="mono" font-size="14" font-weight="500">/admin</tspan></text>
+    <text x="1096" y="132" font-size="12.5">기기별 검사 결과 · 사진</text>
+    <text x="1096" y="152" font-size="12.5">흠집 폴리곤 겹쳐 보기</text>
+    <text x="1096" y="172" font-size="12.5">사람 검수 (확정·기각)</text>
+    <text x="1096" y="192" font-size="12.5">수령 QR · 진단 벤치마크</text>
+    <text x="1096" y="220" font-size="12" class="m">등급 A = 문제 없음</text>
+    <text x="1096" y="238" font-size="12" class="m">등급 B~D = 문제 있음</text>
+    <text x="1096" y="270" font-size="11.5" class="m">375px · 1280px</text>
+    <path class="an" d="M1080 96H1012" marker-end="url(#hn)"/>
 
     <!-- 고객 노트북: 진단 에이전트 -->
-    <rect class="zone" x="944" y="346" width="240" height="228" rx="10"/>
-    <text x="960" y="370" font-size="14" font-weight="700">고객 노트북 (macOS)</text>
-    <rect class="n" x="960" y="386" width="208" height="168" rx="8"/>
-    <text x="976" y="412" font-size="16" font-weight="700">agent <tspan font-size="13" font-weight="500">· 진단 에이전트</tspan></text>
-    <text x="976" y="436" font-size="12.5">페어링 코드 → 업로드 토큰</text>
-    <text x="976" y="456" font-size="12.5">배터리·SSD·벤치마크</text>
-    <text x="976" y="476" font-size="12.5">잠금·디스크 상태 읽기</text>
-    <text x="976" y="496" font-size="12.5">보여 주고 동의하면 업로드</text>
-    <text x="976" y="522" font-size="11.5" class="m">진단 JSON → gateway</text>
-    <text x="976" y="539" font-size="11.5" class="m">→ diagnostics_server</text>
-    <path class="an" d="M960 430H936V122H892" marker-end="url(#hn)"/>
+    <rect class="zone" x="1064" y="346" width="240" height="228" rx="10"/>
+    <text x="1080" y="370" font-size="14" font-weight="700">고객 노트북 (macOS)</text>
+    <rect class="n" x="1080" y="386" width="208" height="168" rx="8"/>
+    <text x="1096" y="412" font-size="16" font-weight="700">agent <tspan font-size="13" font-weight="500">· 진단 에이전트</tspan></text>
+    <text x="1096" y="436" font-size="12.5">페어링 코드 → 업로드 토큰</text>
+    <text x="1096" y="456" font-size="12.5">배터리·SSD·벤치마크</text>
+    <text x="1096" y="476" font-size="12.5">잠금·디스크 상태 읽기</text>
+    <text x="1096" y="496" font-size="12.5">보여 주고 동의하면 업로드</text>
+    <text x="1096" y="522" font-size="11.5" class="m">진단 JSON → gateway</text>
+    <text x="1096" y="539" font-size="11.5" class="m">→ diagnostics_server</text>
+    <path class="an" d="M1080 430H1050V110H1012" marker-end="url(#hn)"/>
+
+    <!-- 고객 폰 -->
+    <rect class="zone" x="1064" y="598" width="240" height="210" rx="10"/>
+    <text x="1080" y="622" font-size="14" font-weight="700">고객 폰 (브라우저)</text>
+    <rect class="p solid" x="1080" y="638" width="208" height="150" rx="8"/>
+    <text x="1096" y="664" font-size="16" font-weight="700">web <tspan class="mono" font-size="13" font-weight="500">/capture?t=</tspan></text>
+    <text x="1096" y="688" font-size="12">수령 QR → 로그인 → 렌탈 연결</text>
+    <text x="1096" y="707" font-size="12">폰으로 노트북 촬영 · 업로드</text>
+    <text x="1096" y="726" font-size="12">3D 리포트 · /verify 검증</text>
+    <text x="1096" y="745" font-size="12">/devices 보유 노트북 비교</text>
+    <text x="1096" y="770" font-size="11.5" class="m">로그인 없이 보는 공개 목록</text>
+    <path class="ap solid" d="M1080 664H1042V124H1012" marker-end="url(#hp)"/>
 
     <!-- 부스 → 서버 -->
     <path class="ab" d="M288 214H332V106H364" marker-end="url(#hb)"/>
@@ -225,8 +253,9 @@ svg text{fill:#17202b} svg .m{fill:#5b6675} svg .mono{font-family:"IBM Plex Mono
     <g><circle class="step" cx="96" cy="345" r="11"/><text x="96" y="350" text-anchor="middle" class="stept">2</text></g>
     <g><circle class="step" cx="270" cy="206" r="11"/><text x="270" y="211" text-anchor="middle" class="stept">3</text></g>
     <g><circle class="step" cx="332" cy="160" r="11"/><text x="332" y="165" text-anchor="middle" class="stept">4</text></g>
-    <g><circle class="step" cx="926" cy="106" r="11"/><text x="926" y="111" text-anchor="middle" class="stept">5</text></g>
-    <g><circle class="step" cx="948" cy="430" r="11"/><text x="948" y="435" text-anchor="middle" class="stept">6</text></g>
-    <g><circle class="step" cx="760" cy="582" r="11"/><text x="760" y="587" text-anchor="middle" class="stept">7</text></g>
-    <g><circle class="step" cx="330" cy="780" r="11"/><text x="330" y="785" text-anchor="middle" class="stept">8</text></g>
+    <g><circle class="step" cx="1064" cy="96" r="11"/><text x="1064" y="101" text-anchor="middle" class="stept">5</text></g>
+    <g><circle class="step" cx="1064" cy="664" r="11"/><text x="1064" y="669" text-anchor="middle" class="stept">6</text></g>
+    <g><circle class="step" cx="1066" cy="430" r="11"/><text x="1066" y="435" text-anchor="middle" class="stept">7</text></g>
+    <g><circle class="step" cx="812" cy="626" r="11"/><text x="812" y="631" text-anchor="middle" class="stept">8</text></g>
+    <g><circle class="step" cx="330" cy="822" r="11"/><text x="330" y="827" text-anchor="middle" class="stept">9</text></g>
   </svg>
