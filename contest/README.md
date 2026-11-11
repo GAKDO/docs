@@ -68,6 +68,7 @@
 | 파일 | 내용 |
 |---|---|
 | [checklist.md](checklist.md) | 마감까지 날짜별 할 일과 제출 체크리스트 |
+| [motivation.md](motivation.md) | 시작 동기와 문제 정의(사업단 노트북 대여, KT서비스 사례), 영상 첫 30초·발표 도입 대본 |
 | [scoring-map.md](scoring-map.md) | 심사 항목 ↔ 시연 시나리오 ↔ 보여 줄 증거, 5분 영상 구성안 |
 | [evidence.md](evidence.md) | 모을 증거 목록(화면·수치·그림)과 측정 방법·상태 |
 | [project-description-outline.md](project-description-outline.md) | 과제설명서 5쪽 뼈대 |
