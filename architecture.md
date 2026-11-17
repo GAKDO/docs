@@ -1,5 +1,9 @@
 # 아키텍처 한눈에 보기
 
+![TRACE 시스템 아키텍처](figures/trace-system-architecture.png)
+
+위 그림이 지금 구성입니다(2026-11-17 기준, 학교 서버 Docker Compose · https://gakdo.site).
+
 > **이 문서는 10/31 클러스터 기준 원래 설계이고, 지금 배포와 다릅니다.** 지금 구성(학교 서버 Docker Compose · https://gakdo.site)은 [mvp/01-architecture.md](mvp/01-architecture.md)·[mvp/02-services.md](mvp/02-services.md)가 기준입니다(11/8 갱신).
 >
 > - 11/3: Rancher 클러스터·Argo CD·Cloudflare Tunnel·InfluxDB·Grafana를 멈추고 보관했습니다. 아래 구성도의 "Rancher 클러스터", "Argo CD", "InfluxDB · Grafana", NodePort 8314·8316, 배포 흐름(Argo CD 동기화·자동 롤백)은 지금 쓰지 않습니다.
