@@ -23,7 +23,7 @@ TRACE는 노트북 렌탈의 **출고·수령·반납 세 시점**에 외관(흠
 | [environment.md](environment.md) | 학교 서버·공유 인프라 주소, 포트 범위, Crowfoot·도메인·Gmail 준비 | A |
 | [design/mvp-design.md](design/mvp-design.md) | **MVP 설계서**: 요구사항 50개, 아키텍처, 인증, ERD 규칙, 이벤트 계약, 확장성, 리뷰 결정 14건 | 전원 |
 | [design/requirements-status.md](design/requirements-status.md) | 요구사항별 구현 위치·상태 (11/8 코드 감사) | 전원 |
-| [design/ddl.md](design/ddl.md) · [db/V1__init.sql](db/V1__init.sql) | 지금 테이블 정의(스키마 7개·테이블 37개, 서버 마이그레이션 V2 이후 포함)·Mermaid ERD와, 처음 스키마 V1(31개) SQL. 정규화 점검은 [design/erd-normalization.md](design/erd-normalization.md), 리뷰 예상 질문은 [design/erd-review-qa.md](design/erd-review-qa.md) | A |
+| [design/ddl.md](design/ddl.md) · [db/V1__init.sql](db/V1__init.sql) | 지금 테이블 정의(스키마 7개·테이블 37개, 서버 마이그레이션 V2 이후 포함)·Mermaid ERD와, 처음 스키마 V1(31개) SQL. 정규화 점검은 [design/erd-normalization.md](design/erd-normalization.md), 리뷰 예상 질문은 [review/erd.md](review/erd.md) | A |
 | [design/rest-api-v0.md](design/rest-api-v0.md) | REST API 요약(원본은 contracts), 역할 × 경로 표, 화면별로 부르는 API, 계약·서버·gateway 대조 | A·C |
 | [design/diagnostics-json-v0.md](design/diagnostics-json-v0.md) | 진단 결과 JSON v0, 다른 서비스 조사, macOS 실제 키 | A·B |
 | [design/kickoff-plan.md](design/kickoff-plan.md) | 착수 준비: 일정, 공유 인프라 자원, 체크리스트 | 전원 |

@@ -1,6 +1,6 @@
 # ERD 리뷰 예상 질문과 답 (2026-11-20)
 
-강사님 전체 리뷰에서 ERD·DB 설계에 대해 나올 만한 질문과 우리 답을 정리했습니다. 답은 지금 코드와 마이그레이션 기준이고, 근거 문서를 함께 적었습니다. 지금 스키마는 [ddl.md](ddl.md), 정규화 점검은 [erd-normalization.md](erd-normalization.md), 설계 규칙은 [mvp-design.md](mvp-design.md#erd)의 "ERD" 절입니다.
+강사님 전체 리뷰에서 ERD·DB 설계에 대해 나올 만한 질문과 우리 답을 정리했습니다. 답은 지금 코드와 마이그레이션 기준이고, 근거 문서를 함께 적었습니다. 지금 스키마는 [ddl.md](../design/ddl.md), 정규화 점검은 [erd-normalization.md](../design/erd-normalization.md), 설계 규칙은 [mvp-design.md](../design/mvp-design.md#erd)의 "ERD" 절입니다.
 
 ## 30초 요약 (먼저 말할 것)
 
@@ -35,13 +35,13 @@ rental 6(기종·기기·렌탈·시점·파일럿·부스 코드), capture 2 + 
 ## 3. 정규화
 
 **Q. 정규화는 어디까지 했나요?**
-같은 서버 안은 3NF입니다. 모든 표가 대리 키 + 업무 키를 갖고, 한 표가 한 사실만 담으며 부분 종속은 없습니다. 11/20에 마이그레이션을 모두 적용한 실제 스키마로 다시 점검해 8건을 고쳤습니다. 대표 예는 `rental.booth_code.rental_id`입니다. 시점이 렌탈을 정하는데(`checkpoint_id → checkpoint.rental_id`) 렌탈을 또 적은 이행 종속이라 코드가 시점에서 따라가게 바꿨습니다. 목록은 [erd-normalization.md](erd-normalization.md) "고친 것".
+같은 서버 안은 3NF입니다. 모든 표가 대리 키 + 업무 키를 갖고, 한 표가 한 사실만 담으며 부분 종속은 없습니다. 11/20에 마이그레이션을 모두 적용한 실제 스키마로 다시 점검해 8건을 고쳤습니다. 대표 예는 `rental.booth_code.rental_id`입니다. 시점이 렌탈을 정하는데(`checkpoint_id → checkpoint.rental_id`) 렌탈을 또 적은 이행 종속이라 코드가 시점에서 따라가게 바꿨습니다. 목록은 [erd-normalization.md](../design/erd-normalization.md) "고친 것".
 
 **Q. 뺄 수 없는 중복은 어떻게 했나요?**
 제약으로 묶었습니다. `inspection.grade_result`는 "시점당 등급 하나"(UNIQUE) 때문에 `checkpoint_id`를 뺄 수 없어 합성 FK `(capture_set_id, checkpoint_id) → capture_set(id, checkpoint_id)`로 세트와 시점이 어긋나지 못하게 했습니다. 계산값 `battery_reading.max_capacity_pct`는 같은 식인지 CHECK로 확인하고, `defect_match.status`와 `prev_defect_id`는 `(status = 'EXISTING') = (prev_defect_id IS NOT NULL)` CHECK로 묶었습니다.
 
 **Q. 서버 사이에 값을 복사해 둔 건 정규화 위반 아닌가요?**
-의도된 비정규화입니다. 원본은 늘 한 서버에만 있고, 다른 서버는 이벤트나 토큰 발급 때 받은 값을 사본으로 듭니다. 예: `rental.checkpoint.grade`는 capture-server 등급을 `trace.checkpoint.graded`로 받은 사본으로, "문제 있는 검사만 보기"를 rental 안에서 거르려고 둡니다. `capture_set.device`는 찍은 때의 기종·치수 스냅샷입니다(나중에 기종 정보가 바뀌어도 그때 기준으로 측정해야 함). 사본마다 원본 서버를 [erd-normalization.md](erd-normalization.md) "의도된 비정규화" 표에 적었습니다.
+의도된 비정규화입니다. 원본은 늘 한 서버에만 있고, 다른 서버는 이벤트나 토큰 발급 때 받은 값을 사본으로 듭니다. 예: `rental.checkpoint.grade`는 capture-server 등급을 `trace.checkpoint.graded`로 받은 사본으로, "문제 있는 검사만 보기"를 rental 안에서 거르려고 둡니다. `capture_set.device`는 찍은 때의 기종·치수 스냅샷입니다(나중에 기종 정보가 바뀌어도 그때 기준으로 측정해야 함). 사본마다 원본 서버를 [erd-normalization.md](../design/erd-normalization.md) "의도된 비정규화" 표에 적었습니다.
 
 **Q. jsonb를 많이 쓰는데 1NF 위반 아닌가요?**
 앱이 통째로 읽고 쓰는 값(다각형·호모그래피, 계약 조각, 서명 원문, 읽기 모델의 배열)만 jsonb로 두고 원자값으로 다룹니다. SQL이 안쪽을 조건으로 쓰는 곳은 `capture_set.skipped_faces` 한 군데뿐입니다. 안쪽 값으로 조인·검색하게 되면 그 칸부터 자식 표로 빼는 것이 원칙입니다.
@@ -91,7 +91,7 @@ DB에는 MinIO 객체 키와 `sha256`만 둡니다. 업로드 URL에 체크섬�
 서버마다 Flyway로 자기 스키마만 바꿉니다(`V<번호>__<설명>.sql`, 이미 적용한 파일은 고치지 않음). 자동 롤백은 코드만 되돌리므로 "칸 추가 먼저, 삭제는 다음 배포"로 나눕니다. 11/20 정규화도 1단계(코드가 칸을 안 쓰고 NULL 허용)와 2단계(main 배포 뒤 칸 삭제)로 나눴습니다. 새 제약은 `NOT VALID`로 더한 뒤 확인을 시도해, 옛 행이 어긋나도 서버는 뜨고 새 행은 늘 확인됩니다.
 
 **Q. 문서의 ERD와 실제 DB가 같은지 어떻게 아나요?**
-11/20에 서버 5개의 마이그레이션을 빈 PostgreSQL 16에 모두 적용한 DB와 [ddl.md](ddl.md) SQL을 적용한 DB를 비교해, 컬럼·제약·인덱스 638줄이 같은 것을 확인했습니다. Crowfoot의 ERD v1(10/31, 30개)은 처음 설계 기록이고 지금 기준은 ddl.md의 Mermaid 그림입니다.
+11/20에 서버 5개의 마이그레이션을 빈 PostgreSQL 16에 모두 적용한 DB와 [ddl.md](../design/ddl.md) SQL을 적용한 DB를 비교해, 컬럼·제약·인덱스 638줄이 같은 것을 확인했습니다. Crowfoot의 ERD v1(10/31, 30개)은 처음 설계 기록이고 지금 기준은 ddl.md의 Mermaid 그림입니다.
 
 **Q. 데이터가 많아지면요?**
 가장 빨리 느는 것은 사진·흠집·진단 자식 표인데 모두 상위 행(세트·사진·실행)에 붙어 있고 그 FK에 인덱스가 있어, 시점 단위 조회는 행 수와 무관하게 짧습니다. 큰 바이너리는 DB 밖(MinIO)이고, 성능 그래프용 목록은 `created_at DESC` 인덱스로 최근 것만 읽습니다. 수백만 행 이후에는 `photo`·`defect`를 생성 월로 파티셔닝하는 것을 생각합니다.
