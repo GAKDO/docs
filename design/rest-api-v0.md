@@ -11,7 +11,7 @@
 - **형식:** JSON camelCase, 시각은 ISO 8601 + 오프셋, ID는 `publicId`(NanoID 21자, 예: `IPv6mcQOlTkKj6mOecAQt`)이고 DB 기본 키(bigint)는 내보내지 않습니다.
 - **오류:** RFC 9457 Problem Details(`application/problem+json`)에 `code`를 더합니다. Spring Boot 3의 ProblemDetail을 그대로 씁니다.
 - **목록:** `?limit=20&cursor=...` → `{ "items": [], "nextCursor": "..." }`
-- **요청 제한:** 계약은 가입·이메일 코드 확인·재발송·로그인·페어링 교환에 429(IP당 분당 10회, `RATE_LIMITED`)를 둡니다. gateway(Redis, 키 `trace:`)는 로그인·페어링 교환에 더해 11/8 gateway #11부터 가입·이메일 코드 확인·재발송도 IP로 셉니다. 공개 catalog 경로 네 개(`/catalog/devices`, `/captures/catalog`, `/captures/catalog/checkpoints/{id}`, `/diagnostics/catalog`)는 같은 버킷으로 IP당 합산 분당 300회입니다(gateway #14, 계약 설명은 contracts #34 `4c90a62`에서 맞춤). 그 밖에 재발송은 auth-server가 60초에 1번(`RESEND_TOO_SOON`), 부스 코드 교환은 rental-server가 모든 부스 합쳐 틀린 코드 1분 30번을 넘으면 1분 동안 429를 냅니다.
+- **요청 제한:** 계약은 가입·이메일 코드 확인·재발송·로그인·페어링 교환에 429(IP당 분당 10회, `RATE_LIMITED`)를 둡니다. gateway(Redis, 키 `trace:`)는 로그인·페어링 교환에 더해 11/8 gateway #11부터 가입·이메일 코드 확인·재발송도 IP로 셉니다. 공개 catalog 경로 네 개(`/catalog/devices`, `/captures/catalog`, `/captures/catalog/checkpoints/{id}`, `/diagnostics/catalog`)는 같은 버킷으로 IP당 합산 분당 300회입니다(gateway #14, 계약 설명은 contracts #34 `4c90a62`에서 맞춤). 11/8 보안 점검부터 비밀번호 재설정 요청·재설정도 IP당 분당 10회(계약 429는 contracts 11/20 API 리뷰에서 적음), 소셜 로그인 시작·콜백은 IP당 분당 30회입니다. 그 밖에 재발송은 auth-server가 60초에 1번(`RESEND_TOO_SOON`), 부스 코드 교환은 rental-server가 모든 부스 합쳐 틀린 코드 1분 30번을 넘으면 1분 동안 429를 냅니다.
 - **중복 요청:** 촬영 완료와 진단 업로드는 `Idempotency-Key` 헤더로 한 번만 처리합니다.
 - **배포 확인:** 서버마다 `GET /api/v1/<auth|rentals|captures|diagnostics|reports>/ping`이 인증 없이 `commit`을 돌려줍니다.
 - **서버로 넘기는 헤더:** `X-User-Id`·`X-Role`·`X-Scope`는 gateway만 넣고, 밖에서 온 같은 이름의 헤더는 지웁니다.
@@ -111,6 +111,7 @@
 | --- | --- | --- | --- | --- | --- |
 | POST | /diagnostics/runs | AGENT | 진단 JSON v0 업로드(checkpointId는 토큰에서) | 201 `{runId, flags}` · 409 이미 올림 · 422 형식·시리얼 불일치 | FR-DIA-05·06 |
 | GET | /diagnostics/checkpoints/{checkpointId} | ADMIN·CUSTOMER(본인) | 진단 요약·이전 시점 비교·플래그 | 200 | FR-DIA-06 |
+| POST | /diagnostics/checkpoints/{checkpointId}/redo | ADMIN | 봉인 전 시점의 진단을 이전 진단으로 돌리고 새 페어링 코드로 다시 진단하게 함(11/13, 이전 진단은 지우지 않음) | 200 · 404 · 409 `RECORD_ALREADY_SEALED` | FR-DIA-05 |
 | GET | /diagnostics/catalog?checkpointIds= | PUBLIC | 공개 진단 요약(11/8, 배터리·SSD·벤치마크). 부품 식별자·점검 플래그·잠금 상태는 빼고, 진단 없는 시점은 빠짐. ID는 최대 100개 | 200 · 400 · 429 | FR-DIA-06 |
 
 ## report-server — /api/v1/reports, /api/v1/verify
@@ -223,6 +224,10 @@ FR-AUTH-03의 수용 기준입니다. gateway는 이 표를 손으로 옮기지 
 - [x] 역할 × 경로 표를 gateway 규칙으로 옮기기 (A) — gateway `access-policy.yaml`(계약에서 생성)
 - [ ] C가 화면별 API 표를 보고 빠진 API 요청 (C)
 - [ ] B가 페어링 교환·진단 업로드 두 개를 확인 (B)
+
+## 구현 대조 (11/20)
+
+contracts develop(`42ac468`)의 작업 74개 중 Java 서버 5개의 72개(ping·내부 JWKS 포함, chat-server 2개는 Python이라 따로)를 서버 5개 develop의 `@*Mapping`과 다시 맞췄습니다. **계약에만 있거나 서버에만 있는 경로는 0개**이고, gateway `access-policy.yaml`은 계약에서 다시 만들어도 줄 순서와 커밋 표시만 달라 역할·범위는 같습니다. 오류 코드도 서버 5개의 `ErrorCode` 값 전부가 codes.yaml `error_code`에 있고 HTTP 상태가 계약의 `x-trace-error-codes` 자리와 같습니다. 11/20에 고친 것: 비밀번호 재설정 두 경로의 429를 계약에 적음(contracts), 뒤쪽 서버가 내려갔을 때 gateway가 Spring 기본 JSON 500 대신 503 Problem `INTERNAL_ERROR`로 답함(gateway). 자세한 점검과 예상 질문은 [`review/api.md`](../review/api.md).
 
 ## 구현 대조 (11/8)
 
