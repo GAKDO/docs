@@ -36,7 +36,7 @@
 
 - **1단계(위 PR 4개):** 코드가 중복 칸을 쓰지 않게 하고, 칸은 NULL 허용으로만 바꿉니다. 이전 코드가 돌아와도 동작합니다.
 - **2단계(1단계가 main에 배포된 뒤):** 칸과 표를 지웁니다.
-  - rental V6: `booth_code.rental_id` 삭제
+  - rental V7: `booth_code.rental_id` 삭제(V6은 리뷰 준비 때 더한 인덱스)
   - diagnostics V7: `inspection_flag.checkpoint_id`, `diagnostic_run.raw_object_key` 삭제
   - report V6: `manual_seal_log`의 네 칸 삭제, `report_view` 표 삭제
 
