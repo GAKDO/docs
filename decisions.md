@@ -164,6 +164,20 @@
 
 **페어링 전역 실패 차단은 시연까지 유지하고, 11/10 이후 IP별 차단 + 전체 급증 알림으로 바꾼다.** 11/4 민서 결정(추천안). 1.0.0에서 넣은 "모든 클라이언트 합쳐 1분 30번 넘게 틀리면 1분 동안 모든 페어링 429"는 공격자가 일부러 틀려서 정상 페어링을 1분씩 멈출 수 있다(CWE-645). 진단 에이전트(AG1·DI1)는 3단계라 MVP·시연에는 영향이 없고, 살아 있는 코드가 적고 5분 1회용이라 맞힐 확률도 거의 없어 그대로 둔다. 진단 에이전트를 다시 넣을 때 auth_server만 고친다: 실패는 IP별로 세어 그 IP만 막고, 전체 실패 급증은 막지 않고 알린다(OAuth 기기 인증 RFC 8628 관행). 계약은 바뀌지 않는다(429·Retry-After 그대로).
 
+## 11/3
+
+**MVP를 단계로 나눈다: 먼저 끝까지 도는 최소 흐름, 그다음 하나씩 다시 넣는다.** 11/3 강사님 리뷰, 민서 승인. 기능 27개를 동시에 만들면 11/10에 어느 흐름도 끝까지 돌지 않을 위험이 컸습니다. 그래서 "관리자가 렌탈을 열고 → 부스가 TOP·BOT × 조명 3 × 카메라 2 = 12장을 찍고 → Jetson YOLO11-seg가 판정하고 → capture-server가 빠른 검사(QUICK) 등급을 저장하고 → /admin에서 본다"를 MVP로 먼저 띄웠습니다. 요구사항 50개는 지우지 않고 순서만 바꿨습니다(10/30 "모두 필수" 유지). 단계표는 [team/board.md](team/board.md) "11/3 MVP 재조정", 요구사항별 결과는 [design/requirements-status.md](design/requirements-status.md) "11/3 방향 전환과 요구사항".
+- MVP(11/9): BO1·BO2, CA1·CA2(QUICK), AU1·GW1·RE1, WE1 + 결과 화면, ML1·ML3, G1. 2단계: 해시 체인(RP1·RP2) → 반납 비교, 폰 촬영(WE2), WE3·WE4, ML2. 3단계: DI1·AG1, Grafana, 9면 전체 세트. 중단: 클러스터, AU2 서버·AU3·RE2·DI2·AG2.
+- 결과: 중단·보류한 기능 대부분을 11/4~11/10에 다시 넣었습니다(report-server 11/4, 진단 11/6, 회원·영수증·파일럿 API 11/8, 폰 수령 11/8, 세 시점 완주 11/9). 끝까지 하지 않은 것은 클러스터, InfluxDB·Grafana, 파일럿 등록 화면, Elasticsearch, 3DGS입니다.
+
+**배포는 클러스터 대신 학교 서버 Docker Compose 하나, 공개 주소는 gakdo.site.** 11/3 밤 민서 결정. 강사님 nginx(Let's Encrypt)가 https://gakdo.site 를 학교 서버 8315(web nginx)로 넘기고, web nginx가 `/api/`를 gateway로, `/trace-captures/`를 MinIO로 넘깁니다. Cloudflare는 DNS만 씁니다. 쿠버네티스 매니페스트는 gitops에 남겨 CI로 계속 검증합니다(NFR-05는 이 결정으로 ◐).
+
+**MVP는 렌탈 하나에 출고 검사 한 번.** 11/3 민서 결정. 봉인(RP1)이 없으면 다음 시점이 409라, 수령·반납 버튼은 web에서만 숨기고(`VITE_ARCHIVED_FEATURES`) 서버 규칙은 그대로 뒀습니다.
+
+## 11/5
+
+**부스 한 세트 판정 시간은 목표 30초, 한도 60초.** 민서 결정. 11/5 합성 모델 실측이 12장 약 49초로 예상돼 NFR-01(30초)을 넘을 수 있어, 30초를 목표로 두고 60초를 넘으면 실패로 보기로 했습니다. 11/9 대회 모델 v004 엔진으로 탐지만 12장 2.53~2.63초가 나왔습니다([contest/metrics/M3.md](contest/metrics/M3.md)).
+
 ## 11/6
 
 **물건 일반화는 설계로 답하고 프리즈 전에는 코드를 바꾸지 않는다.** 강사님 브리핑 피드백("어떤 물건이든 학습만 시키면 렌탈")에 대한 민서 결정입니다. 봉인·등급·영수증은 이미 물건과 무관하고, 노트북에 묶인 곳은 촬영 목록·탐지 모델·기종 정보(`form_factor`)뿐이라 확장은 값 추가와 학습으로 됩니다. 11/13 프리즈 전에는 [design/asset-extensibility.md](design/asset-extensibility.md)를 과제설명서·발표에만 반영합니다.
@@ -195,3 +209,23 @@
 **InfluxDB는 쓰지 않는다(재확인).** 11/3에 멈춘 InfluxDB 추이 쓰기를 11/8 diagnostics_server #9로 넣었다가, 민서 재확인으로 #10에서 되돌렸습니다. 진단 추이는 관리자 화면 '성능'(PostgreSQL 조회)으로 봅니다. Influx·Grafana 기능은 다시 넣지 않습니다.
 
 **보안 점검(11/8)에서 바로 고칠 것만 고치고, 시연 흐름을 깨는 것은 미룬다.** 레포 9곳 PR(booth #49, ml #31, auth_server #10, gateway #13, web #90, gitops #20, capture_server #21, report_server #10, diagnostics_server #11). 새 설정: 학교 `.env` `WEB_TRUSTED_PROXIES`(앞단 nginx IP, 잘못 넣으면 web이 뜨지 않음), Jetson `TRACE_BOOTH_UI_TOKEN`(기본 꺼짐). 비밀번호 재설정 코드는 계정당 24시간 5개. 미룬 것: 부스 토큰 필수화·Host 허용 목록, 서비스별 DB 역할·MinIO 키·RabbitMQ 계정 분리, 페어링 IP별 차단, 봉인 뒤 재촬영 막기, 촬영 세트 상한.
+
+## 11/10
+
+**소셜 로그인은 Google·GitHub를 필수로, 카카오·네이버는 키만 넣으면 켜지게.** 민서 결정. 소셜 로그인은 고객 계정만 만들고 이메일을 꼭 받습니다(관리자는 초기 데이터로만). 계약은 추가만(contracts #38). 같은 날 민서가 이 기능과 챗봇·MCP는 계약 PR을 직접 만들어도 된다고 정했습니다.
+
+**사이트 도우미 챗봇은 Gemini 무료 API를 먼저 쓰고, 한도를 넘거나 실패하면 학교 서버의 Ollama(qwen2.5)로 넘긴다.** 챗봇은 읽기만 합니다(사용자 토큰으로 GET만). 외부 모델로 보내는 일련번호는 뒤 4자리만 남깁니다(chat-server #5, 11/11). 개인정보처리방침에 Gemini 전송을 적었습니다(web #114).
+
+**반납 정산은 반납 시점의 신규 흠집만 근거로, 저장하지 않고 읽을 때 규칙표로 계산한다.** 반납 정산서 `GET .../checkpoints/{checkpointId}/settlement`(settlement-rules-v2, capture_server #26). 전체 검사는 위치 비교로 신규(NEW)인 묶음만, 빠른 검사는 기기를 놓는 자리가 매번 달라 위치 비교가 없으므로 면·종류별 흠집 수가 앞 시점보다 늘어난 만큼만 셉니다. 긁힘 10mm 미만·오염은 0%, 합계 상한은 기준가의 15%입니다. 규칙을 바꾸면 버전을 올려 같은 결과·같은 버전이면 누구나 같은 금액이 나오게 합니다.
+
+## 11/12
+
+**비밀번호를 정한 적 없는 소셜 가입자는 로그인 10분 안이면 비밀번호 없이 탈퇴한다.** 민서 결정. 기준은 `passwordSet`과 토큰의 `auth_time`이고, 10분이 지나면 `REAUTH_REQUIRED`로 다시 로그인하게 합니다(contracts #45, auth_server #15, web #132). FR-USR-04를 소셜 가입자에게도 지키기 위한 것입니다.
+
+## 11/13
+
+**수령·반납 세트는 출고와 같은 검사 방식(profile)만 받는다.** 출고를 빠른 검사로 했는데 반납을 전체 검사로 찍으면 비교할 면이 맞지 않습니다. 렌탈 검사 방식 조회 API를 더하고(contracts #49), capture-server·부스가 다른 방식을 막습니다(capture_server #30, booth #68).
+
+**봉인 전 시점이면 진단을 다시 할 수 있고, 이전 진단은 이력으로 남긴다.** 충전기 없이 찍혀 벤치마크가 빠진 진단을 고치기 위해서입니다(contracts #48, diagnostics_server #18). 봉인 뒤에는 바꿀 수 없습니다(해시 체인).
+
+**11/13 코드 프리즈.** 이후 머지는 문서·README·SonarQube 정리·정규화(11/20 [design/erd-normalization.md](design/erd-normalization.md))만입니다.
