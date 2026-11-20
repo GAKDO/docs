@@ -34,8 +34,8 @@
 
 헌법이 "DB 마이그레이션은 이전 버전 코드에서도 동작하게 나눈다(컬럼 추가 먼저, 삭제는 다음 배포)"고 정했습니다. 자동 롤백은 코드만 되돌리기 때문입니다.
 
-- **1단계(위 PR 4개):** 코드가 중복 칸을 쓰지 않게 하고, 칸은 NULL 허용으로만 바꿉니다. 이전 코드가 돌아와도 동작합니다.
-- **2단계(1단계가 main에 배포된 뒤):** 칸과 표를 지웁니다.
+- **1단계(위 PR 4개, 11/20 develop 머지):** 코드가 중복 칸을 쓰지 않게 하고, 칸은 NULL 허용으로만 바꿉니다. 이전 코드가 돌아와도 동작합니다. 운영 gakdo.site는 학교 서버가 3분마다 `:develop` 이미지를 받아 띄우므로(gitops compose `TRACE_TAG` 기본값 develop) develop 머지와 함께 운영 DB에도 적용됐습니다.
+- **2단계(1단계가 운영에서 문제없이 돈 뒤):** 칸과 표를 지웁니다. develop 머지가 곧 운영 반영이고 지운 칸은 되돌릴 수 없으므로 머지 전에 사람이 확인합니다.
   - rental V7: `booth_code.rental_id` 삭제(V6은 리뷰 준비 때 더한 인덱스)
   - diagnostics V7: `inspection_flag.checkpoint_id`, `diagnostic_run.raw_object_key` 삭제
   - report V6: `manual_seal_log`의 네 칸 삭제, `report_view` 표 삭제
