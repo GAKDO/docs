@@ -100,8 +100,9 @@ flowchart TB
 
 - 밖에서 들어오는 길은 **443 하나**뿐입니다. 관리자 화면(①), 부스의 API 호출(②), 부스의 사진 업로드(③), 진단 에이전트의 페어링·업로드가 모두 강사님 nginx → web nginx(8315)를 지나갑니다.
 - **촬영·탐지 화면은 Jetson 안의 작은 웹 서버**입니다(booth `trace-booth serve`, 8320). 태블릿은 부스 공유기 안에서 Jetson에 붙고, 부스 토큰으로 gakdo.site와 통신하는 것은 Jetson뿐입니다. 11/6부터 태블릿은 `https://gakdo.site/booth`(web, ADMIN 로그인)도 열어 기다리는 기기 고르기 → 부스 코드 발급 → 판정·사진 보기를 할 수 있습니다. 카메라·조명·탐지는 그대로 Jetson이 합니다.
-- 서버 6개(gateway·auth·rental·capture·diagnostics·report)와 인프라 4개는 Compose 네트워크 안에서만 서로 부릅니다. 밖으로 열린 것은 web 8315뿐이고, RabbitMQ·MinIO는 학교 서버 127.0.0.1에만 엽니다.
-- 서버끼리는 REST로 부르지 않고 RabbitMQ `trace.events`로만 주고받습니다(예외: gateway가 auth-server JWKS를 읽음). 큐·라우팅 키는 [2. 서비스별](02-services.md#이벤트-흐름-118-코드-기준)에 있습니다.
+- 서버들(gateway·auth·rental·capture·diagnostics·report·chat-server·inspect-worker)과 인프라 4개는 Compose 네트워크 안에서만 서로 부릅니다. 밖으로 열린 것은 web 8315뿐이고, RabbitMQ·MinIO는 학교 서버 127.0.0.1에만 엽니다.
+- 서버끼리는 REST로 부르지 않고 RabbitMQ `trace.events`로만 주고받습니다(예외: gateway와 각 서버가 auth-server JWKS를 읽음, chat-server가 사용자 토큰으로 gateway를 GET). 큐·라우팅 키는 [2. 서비스별](02-services.md#이벤트-흐름-1120-코드-기준)에 있습니다.
+- 11/8 뒤 Compose에 더한 것: inspect-worker(11/8, 폰 사진 정합·탐지, 큐만 씀), chat-server·ollama(11/10, 사이트 도우미 챗봇). 위 글자판 그림에는 없고 [2. 서비스별](02-services.md) 2-11·2-12와 맨 위 전체 그림에 있습니다.
 - 점선은 서비스가 아니라 **학습 데이터 경로**입니다. 부스가 학습 사진을 학교 MinIO에 올리고, 집 PC가 학습해 만든 model.onnx를 Jetson에 옮깁니다.
 
 ## 1-2. 검사 한 건의 흐름 (요약)
@@ -152,7 +153,8 @@ sequenceDiagram
 |---|---|---|---|
 | 443 | gakdo.site (s2-nginx) | 강사님 nginx → 10.116.64.12:8315 | 외부 |
 | 8315 | 학교 서버 | web nginx(컨테이너 8080). `/` 화면, `/api/` → gateway, `/trace-captures/` → MinIO | 학교 내부망 (밖에서는 443으로만) |
-| 8080 | Compose 안 | gateway · auth-server · rental-server · capture-server · diagnostics-server(11/6 기본) · report-server(11/8 기본) · inspect-worker(11/8, 포트 없음) | 호스트에 안 엶 |
+| 8080 | Compose 안 | gateway · auth-server · rental-server · capture-server · diagnostics-server(11/6 기본) · report-server(11/8 기본) · chat-server(11/10) · inspect-worker(11/8, 포트 없음) | 호스트에 안 엶 |
+| 11434 | Compose 안 | ollama (chat-server 대체 모델) | 호스트에 안 엶 |
 | 5432 | Compose 안 | PostgreSQL 16 | 호스트에 안 엶 |
 | 6379 | Compose 안 | Redis | 호스트에 안 엶 |
 | 5672 / 15672 | 학교 서버 | RabbitMQ / 관리 화면 | 127.0.0.1만 |
