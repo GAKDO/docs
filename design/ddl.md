@@ -1,21 +1,21 @@
 # 테이블 정의 (DDL)
 
-PostgreSQL `trace` DB의 스키마 7개, 테이블 35개입니다. **2026-11-08 기준, 각 서버의 Flyway 마이그레이션(V1 + V2 이후)을 모두 적용한 지금 스키마**를 적었습니다. 아래 SQL을 빈 DB에 차례로 실행하면 서버 5개 develop의 마이그레이션을 모두 돌린 결과 + ml 기록부와 같은 표·컬럼·제약이 나옵니다(11/8 로컬 PostgreSQL 16에 둘 다 적용해 비교). 처음 스키마(10/31, 테이블 31개)는 [../db/V1__init.sql](../db/V1__init.sql)이고, 그 뒤 서버가 더한 것은 아래 표와 각 절의 `-- Vn` 주석에 있습니다.
+PostgreSQL `trace` DB의 스키마 7개, 테이블 37개입니다. **2026-11-20 기준, 각 서버의 Flyway 마이그레이션(V1 + V2 이후)을 모두 적용한 지금 스키마**를 적었습니다. 아래 SQL을 빈 DB에 차례로 실행하면 서버 5개 develop의 마이그레이션을 모두 돌린 결과 + ml 기록부와 같은 표·컬럼·제약·인덱스가 나옵니다(11/20 로컬 PostgreSQL 16에 둘 다 적용해 비교). 11/20 정규화 점검에서 찾은 것과 고친 것은 [erd-normalization.md](erd-normalization.md)에 있습니다. 처음 스키마(10/31, 테이블 31개)는 [../db/V1__init.sql](../db/V1__init.sql)이고, 그 뒤 서버가 더한 것은 아래 표와 각 절의 `-- Vn` 주석에 있습니다.
 
 | 서버 | 마이그레이션 (`src/main/resources/db/migration`) | V1 뒤에 더한 것 |
 | --- | --- | --- |
-| auth-server | V1 auth 절, V2·V3 | `pairing_code.rental_id`(V2), `pairing_code.device_serial`(V3) |
-| rental-server | V1 rental 절, V2·V3 | 기종 시드 `MBA13-M2`(V2, 데이터만), 표 `booth_code`(V3, 부스 6자리 코드) |
-| capture-server | V1 capture·inspection 절, V2~V6 | `capture_set.device`(V3), `profile`(V4, FULL·QUICK), `completed_at`·`detection_model_version`·`inference_ms`·인덱스(V5), `booth_total_ms`(V6) |
-| diagnostics-server | V1 diagnostics 절, V2·V3 | `diagnostic_run.rental_id`·`collected_at`·`raw_body`·`idempotency_key`·`benchmark_skipped_reason`, 시점당 하나(UNIQUE), battery·ssd `status` 등(V2), `diagnostic_run.checks`와 플래그 종류 3개(V3) |
-| report-server | V1 report 절, V2~V4 | `record_chain` 검증 재료, 표 `checkpoint_view`·`processed_event`·`manual_seal_log`(V2), 핀·기종 칸(V3), `checkpoint_view.inspected_at`(V4) |
+| auth-server | V1 auth 절, V2~V5 | `pairing_code.rental_id`(V2), `pairing_code.device_serial`(V3), 표 `social_identity`(V4, 소셜 로그인), `account.password_set`(V5) |
+| rental-server | V1 rental 절, V2~V5 | 기종 시드 `MBA13-M2`(V2, 데이터만), 표 `booth_code`(V3, 부스 6자리 코드), `rental.customer_name`·`due_at`·`note`와 `checkpoint.grade`(V4), `booth_code.rental_id` 안 씀(V5, 정규화) |
+| capture-server | V1 capture·inspection 절, V2~V9 | `capture_set.device`(V3), `profile`(V4, FULL·QUICK), `completed_at`·`detection_model_version`·`inference_ms`·인덱스(V5), `booth_total_ms`(V6), 사람 검수 칸(V7), `photo.align_failure`(V8), 등급·흠집 비교 확인 제약(V9, 정규화) |
+| diagnostics-server | V1 diagnostics 절, V2~V6 | `diagnostic_run.rental_id`·`collected_at`·`raw_body`·`idempotency_key`·`benchmark_skipped_reason`, battery·ssd `status` 등(V2), `diagnostic_run.checks`와 플래그 종류 3개(V3), 보안 플래그 2개(V4), 진단 다시 하기 `superseded_at`·표 `sealed_checkpoint`(V5), `inspection_flag.checkpoint_id` 안 씀·배터리 효율 확인 제약(V6, 정규화) |
+| report-server | V1 report 절, V2~V5 | `record_chain` 검증 재료, 표 `checkpoint_view`·`processed_event`·`manual_seal_log`(V2), 핀·기종 칸(V3), `checkpoint_view.inspected_at`(V4), `manual_seal_log`를 체인 줄에 FK로 묶고 겹치는 칸 안 씀(V5, 정규화) |
 | ml (집 PC) | `ml/src/trace_ml/sql/V1__ml.sql` | 없음 (집 PC 로컬 PostgreSQL) |
 
 ID는 두 가지입니다. 모든 테이블의 기본 키 `id`는 DB가 매기는 bigint이고 밖으로 내보내지 않습니다. API·이벤트·URL에 나가는 9개 테이블(기기·렌탈·시점·파일럿 참여자·촬영 세트·사진·흠집·진단 실행·계정)에는 `public_id`(NanoID 21자, 앱에서 생성)를 따로 둡니다. 다른 서비스의 행은 FK 없이 그 서비스의 `public_id`를 값으로 둡니다(11/2 강사 피드백). capture·inspection은 같은 capture-server가 가져서 서로 FK를 씁니다.
 
-## ERD (11/8 지금 스키마)
+## ERD (11/20 지금 스키마)
 
-실선은 같은 서버 안의 FK, 점선은 다른 서버의 `public_id`를 값으로만 드는 참조입니다(FK 없음). 표 이름은 `<스키마>_<표>`로 썼습니다. 원래 ERD v1(10/31, 테이블 30개)은 [Crowfoot](https://crowfoot.java21.net/workspaces/68/models/688)에 있고, V1(31개) 뒤에 서버가 더한 표 4개(`rental.booth_code`, `report.checkpoint_view`·`processed_event`·`manual_seal_log`)는 Crowfoot에 아직 없으므로 이 그림이 기준입니다.
+실선은 같은 서버 안의 FK, 점선은 다른 서버의 `public_id`를 값으로만 드는 참조입니다(FK 없음). 표 이름은 `<스키마>_<표>`로 썼습니다. 원래 ERD v1(10/31, 테이블 30개)은 [Crowfoot](https://crowfoot.java21.net/workspaces/68/models/688)에 있고, V1(31개) 뒤에 서버가 더한 표 6개(`rental.booth_code`, `report.checkpoint_view`·`processed_event`·`manual_seal_log`, `auth.social_identity`, `diagnostics.sealed_checkpoint`)는 Crowfoot에 아직 없으므로 이 그림이 기준입니다.
 
 ```mermaid
 erDiagram
@@ -23,7 +23,6 @@ erDiagram
   rental_device ||--o{ rental_rental : "device_id"
   rental_device ||--o{ rental_pilot_participant : "device_id"
   rental_rental ||--|{ rental_checkpoint : "rental_id"
-  rental_rental ||--o{ rental_booth_code : "rental_id"
   rental_checkpoint ||--o{ rental_booth_code : "checkpoint_id"
 
   capture_capture_set ||--|{ capture_photo : "capture_set_id"
@@ -32,7 +31,7 @@ erDiagram
   inspection_defect ||--o| inspection_defect_match : "defect_id"
   inspection_defect |o--o{ inspection_defect_match : "prev_defect_id"
   capture_capture_set ||--o{ inspection_face_texture : "capture_set_id"
-  capture_capture_set ||--o| inspection_grade_result : "capture_set_id"
+  capture_capture_set ||--o| inspection_grade_result : "capture_set_id + checkpoint_id"
 
   diagnostics_diagnostic_run ||--o{ diagnostics_hardware_component : "run_id"
   diagnostics_diagnostic_run ||--o| diagnostics_battery_reading : "run_id"
@@ -42,15 +41,18 @@ erDiagram
 
   auth_account ||--o{ auth_rental_access : "account_id"
   auth_account ||--o{ auth_email_token : "account_id"
+  auth_account ||--o{ auth_social_identity : "account_id"
+
+  report_record_chain ||--o| report_manual_seal_log : "checkpoint_id"
 
   ml_dataset_version ||--o{ ml_training_run : "dataset_version_id"
 
   rental_checkpoint ||..o{ capture_capture_set : "checkpoint_id 값"
   rental_checkpoint ||..o| inspection_grade_result : "checkpoint_id 값"
-  rental_checkpoint ||..o| diagnostics_diagnostic_run : "checkpoint_id 값"
+  rental_checkpoint ||..o{ diagnostics_diagnostic_run : "checkpoint_id 값"
+  rental_checkpoint ||..o| diagnostics_sealed_checkpoint : "checkpoint_id 값"
   rental_checkpoint ||..o| report_record_chain : "checkpoint_id 값"
   rental_checkpoint ||..o| report_checkpoint_view : "checkpoint_id 값"
-  rental_checkpoint ||..o| report_manual_seal_log : "checkpoint_id 값"
   rental_checkpoint ||..o| auth_seal_receipt : "checkpoint_id 값"
   rental_checkpoint ||..o{ auth_capture_link : "checkpoint_id 값"
   rental_checkpoint ||..o{ auth_pairing_code : "checkpoint_id 값"
@@ -58,7 +60,7 @@ erDiagram
   rental_rental ||..o| auth_rental_access : "rental_id 값"
 ```
 
-`report.report_view`·`report.processed_event`, `auth.client_credential`, `ml.dataset_device`는 다른 표와 잇지 않아 그림에서 뺐습니다.
+`report.report_view`·`report.processed_event`, `auth.client_credential`, `ml.dataset_device`는 다른 표와 잇지 않아 그림에서 뺐습니다. 부스 코드의 렌탈은 시점에서 따라가고(V5), 수동 봉인 기록은 같은 서버의 체인 줄을 FK로 가리킵니다(V5). 시점당 진단은 다시 하기(V5) 때문에 여러 줄일 수 있고 지금 진단(`superseded_at IS NULL`)만 하나입니다.
 
 ## rental (rental-server)
 
@@ -108,6 +110,9 @@ CREATE TABLE rental.rental (
   status      varchar(16)  NOT NULL CHECK (status IN ('OPEN','RETURNED','CLOSED')),
   started_at  timestamptz,
   ended_at    timestamptz,
+  customer_name varchar(64),                          -- V4: 고객 이름(선택, 관리자에게만 보임)
+  due_at      date,                                   -- V4: 반납 예정일(선택)
+  note        varchar(500),                           -- V4: 관리자 메모(선택)
   created_at  timestamptz NOT NULL DEFAULT now(),
   updated_at  timestamptz NOT NULL DEFAULT now()
 );
@@ -121,10 +126,12 @@ CREATE TABLE rental.checkpoint (
   type         varchar(3)  NOT NULL CHECK (type IN ('OUT','RCV','RET')),
   status       varchar(16) NOT NULL CHECK (status IN ('OPEN','CAPTURED','GRADED','SEALED')),
   occurred_at  timestamptz,
+  grade        varchar(1) CHECK (grade IN ('A','B','C','D')),  -- V4: 마지막 등급. capture-server가 정한 값을 trace.checkpoint.graded로 받아 둔 사본("문제 있는 검사만 보기")
   created_at   timestamptz NOT NULL DEFAULT now(),
   updated_at   timestamptz NOT NULL DEFAULT now(),
   UNIQUE (rental_id, type)                            -- FR-RNT-02
 );
+CREATE INDEX ix_checkpoint_rental_grade ON rental.checkpoint(rental_id, grade);  -- V4
 
 CREATE TABLE rental.pilot_participant (
   id          bigint GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
@@ -141,7 +148,7 @@ CREATE TABLE rental.pilot_participant (
 CREATE TABLE rental.booth_code (
   id             bigint GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
   code_hash      varchar(64) NOT NULL,
-  rental_id      bigint      NOT NULL REFERENCES rental.rental(id) ON DELETE CASCADE,
+  rental_id      bigint      REFERENCES rental.rental(id) ON DELETE CASCADE,  -- V5: 안 씀(NULL). 렌탈은 시점에서 따라간다. 다음 마이그레이션에서 삭제
   checkpoint_id  bigint      NOT NULL REFERENCES rental.checkpoint(id) ON DELETE CASCADE,
   expires_at     timestamptz NOT NULL,
   used_at        timestamptz,
@@ -149,6 +156,7 @@ CREATE TABLE rental.booth_code (
 );
 CREATE INDEX ix_booth_code_hash ON rental.booth_code(code_hash);
 CREATE INDEX ix_booth_code_rental ON rental.booth_code(rental_id);
+CREATE INDEX ix_booth_code_checkpoint ON rental.booth_code(checkpoint_id);  -- V5
 
 -- V2: 기종 시드(데이터만). MBA13-M2 = MacBook Air (M2, 2022), 304.1 × 215.0, 본체 7.0·상판 4.0 mm
 -- 대회까지 기종은 이것 하나(decisions.md 11/7)
@@ -181,12 +189,18 @@ CREATE TABLE capture.capture_set (
   detection_model_version  varchar(64),     -- V5: 부스가 탐지와 함께 보낸 모델 버전
   inference_ms   integer CHECK (inference_ms IS NULL OR inference_ms >= 0),     -- V5: Jetson 탐지 시간
   booth_total_ms integer CHECK (booth_total_ms IS NULL OR booth_total_ms >= 0), -- V6: 부스 촬영 시작 → 판정 표시
+  review_completed_at   timestamptz,        -- V7: 사람 검수를 끝낸 시각(등급 발행 허락)
+  review_completed_by   varchar(64),        -- V7: 검수한 관리자(계정 publicId)
+  review_completion_key varchar(128),       -- V7: 검수 완료 요청의 Idempotency-Key
   created_at     timestamptz NOT NULL DEFAULT now(),
-  updated_at     timestamptz NOT NULL DEFAULT now()
+  updated_at     timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT uq_capture_set_id_checkpoint UNIQUE (id, checkpoint_id)  -- V9: grade_result 합성 FK의 대상
 );
 CREATE INDEX ix_capture_set_checkpoint ON capture.capture_set(checkpoint_id);
 CREATE INDEX ix_capture_set_rental ON capture.capture_set(rental_id);
 CREATE INDEX ix_capture_set_created ON capture.capture_set(created_at DESC);   -- V5: 최근 세트부터 (GET /captures/benchmarks)
+CREATE INDEX ix_capture_set_review_open ON capture.capture_set(completed_at)
+  WHERE review_completed_at IS NULL AND status <> 'GRADED';                    -- V7: 검수 대기 목록
 
 CREATE TABLE capture.photo (
   id              bigint GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
@@ -200,6 +214,7 @@ CREATE TABLE capture.photo (
   uploaded        boolean      NOT NULL DEFAULT false,   -- 완료 때 저장소에서 존재·해시를 확인함 (CA1)
   blur_score      real,
   quality_ok      boolean      NOT NULL DEFAULT true,
+  align_failure   varchar(500),                          -- V8: 정합 실패 사유(inspect.completed failedPhotos[].reason)
   taken_at        timestamptz  NOT NULL,
   created_at      timestamptz  NOT NULL DEFAULT now(),
   updated_at      timestamptz  NOT NULL DEFAULT now(),
@@ -229,8 +244,15 @@ CREATE TABLE inspection.defect (
   confidence     real        NOT NULL,
   model_version  varchar(64) NOT NULL,
   source         varchar(8)  NOT NULL DEFAULT 'AUTO' CHECK (source IN ('AUTO','HUMAN')),
+  review_status  varchar(10) NOT NULL DEFAULT 'PENDING'
+                 CHECK (review_status IN ('PENDING','CONFIRMED','DISMISSED')),  -- V7: 사람 검수(11/8). 확정한 것만 등급·봉인에 쓴다
+  dismiss_reason varchar(12)
+                 CHECK (dismiss_reason IS NULL OR dismiss_reason IN ('DUST','TAPE','REFLECTION','PART','OTHER')),  -- V7
+  reviewed_by    varchar(64),                         -- V7: 검수한 관리자(계정 publicId)
+  reviewed_at    timestamptz,                         -- V7
   created_at     timestamptz NOT NULL DEFAULT now(),
-  updated_at     timestamptz NOT NULL DEFAULT now()
+  updated_at     timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT ck_defect_dismiss_reason CHECK ((review_status = 'DISMISSED') = (dismiss_reason IS NOT NULL))  -- V7: 기각에만 사유
 );
 CREATE INDEX ix_defect_photo ON inspection.defect(photo_id);
 
@@ -242,7 +264,8 @@ CREATE TABLE inspection.defect_match (
   distance_mm     real,
   rule_version    varchar(32) NOT NULL,             -- 비교 규칙 버전(예: view-match-v1, 11/2)
   created_at      timestamptz NOT NULL DEFAULT now(),
-  updated_at      timestamptz NOT NULL DEFAULT now()
+  updated_at      timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT ck_defect_match_prev CHECK ((status = 'EXISTING') = (prev_defect_id IS NOT NULL))  -- V9: 두 칸이 어긋나지 않게
 );
 
 CREATE INDEX ix_defect_match_prev ON inspection.defect_match(prev_defect_id);
@@ -256,7 +279,10 @@ CREATE TABLE inspection.grade_result (
   capture_set_id bigint      REFERENCES capture.capture_set(id),  -- 등급을 매긴 세트(다음 시점 비교 기준, CA2)
   unjudgeable_faces jsonb    NOT NULL DEFAULT '[]',    -- 판정 불가 면 ["SCR1", …] (CA2)
   created_at     timestamptz NOT NULL DEFAULT now(),
-  updated_at     timestamptz NOT NULL DEFAULT now()
+  updated_at     timestamptz NOT NULL DEFAULT now(),
+  -- V9: 등급의 시점과 등급을 매긴 세트의 시점이 같아야 한다(세트가 시점을 정한다). capture_set_id가 NULL인 옛 행은 확인하지 않는다
+  CONSTRAINT fk_grade_result_set_checkpoint
+    FOREIGN KEY (capture_set_id, checkpoint_id) REFERENCES capture.capture_set(id, checkpoint_id)
 );
 
 CREATE TABLE inspection.face_texture (                 -- 면별 텍스처 키(trace.inspect.completed textureKeys, 버킷 trace-derived, CA2)
@@ -272,7 +298,7 @@ CREATE TABLE inspection.face_texture (                 -- 면별 텍스처 키(t
 
 ## diagnostics (diagnostics-server)
 
-DI1(diagnostics_server V2)에서 원본 JSON을 MinIO 대신 DB(`raw_body`)에 두기로 해 `raw_object_key`는 비어 있습니다. 자세한 표는 diagnostics_server `specs/001-diagnostics-upload/data-model.md`.
+DI1(diagnostics_server V2)에서 원본 JSON을 MinIO 대신 DB(`raw_body`)에 두기로 해 `raw_object_key`는 비어 있습니다(V6부터 코드도 읽지 않음, 다음 마이그레이션에서 삭제). 진단 다시 하기(V5)로 시점당 진단은 여러 줄일 수 있고, 지금 진단(`superseded_at IS NULL`)만 하나입니다. 자세한 표는 diagnostics_server `specs/001-diagnostics-upload/data-model.md`.
 
 ```sql
 CREATE SCHEMA IF NOT EXISTS diagnostics;
@@ -289,16 +315,19 @@ CREATE TABLE diagnostics.diagnostic_run (
   checks          jsonb,                              -- V3: 잠금·디스크 상태(진단 JSON checks, 11/7). 옛 진단은 null
   collected_at    timestamptz  NOT NULL,              -- V2: 측정을 마친 시각
   raw_body        text         NOT NULL,              -- V2: 올린 원본 JSON 그대로. sha256은 이 바이트의 해시
-  raw_object_key  varchar(512),                       -- MinIO 원본 키. V2부터 쓰지 않음(NULL)
+  raw_object_key  varchar(512),                       -- MinIO 원본 키. V2부터 쓰지 않음(NULL). 다음 마이그레이션에서 삭제
   sha256          char(64)     NOT NULL,
   idempotency_key varchar(128) NOT NULL,              -- V2: 같은 키 재생·다른 본문 422
   benchmark_skipped_reason varchar(16)
                   CHECK (benchmark_skipped_reason IN ('NO_PERMISSION','UNSUPPORTED','TOOL_ERROR','NO_AC_POWER')),  -- V2
   consented_at    timestamptz  NOT NULL,              -- FR-DIA-05
+  superseded_at   timestamptz,                        -- V5: 진단 다시 하기로 "이전 진단"이 된 시각. 지금 진단은 NULL
   created_at      timestamptz  NOT NULL DEFAULT now(),
-  updated_at      timestamptz  NOT NULL DEFAULT now(),
-  CONSTRAINT uq_run_checkpoint UNIQUE (checkpoint_id) -- V2: 시점당 진단 하나(409 DIAGNOSTIC_ALREADY_UPLOADED)
+  updated_at      timestamptz  NOT NULL DEFAULT now()
 );
+-- V5: 시점당 지금 진단은 하나(409 DIAGNOSTIC_ALREADY_UPLOADED). 이전 진단은 이력으로 남는다
+CREATE UNIQUE INDEX uq_run_checkpoint_current ON diagnostics.diagnostic_run(checkpoint_id) WHERE superseded_at IS NULL;
+CREATE INDEX ix_run_checkpoint ON diagnostics.diagnostic_run(checkpoint_id);            -- V5
 CREATE INDEX ix_run_serial     ON diagnostics.diagnostic_run(device_serial);
 CREATE INDEX ix_run_rental     ON diagnostics.diagnostic_run(rental_id, created_at);  -- V2
 
@@ -322,11 +351,16 @@ CREATE TABLE diagnostics.battery_reading (
   design_capacity       integer,
   full_charge_capacity  integer,
   capacity_unit         varchar(3) CHECK (capacity_unit IN ('mAh','mWh')),  -- macOS mAh, Windows mWh (환산하지 않음)
-  max_capacity_pct      numeric(5,2),                -- 서버 계산: 완충 ÷ 설계 × 100
+  max_capacity_pct      numeric(5,2),                -- 서버 계산: 완충 ÷ 설계 × 100 (계산값. 아래 CHECK가 같은 식으로 확인)
   os_max_capacity_pct   smallint,                    -- macOS가 보여 주는 값, 없으면 NULL
   condition             varchar(32),                 -- NORMAL, SERVICE_RECOMMENDED
   created_at        timestamptz NOT NULL DEFAULT now(),
-  updated_at        timestamptz NOT NULL DEFAULT now()
+  updated_at        timestamptz NOT NULL DEFAULT now(),
+  -- V6: 계산값이 두 용량과 어긋나지 않게 한다(소수 둘째 자리 반올림, 둘 중 하나라도 없으면 NULL)
+  CONSTRAINT ck_battery_max_capacity_pct CHECK (
+    max_capacity_pct IS NOT DISTINCT FROM
+      CASE WHEN design_capacity > 0 AND full_charge_capacity IS NOT NULL
+           THEN round(full_charge_capacity::numeric * 100 / design_capacity, 2) END)
 );
 
 CREATE TABLE diagnostics.ssd_health (
@@ -357,20 +391,30 @@ CREATE TABLE diagnostics.benchmark_result (
 
 CREATE TABLE diagnostics.inspection_flag (
   id             bigint GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
-  checkpoint_id  varchar(21) NOT NULL,                -- rental.checkpoint.public_id (FK 없음)
+  checkpoint_id  varchar(21),                         -- V6: 안 씀(NULL). 시점은 run_id의 진단 실행에서 따라간다. 다음 마이그레이션에서 삭제
   run_id         bigint NOT NULL REFERENCES diagnostics.diagnostic_run(id),
   base_run_id    bigint NOT NULL REFERENCES diagnostics.diagnostic_run(id), -- 비교 기준(이전 시점). 상태 플래그(잠금·디스크, 11/7)는 이번 진단 자신
-  kind           varchar(24) NOT NULL CHECK (kind IN ('COMPONENT_CHANGED','CAPACITY_DROP','BENCH_DROP','ACTIVATION_LOCK_ON','DISK_ENCRYPTION_ON','DISK_HEALTH_WARNING')),
+  kind           varchar(24) NOT NULL,
+  CONSTRAINT inspection_flag_kind_check CHECK (kind IN (
+    'COMPONENT_CHANGED','CAPACITY_DROP','BENCH_DROP','ACTIVATION_LOCK_ON','DISK_ENCRYPTION_ON','DISK_HEALTH_WARNING',
+    'SECURITY_PROTECTION_OFF','THREAT_DETECTED')),    -- V3 잠금·디스크 3종, V4 보안 2종
   detail         jsonb       NOT NULL,
   created_at     timestamptz NOT NULL DEFAULT now(),
   updated_at     timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX ix_flag_run ON diagnostics.inspection_flag(run_id);  -- V2
+
+-- V5: 봉인된 시점(trace.record.sealed를 받아 둔 사본). 봉인된 시점은 진단 다시 하기를 막는다
+CREATE TABLE diagnostics.sealed_checkpoint (
+  checkpoint_id varchar(21) PRIMARY KEY,              -- rental.checkpoint.public_id (FK 없음)
+  sealed_at     timestamptz NOT NULL,
+  created_at    timestamptz NOT NULL DEFAULT now()
+);
 ```
 
 ## report (report-server)
 
-읽기 모델은 RP1(V2)부터 시점 단위 `checkpoint_view`를 씁니다. `report_view`는 V1에서 만들었지만 비워 둡니다. 핀·기종(V3)과 `inspected_at`(V4)은 화면용이라 해시 체인 재료(trace-chain-1)에는 들어가지 않습니다.
+읽기 모델은 RP1(V2)부터 시점 단위 `checkpoint_view`를 씁니다. `report_view`는 V1에서 만들었지만 비워 둡니다(V5부터 코드가 건드리지 않음, 다음 마이그레이션에서 표 삭제). 핀·기종(V3)과 `inspected_at`(V4)은 화면용이라 해시 체인 재료(trace-chain-1)에는 들어가지 않습니다.
 
 ```sql
 CREATE SCHEMA IF NOT EXISTS report;
@@ -454,14 +498,15 @@ CREATE TABLE report.processed_event (
   updated_at   timestamptz NOT NULL DEFAULT now()
 );
 
--- V2: 관리자 수동 봉인 사용 기록(11/2 결정)
+-- V2: 관리자 수동 봉인 사용 기록(11/2 결정). V5: 렌탈·종류·등급·순번은 같은 시점의 record_chain 줄에서 읽는다
 CREATE TABLE report.manual_seal_log (
   id               bigint GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
-  rental_id        varchar(21) NOT NULL,
-  checkpoint_id    varchar(21) NOT NULL UNIQUE,
-  checkpoint_type  varchar(3)  NOT NULL CHECK (checkpoint_type IN ('OUT','RCV','RET')),
-  grade            char(1)     NOT NULL CHECK (grade IN ('A','B','C','D')),
-  seq              integer     NOT NULL,
+  rental_id        varchar(21),                            -- V5: 안 씀(NULL). 다음 마이그레이션에서 삭제
+  checkpoint_id    varchar(21) NOT NULL UNIQUE
+                   CONSTRAINT fk_manual_seal_log_chain REFERENCES report.record_chain(checkpoint_id) ON DELETE CASCADE,  -- V5
+  checkpoint_type  varchar(3)  CHECK (checkpoint_type IN ('OUT','RCV','RET')),  -- V5: 안 씀(NULL)
+  grade            char(1)     CHECK (grade IN ('A','B','C','D')),              -- V5: 안 씀(NULL)
+  seq              integer,                                -- V5: 안 씀(NULL)
   reason           varchar(300) NOT NULL,
   sealed_by        varchar(64) NOT NULL,                   -- 관리자 JWT sub(계정 publicId)
   created_at       timestamptz NOT NULL DEFAULT now(),
@@ -526,6 +571,7 @@ CREATE TABLE auth.account (
   email_verified_at  timestamptz,                      -- FR-USR-05, 인증하면 ACTIVE
   privacy_agreed_at  timestamptz,                      -- 고객 가입 때 개인정보 수집 동의
   withdrawn_at       timestamptz,
+  password_set       boolean      NOT NULL DEFAULT true,  -- V5: 사용자가 비밀번호를 직접 정했는지. 소셜 가입(난수 비밀번호)은 false (11/12)
   created_at         timestamptz  NOT NULL DEFAULT now(),
   updated_at         timestamptz  NOT NULL DEFAULT now(),
   CHECK (status = 'WITHDRAWN' OR (email IS NOT NULL AND password_hash IS NOT NULL)),
@@ -542,6 +588,22 @@ CREATE TABLE auth.rental_access (
   updated_at  timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX ix_access_account ON auth.rental_access(account_id);
+
+-- V4: 소셜 로그인 연결(Google·GitHub·카카오·네이버). 계정 하나에 제공자마다 하나
+-- 제공자 사용자 번호(subject)로 다시 찾는다. email은 연결할 때 제공자가 준 값(계정 이메일과 다른 사실)
+CREATE TABLE auth.social_identity (
+  id           bigint GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+  account_id   bigint NOT NULL REFERENCES auth.account(id),
+  provider     varchar(16)  NOT NULL CHECK (provider IN ('GOOGLE','GITHUB','KAKAO','NAVER')),
+  subject      varchar(128) NOT NULL,
+  email        varchar(254),
+  linked_at    timestamptz  NOT NULL,
+  created_at   timestamptz  NOT NULL DEFAULT now(),
+  updated_at   timestamptz  NOT NULL DEFAULT now(),
+  UNIQUE (provider, subject),
+  UNIQUE (account_id, provider)
+);
+CREATE INDEX ix_social_identity_account ON auth.social_identity(account_id);
 
 -- 이메일 인증·비밀번호 재설정 6자리 코드 (FR-USR-05·06)
 CREATE TABLE auth.email_token (
