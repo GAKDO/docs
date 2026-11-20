@@ -7,7 +7,6 @@
 | `mvp-design.md` | MVP 설계서 › 설계서 (요구사항·아키텍처·인증·ERD 규칙·이벤트·확장성·리뷰 결정) |
 | `ddl.md` | MVP 설계서 › 테이블 정의 (DDL) |
 | `erd-normalization.md` | (docs에서 직접 씀) 11/20 ERD 정규화 점검: 찾은 것·고친 것·의도된 비정규화 |
-| `erd-review-qa.md` | (docs에서 직접 씀) 11/20 강사님 리뷰 대비 ERD·DB 예상 질문과 답 |
 | `diagnostics-json-v0.md` | MVP 설계서 › 진단 JSON v0 |
 | `rest-api-v0.md` | MVP 설계서 › REST API v0 |
 | `kickoff-plan.md` | TRACE 착수 준비 |
