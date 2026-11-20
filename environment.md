@@ -1,5 +1,7 @@
 # 개발·운영 환경
 
+> **11/20 주의:** 11/3부터 운영은 학교 서버 한 대의 **Docker Compose**입니다(인프라 4종도 같은 Compose 안). develop에 머지하면 `:develop` 이미지를 `autodeploy.sh`가 3분 안에 배포합니다. 아래 "클러스터"·Argo CD·공유 인프라·InfluxDB·Grafana 표는 11/2 클러스터 계획 기록이고, 지금 구성은 [architecture.md](architecture.md)와 [cicd.md](cicd.md)를 보세요.
+
 학교 서버, 공유 인프라, 외부 서비스를 어떻게 쓰는지 정리합니다. **비밀번호·토큰·학번은 이 레포에 적지 않습니다.** 비밀 값은 Rancher Secret과 GitHub Secret에만 둡니다.
 
 ## 학교 서버와 포트

@@ -7,7 +7,7 @@
 ## 30초 요약
 
 - **설계 3일 → 계약 고정 → 끝까지 도는 MVP 먼저 → 하나씩 다시 넣기.** 10/30~11/1에 요구사항 50개·기능 27개를 정하고, 11/3에 계약(contracts 1.0.0)을 고정했습니다. 같은 날 강사님 리뷰로 "부스 12장 → Jetson 판정 → 관리자 화면"을 먼저 끝까지 돌리기로 순서를 바꿨고, 11/9 MVP, 11/13 코드 프리즈, 11/16 제출, 11/19 본선입니다.
-- **레포 15개, 머지된 PR 513건(11/16 기준, A 345·B 91·C 77), Spec Kit 명세 40개.** 레포마다 `/speckit-specify → clarify → plan → tasks → analyze → implement → converge`로 만들고 명세를 `specs/`에 코드와 함께 올렸습니다.
+- **레포 15개, 머지된 PR 513건(11/16 기준, A 345·B 91·C 77), Spec Kit 명세 36개(레포 12곳).** 레포마다 `/speckit-specify → clarify → plan → tasks → analyze → implement → converge`로 만들고 명세를 `specs/`에 코드와 함께 올렸습니다.
 - **PR 하나 = 기능 하나, 필수 검사가 초록일 때만 머지.** 사람 승인 대신 CI(테스트·커버리지·gitleaks·계약 린트)와 CodeRabbit 자동 리뷰를 관문으로 썼습니다. 계약 PR만 팀 공지 후 먼저 머지합니다.
 - **테스트 약 1,800개, 줄 커버리지 60~98%.** 서버 6개는 JaCoCo 40%가 CI 관문입니다. 11/20에 파이썬 레포 4개에도 70% 관문을 더하고, 부스는 Jetson과 같은 Python 3.10 검사를 더했습니다.
 - **운영은 develop 이미지를 학교 서버가 3분마다 받아 배포합니다.** 처음 설계한 Git Flow(main = 배포)와 다릅니다. 11/3 클러스터를 멈추고 Compose로 바꾸면서 생긴 차이이고, 문서가 늦게 따라왔습니다(아래 "솔직하게 말할 것").
@@ -19,7 +19,7 @@
 | 기간 | 10/30 설계 시작 → 11/13 프리즈(15일) → 11/16 제출 | [../contest/process.md](../contest/process.md) |
 | 레포 | 15개(서버 6·web·booth·agent·ml·chat-server·contracts·gitops·docs·.github) | 조직 GAKDO |
 | 머지 PR | 513건(11/16), 그 뒤 README·정규화·리뷰 준비 PR | 팀원 참여도 근거(11/16) |
-| Spec Kit 명세 | 40개(`specs/<번호>-<이름>/spec.md·plan.md·tasks.md`) | 각 레포 `specs/` |
+| Spec Kit 명세 | 36개, 레포 12곳(`specs/<번호>-<이름>/spec.md·plan.md·tasks.md`) | 각 레포 `specs/` |
 | 스탠드업 기록 | 13일(11/2~11/13, 11/16) | [../team/standup/](../team/standup/) |
 | 결정 기록 | 리뷰 결정 14건 + 날짜별 결정 | [../decisions.md](../decisions.md) |
 | 테스트 | 자바 약 550 · 파이썬 650 · 웹 584 | 아래 표 |
@@ -185,7 +185,7 @@ macOS:   curl -fsSL https://gakdo.site/agent.sh | sh -s <페어링 코드>
 Windows: & ([scriptblock]::Create((irm https://gakdo.site/agent.ps1))) <페어링 코드>
 ```
 
-- gakdo.site 주소는 web nginx가 GitHub의 **고정 태그**(지금 v0.3.0) 스크립트로 302를 줍니다. 레포 클론·가상환경·pip 없이 `~/.trace-agent`에 풀고 `python -m trace_agent run`을 합니다.
+- gakdo.site 주소는 web nginx가 GitHub의 **고정 태그**(지금 macOS `agent.sh` v0.3.0, Windows `agent.ps1` v0.2.0) 스크립트로 302를 줍니다. 레포 클론·가상환경·pip 없이 `~/.trace-agent`에 풀고 `python -m trace_agent run`을 합니다.
 - 실행 의존성은 jsonschema 하나라 `pip --target`으로 받습니다(학교 망 PyPI가 막히면 미러). 파이썬이 3.11보다 낮은 맥(기본 3.9)은 python-build-standalone 3.12를 **SHA-256을 고정해** 받고, `smartctl`이 없으면 smartmontools dmg에서 관리자 권한 없이 꺼냅니다(agent #10·#11).
 - 읽는 명령·경로는 코드 상수로 고정(system_profiler·ioreg·smartctl·pmset / Get-CimInstance·powercfg). 결과를 contracts 진단 JSON Schema로 검증한 뒤 **먼저 보여 주고, y일 때만** 페어링 JWT로 올립니다(FR-DIA-05, 서버에 `consented_at`).
 - 실기: 민서 맥, 친구 MBA(파이썬 3.9뿐), 윈도우 갤럭시북에서 설치·수집 확인(11/9·11/10).
@@ -198,7 +198,7 @@ Windows: & ([scriptblock]::Create((irm https://gakdo.site/agent.ps1))) <페어�
 A. 세 가지입니다. ① 11/3 계약 고정으로 레포 15개가 서로 기다리지 않고 동시에 갔습니다. ② 같은 날 "끝까지 도는 흐름 하나 먼저"로 순서를 바꿔 11/9에 시연 가능한 상태를 먼저 만들었습니다. ③ 완료 기준을 "머지"가 아니라 "실기·배포 확인"으로 잡아 시트 D열에 그것만 체크했습니다. 끝까지 못 한 것(클러스터, InfluxDB·Grafana, 3DGS 등)은 [requirements.md](requirements.md)에 그대로 적었습니다.
 
 **Q. 프리즈 뒤에도 PR이 있는데 프리즈가 맞나?**
-A. 11/13 이후 머지는 문서·README·SonarQube 정리와 11/20 정규화 1단계(삭제 없는 변경)뿐입니다(decisions.md 11/13). 기능 코드는 바꾸지 않았습니다.
+A. 11/13 이후 머지는 문서·README·SonarQube 정리와 11/20 리뷰 준비분뿐입니다(decisions.md 11/13). 11/20 리뷰 준비분은 정규화 1단계(삭제 없는 변경), CI 커버리지 관문, gateway 오류 응답 형식(뒤쪽 서버 연결 실패를 500 기본 JSON 대신 503 Problem으로, gateway #27)입니다. 새 기능은 넣지 않았고, 정상 응답·재시도 규칙도 그대로입니다.
 
 ### 브랜치·배포
 
@@ -248,7 +248,7 @@ A. 같은 검증셋·같은 conf 0.25에서 v002 증강과 비교한 숫자입�
 A. 네. 관리자가 확정한 흠집은 라벨, 흠집 아님은 음성 예시로 `trace-ml review export` → `train --extra-train`에 넣는 흐름을 만들었습니다(ml #28). 대회 전에는 v004를 바꾸지 않기로 해서 그 흐름으로 학습한 모델을 배포하지는 않았습니다.
 
 **Q. `curl | sh`는 보안상 위험하지 않나?**
-A. 위험을 줄인 장치: HTTPS만, 스크립트는 고정 태그(v0.3.0)에서만 받고, 내려받는 파이썬·smartctl은 SHA-256을 고정해 검증, 관리자 권한을 쓰지 않으며, 업로드는 결과를 보여 주고 동의한 뒤에만 합니다. 남은 약점은 스크립트가 받는 에이전트 소스 자체의 체크섬·서명이 없다는 것으로, 11/11 CodeRabbit 리뷰(agent #14)에서도 같은 지적을 받았습니다. 그래서 다음에는 릴리스에 체크섬·서명을 함께 게시하겠습니다.
+A. 위험을 줄인 장치: HTTPS만, 스크립트는 고정 태그(macOS v0.3.0·Windows v0.2.0)에서만 받고, 내려받는 파이썬·smartctl은 SHA-256을 고정해 검증, 관리자 권한을 쓰지 않으며, 업로드는 결과를 보여 주고 동의한 뒤에만 합니다. 남은 약점은 스크립트가 받는 에이전트 소스 자체의 체크섬·서명이 없다는 것으로, 11/11 CodeRabbit 리뷰(agent #14)에서도 같은 지적을 받았습니다. 그래서 다음에는 릴리스에 체크섬·서명을 함께 게시하겠습니다.
 
 **Q. 학습과 추론 환경이 다른데(ultralytics vs TensorRT 직접) 결과가 같다고 어떻게 보장하나?**
 A. 같은 ONNX 조건(입력 고정·opset 17·NMS 끔)으로 내보내고, 같은 사진으로 ultralytics와 마스크 IoU 0.86~0.99를 확인했습니다. 학교 서버(ONNX CPU)와 Jetson(TensorRT)도 같은 파일로 함께 바꿉니다.
