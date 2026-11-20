@@ -259,12 +259,13 @@ rental의 checkpoint가 모든 기록의 기준점이고, 다른 서비스는 �
 
 설계 규칙
 
+- **정규화:** 같은 서버 안에서는 3NF를 지키고, 서버 사이 사본은 의도된 비정규화로 원본 서버를 적어 둡니다. 11/20 점검과 근거는 [erd-normalization.md](erd-normalization.md), 리뷰 예상 질문은 [review/erd.md](../review/erd.md)에 있습니다.
 - **서비스 간 FK 금지:** 다른 스키마의 ID는 값으로만 들고, 정합성은 이벤트로 맞춥니다. 서비스를 따로 배포하고 DB 계정도 나눌 수 있게 하려는 것입니다.
-- **공통 컬럼:** 모든 테이블에 `id`(bigint identity, PK, 밖에 내보내지 않음)·`created_at`·`updated_at`(timestamptz)를 둡니다. API·이벤트·URL에 나가는 행에는 `public_id`(NanoID 21자, 앱에서 생성, UNIQUE)를 더하고, 다른 서비스의 행은 그 `public_id`를 값으로 둡니다.
+- **공통 컬럼:** 모든 테이블에 `id`(bigint identity, PK, 밖에 내보내지 않음)·`created_at`·`updated_at`(timestamptz)를 둡니다(한 번 넣고 고치지 않는 `diagnostics.sealed_checkpoint`만 `created_at`뿐). API·이벤트·URL에 나가는 행에는 `public_id`(NanoID 21자, 앱에서 생성, UNIQUE)를 더하고, 다른 서비스의 행은 그 `public_id`를 값으로 둡니다.
 - **파일은 키만:** 사진·텍스처·진단 원본 JSON은 MinIO에 두고, DB에는 `object_key`와 `sha256`만 남깁니다.
 - **코드 값은 한 곳에서:** 면·조명·클래스·등급·시점 값은 `contracts/codes.yaml`을 따르고, DB에는 CHECK 제약으로 넣습니다.
-- **추이는 InfluxDB에도:** 배터리·벤치마크 원본은 PostgreSQL이고, 대시보드용 시계열은 InfluxDB `trace-pilot`에 따로 씁니다.
-- **검색은 복사본:** Elasticsearch 인덱스는 report-server가 이벤트로 채우는 복사본입니다. 원본은 항상 PostgreSQL입니다.
+- **추이는 PostgreSQL에서:** 배터리·벤치마크 원본은 PostgreSQL입니다. 처음에는 InfluxDB `trace-pilot`에도 시계열을 쓰려 했지만 11/3에 멈췄고(11/6 결정), 추이는 web이 저장된 진단을 모아 그립니다.
+- **검색은 PostgreSQL에서:** 기록 검색 API(FR-RPT-05)는 PostgreSQL을 바로 조회합니다. Elasticsearch 색인은 선택 기능이라 만들지 않았습니다(만들게 되면 이벤트로 채우는 복사본이고 원본은 PostgreSQL).
 - **Label Studio는 범위 밖:** Label Studio는 자기 DB(`labelstudio`)를 쓰고, 우리는 그 결과를 MinIO에서만 읽습니다.
 
 컬럼·제약 전체: 테이블 정의 (DDL)
