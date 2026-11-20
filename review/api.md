@@ -62,8 +62,8 @@
 
 | PR | 무엇을 | 운영 영향 |
 | --- | --- | --- |
-| gateway (develop) | 뒤쪽 서버가 끝내 연결을 받지 않으면 Spring 기본 처리기가 **500 + `{timestamp, path, status, error}`** 를 냈음(테스트로 확인). `ErrorWebExceptionHandler`를 더해 연결 실패 503, 시간 초과 504, 나머지 500을 모두 Problem + `code: INTERNAL_ERROR`로 답함. 새 테스트 1개, 전체 504개 통과 | 오류 응답의 모양만 바뀜(정상 응답·재시도 규칙은 그대로). 서버 재배포 중 잠깐 실패하는 요청이 500이 아니라 503으로 보임 |
-| contracts (develop) | gateway가 11/8부터 막고 있던 비밀번호 재설정 요청·재설정 두 경로에 429(`TooManyRequests`, Retry-After)를 계약에 적음. `openapi/README.md`의 경로 수 표(11/3 숫자 그대로였음)를 지금 숫자로 | 없음(문서만 실제와 맞춤) |
+| gateway #27 (develop 머지됨) | 뒤쪽 서버가 끝내 연결을 받지 않으면 Spring 기본 처리기가 **500 + `{timestamp, path, status, error}`** 를 냈음(테스트로 확인). `ErrorWebExceptionHandler`를 더해 연결 실패 503, 시간 초과 504, 나머지 500을 모두 Problem + `code: INTERNAL_ERROR`로 답함. 새 테스트 1개, 전체 504개 통과 | 오류 응답의 모양만 바뀜(정상 응답·재시도 규칙은 그대로). 서버 재배포 중 잠깐 실패하는 요청이 500이 아니라 503으로 보임 |
+| contracts #53 (develop 머지됨, 계약 1.1.0 다음 `[Unreleased]`) | gateway가 11/8부터 막고 있던 비밀번호 재설정 요청·재설정 두 경로에 429(`TooManyRequests`, Retry-After)를 계약에 적음 | 없음(문서만 실제와 맞춤) |
 | docs (이 PR) | `design/rest-api-v0.md`에 빠졌던 진단 다시 하기(`redo`) 줄, 요청 제한 설명 보강, 11/20 대조 결과 | 없음 |
 
 ## 5. 남은 약점 (솔직하게 말할 것)
