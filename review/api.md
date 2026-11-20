@@ -124,7 +124,7 @@ A. 재시도는 연결 자체가 실패했을 때(`ConnectException` 등)만 합
 **인증·권한**
 
 Q12. 토큰 구조와 수명은요?
-A. auth-server가 RS256 JWT를 발급하고 공개키는 JWKS(클러스터 안에서만)로 줍니다. ADMIN·CUSTOMER 액세스 15분 + 리프레시 7일(HttpOnly·SameSite=Strict·Path=/api/v1/auth 쿠키, 쓸 때마다 새로 발급하고 옛 것은 폐기), 폰 촬영 30분(QR 교환, 그 시점만), 부스 1시간(client credentials, 그 부스만), 진단 에이전트 10분(6자리 페어링 코드 교환, 그 시점만)입니다. 쓰는 곳이 좁을수록 수명을 짧게 했습니다. 액세스 토큰은 메모리에만 두고 localStorage에 넣지 않습니다.
+A. auth-server가 RS256 JWT를 발급하고 공개키는 JWKS(Compose 내부망에서만, gateway에 라우트 없음)로 줍니다. ADMIN·CUSTOMER 액세스 15분 + 리프레시 7일(HttpOnly·SameSite=Strict·Path=/api/v1/auth 쿠키, 쓸 때마다 새로 발급하고 옛 것은 폐기), 폰 촬영 30분(QR 교환, 그 시점만), 부스 1시간(client credentials, 그 부스만), 진단 에이전트 10분(6자리 페어링 코드 교환, 그 시점만)입니다. 쓰는 곳이 좁을수록 수명을 짧게 했습니다. 액세스 토큰은 메모리에만 두고 localStorage에 넣지 않습니다.
 
 Q13. 권한 검사는 gateway에서 하나요, 서버에서 하나요?
 A. 둘 다입니다. gateway는 "이 역할이 이 경로를 부를 수 있나"(계약에서 생성한 표, 451개 조합 테스트)를 보고, 서버는 JWT를 다시 검증한 뒤 "이 렌탈·시점이 정말 이 사람 것인가"를 DB 값으로 봅니다. 앞단을 우회해도 서버가 막습니다. 서버로 넘기는 신원 헤더는 gateway가 밖에서 온 것을 지우고 토큰 값으로만 채웁니다.
@@ -141,7 +141,7 @@ A. 브라우저 기본 EventSource는 Authorization 헤더를 못 보내서, web
 **요청 제한**
 
 Q17. 429는 어디서 어떻게 거나요?
-A. 추측·폭탄 공격이 가능한 공개 경로는 gateway가 IP당 고정 창으로 셉니다(Redis, `trace:` 접두사). 넘으면 429 Problem `RATE_LIMITED` + `Retry-After` 초. 학교 클러스터는 프록시 뒤라 연결 주소 대신 프록시가 넣는 실제 IP 헤더를 쓰고, 클라이언트가 붙일 수 있는 X-Forwarded-For는 믿지 않습니다. 업무별 제한(재발송 60초, 틀린 부스 코드, 코드 입력 남은 횟수 `remainingAttempts`)은 서버가 겁니다.
+A. 추측·폭탄 공격이 가능한 공개 경로는 gateway가 IP당 고정 창으로 셉니다(Redis, `trace:` 접두사). 넘으면 429 Problem `RATE_LIMITED` + `Retry-After` 초. 학교 서버는 강사님 nginx(프록시) 뒤라 연결 주소 대신 그 프록시가 넣는 실제 IP 헤더를 쓰고(web nginx `TRUSTED_PROXIES`), 클라이언트가 붙일 수 있는 X-Forwarded-For는 믿지 않습니다. 업무별 제한(재발송 60초, 틀린 부스 코드, 코드 입력 남은 횟수 `remainingAttempts`)은 서버가 겁니다.
 
 Q18. Redis가 죽으면요?
 A. 제한만 끄고 요청은 통과시킵니다(fail-open). 시연 중 로그인 전체가 막히는 것보다 낫다고 봤고, 비밀번호는 BCrypt, 코드는 시도 횟수 제한이 따로 있어 최소 방어는 남습니다. 5장에 적은 대로 고정 창의 한계도 압니다.
