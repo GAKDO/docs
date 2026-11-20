@@ -1,7 +1,26 @@
 # CI/CD
 
-블로그(AIGJ-01-002-blog/devlog)에서 쓰던 CI/CD를 TRACE 레포 12개에 옮겼습니다. 테스트·품질 분석·이미지·알림·릴리스·리뷰 설정은 블로그 그대로이고, **배포만 Argo CD 방식**으로 바꿨습니다. 블로그는 GitHub Actions가 학교 서버의 k3d에 직접 배포했지만, TRACE는 학교에 이미 설치된 Rancher 클러스터와 Argo CD를 씁니다.
+블로그(AIGJ-01-002-blog/devlog)에서 쓰던 CI/CD를 TRACE 레포에 옮겼습니다. 테스트·품질 분석·이미지·알림·릴리스·리뷰 설정은 블로그 그대로입니다.
 
+> **지금 배포(11/3~, 11/20 확인):** 학교 서버 한 대의 Docker Compose로 돌고, **develop 머지 → GHCR `:develop` 이미지 → 학교 서버 `compose/ops/autodeploy.sh`(cron 3분)가 받아 그 서비스만 무중단 교체·확인·실패 시 되돌리기**입니다. 아래 [지금 배포 흐름](#지금-배포-흐름-학교-서버-compose)이 기준입니다. 그 아래 "배포 흐름"·"연기 시험과 자동 롤백"(Argo CD 방식)은 클러스터용으로 워크플로에 남아 있지만, `GITOPS_TOKEN`으로 gitops 태그만 바꾸고 실제 서버에는 닿지 않습니다.
+
+## 지금 배포 흐름 (학교 서버 Compose)
+
+```mermaid
+flowchart LR
+  pr["PR → develop"] --> ci["backend-ci · 화면 CI · python-ci<br/>비밀값 검사(gitleaks)"]
+  ci --> merge["develop 머지"] --> img["배포 워크플로<br/>이미지 :SHA · :develop → GHCR"]
+  cron["학교 서버 cron 3분<br/>autodeploy.sh"] -->|"서비스별 pull"| img
+  cron --> swap{"새 컨테이너 옆에 띄움<br/>① 죽지 않음 ② ping 응답<br/>③ 응답 commit = 새 이미지"}
+  swap -- "180초 안에 통과" --> done["옛 컨테이너 내림 · 알림"]
+  swap -- 실패 --> back["새 컨테이너만 지움<br/>그 이미지를 '실패'로 기록 · 알림"]
+```
+
+- **끌어오기 방식**: GitHub Actions가 학교 서버에 접속하지 않습니다. 서버가 밖으로 GHCR을 확인하므로 GitHub에 서버 SSH 키를 두지 않습니다(Argo CD와 같은 방향).
+- **무중단 교체**: gateway·Spring 서버 5개·chat-server는 새 컨테이너를 먼저 띄우고, 준비되면 옛 컨테이너를 graceful(30초)로 내립니다. gateway는 연결 실패만 다시 보내고(`Retry` 필터, POST 중복 없음) 이름을 5초만 기억해 새 IP를 찾습니다. web은 호스트 포트 8315를 쥐고 있어 다시 만들며 1~2초 끊깁니다. inspect-worker는 검사 중 바뀌지 않게 자동 배포에서 뺐습니다(`TRACE_DEPLOY_SERVICES`).
+- **멈추기**: 촬영·시연 전에는 `autodeploy.sh pause <사유>`, 끝나면 `resume`. 지금 버전은 `autodeploy.sh status`.
+- **같이 도는 cron**: `health.sh`(2분, 상태가 바뀔 때만 알림), `backup.sh`(매일 밤, PostgreSQL 전체 덤프 14일·MinIO 3일), 바깥 점검은 gitops 워크플로 `운영 점검`(`site-check.yml`, 30분마다 공개 주소·인증서).
+- **main**: 릴리스 PR(develop → main)로 CHANGELOG 버전·태그·`:latest` 이미지를 남깁니다. 학교 서버는 `.env`의 `TRACE_TAG`(기본 `develop`)를 바꾸면 릴리스 태그로 고정할 수 있습니다.
 ## 레포별 워크플로
 
 | 워크플로 | 서버 6개 | web | agent·booth·ml | contracts | gitops | 블로그 원본 |
@@ -24,7 +43,7 @@
 - `school-tunnel`·`server-check`·`school-setup`·`cluster-status`·`infra-bench`: 블로그가 학교 서버에 직접 k3d를 만들고 SSH로 배포하던 구조용입니다. TRACE는 Rancher와 Argo CD가 맡습니다.
 - `readme-check`·`org-profile-sync`: 블로그의 4개 언어 README·조직 프로필 전용입니다.
 
-## 배포 흐름
+## 배포 흐름 (클러스터용, 지금 쓰지 않음)
 
 ```mermaid
 flowchart LR
@@ -44,7 +63,7 @@ flowchart LR
 - gitops 갱신은 같은 레포 안에서 한 줄로 세우고(`concurrency: gitops-bump`, 레포 단위), 다른 서버의 커밋과 겹치면 받아서 최대 3번 다시 시도합니다.
 - 학교 클러스터가 amd64라 이미지는 amd64 한 가지만 만듭니다(블로그는 Oracle ARM VM 때문에 arm64도 만들었음).
 
-## 연기 시험과 자동 롤백
+## 연기 시험과 자동 롤백 (클러스터용)
 
 블로그는 `smoke.sh`로 새 버전을 확인하고 실패하면 `kubectl rollout undo`로 되돌렸습니다. TRACE는 Argo CD가 클러스터를 맞추므로 같은 일을 **바깥에서 확인하고 gitops 커밋을 되돌리는** 방식으로 합니다. kubectl로 직접 되돌리면 Argo CD 자동 동기화(selfHeal)가 다시 새 버전으로 덮어씁니다.
 

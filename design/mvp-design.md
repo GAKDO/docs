@@ -192,7 +192,7 @@ JWT로 합니다. 지난 프로젝트처럼 인증·인가는 auth-server로 분
 설계 규칙
 
 - **서명 키:** RS256 키 쌍을 씁니다. 개인키는 auth-server만 Rancher Secret으로 갖고, 공개키는 `/.well-known/jwks.json`으로 내보내 gateway가 캐시합니다. `kid`로 키를 교체할 수 있습니다.
-- **검증 위치:** gateway(Spring Cloud Gateway + Spring Security OAuth2 Resource Server)가 서명·만료·역할을 확인하고, 서비스에는 `X-User-Id`·`X-Role`·`X-Scope` 헤더로 넘깁니다. 서비스는 NetworkPolicy로 gateway에서 오는 요청만 받습니다.
+- **검증 위치:** gateway(Spring Cloud Gateway + Spring Security OAuth2 Resource Server)가 서명·만료·역할을 확인하고, 서비스에는 `X-User-Id`·`X-Role`·`X-Scope` 헤더로 넘깁니다. 서비스는 NetworkPolicy로 gateway에서 오는 요청만 받습니다. *(11/20 지금: Compose에는 NetworkPolicy가 없어, 서버 5개도 각자 Spring Security 리소스 서버로 같은 JWKS를 읽어 JWT를 다시 검증합니다. gateway는 들어온 `X-User-Id`·`X-Role`·`X-Scope` 헤더를 지우고 토큰 값으로만 다시 채웁니다.)*
 - **클레임:** `iss`(trace), `sub`, `role`, `scope`(checkpointId 또는 boothId), `iat`, `exp`, `jti`. scope 밖의 시점을 요청하면 403입니다.
 - **폐기:** 리프레시 토큰은 Redis `trace:auth:refresh:{jti}`에 두고 로그아웃·비밀번호 변경·재설정 때 지웁니다. 재설정 때 한 번에 지우려고 계정별 jti 집합도 함께 둡니다. 액세스 토큰은 15분으로 짧게 두어 폐기 목록 없이 운영합니다.
 - **브라우저 보관:** 액세스 토큰은 메모리에만, 리프레시 토큰은 HttpOnly·Secure·SameSite=Strict 쿠키에 둡니다.

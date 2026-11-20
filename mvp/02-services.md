@@ -2,7 +2,9 @@
 
 > 그림으로 쉽게 보기: [MVP 안내서 · 서비스별](https://gakdo.github.io/docs/guide/#services)
 
-> 11/8 갱신: 11/4 report-server(11/8부터 기본 기동), 11/6 diagnostics-server(기본 기동)·진단 에이전트가 다시 들어와 서비스를 더했고, 맨 아래에 [이벤트 흐름](#이벤트-흐름-118-코드-기준)을 코드 기준으로 정리했습니다.
+> 11/8 갱신: 11/4 report-server(11/8부터 기본 기동), 11/6 diagnostics-server(기본 기동)·진단 에이전트가 다시 들어와 서비스를 더했고, 맨 아래에 [이벤트 흐름](#이벤트-흐름-1120-코드-기준)을 코드 기준으로 정리했습니다.
+>
+> 11/20 갱신: 11/8 Compose 기본에 들어온 inspect-worker(2-11)와 11/10 더한 chat-server·ollama(2-12)를 표와 절에 더했고, 11/13 diagnostics-server가 `trace.record.sealed`를 받기 시작한 것(봉인된 시점 재진단 막기)을 이벤트 표에 반영했습니다.
 
 학교 서버에서 뜨는 서비스마다 요약 표에는 **레포 · 어디서 · 포트 · 저장소 · 담당**을, 서비스별 절에는 그림과 함께 하는 일 · 받는 API · 이벤트 · 환경 변수를 적었습니다. 그림 색은 [1. MVP 아키텍처](01-architecture.md)와 같습니다(초록 = 부스 사진, 파랑 = 사진 무관, 회색 = 인프라).
 
@@ -19,6 +21,9 @@
 | capture-server | GAKDO/capture_server | 학교 서버 Compose | 8080 | PostgreSQL `capture`·`inspection`, MinIO `trace-captures`·`trace-derived` | A |
 | diagnostics-server | GAKDO/diagnostics_server | 학교 서버 Compose (11/6 기본 기동) | 8080 | PostgreSQL `diagnostics` | A |
 | report-server | GAKDO/report_server | 학교 서버 Compose (기본 기동, 11/8) | 8080 | PostgreSQL `report`, Redis(진행률 구독) | A |
+| inspect-worker | GAKDO/ml | 학교 서버 Compose (11/8 기본 기동, CPU ONNX) | 없음(큐만) | MinIO `trace-derived`, Redis(진행률 발행) | A |
+| chat-server (사이트 도우미 챗봇) | GAKDO/chat-server | 학교 서버 Compose (11/10) | 8080 | 없음 (Gemini → 한도 초과 시 ollama) | B |
+| ollama (qwen2.5:3b, CPU) | 이미지 `ollama/ollama` | 학교 서버 Compose (11/10) | 11434 (Compose 안) | 볼륨 `ollama-data` | B |
 | 진단 에이전트 | GAKDO/agent | 렌탈 노트북(macOS·Windows) | 없음 | 없음(올리기 전 화면에 보여 줌) | B |
 | booth 앱 (부스 화면 + 촬영 + 탐지) | GAKDO/booth | Jetson Orin Nano | 8320 (부스 공유기만) | Jetson 로컬 저장·큐 | B |
 | 학습 | GAKDO/ml | 집 PC | 없음 | 학교 MinIO `trace-raw`·`models` | A (라벨링 연동은 B) |
@@ -62,6 +67,7 @@ flowchart LR
   gw -->|"/api/v1/captures/**"| c["capture-server :8080"]:::nophoto
   gw -->|"/api/v1/diagnostics/**"| d["diagnostics-server :8080"]:::nophoto
   gw -->|"/api/v1/reports/** · /verify/**"| rp["report-server :8080"]:::nophoto
+  gw -->|"/api/v1/chat/** (11/10)"| ch["chat-server :8080"]:::nophoto
   gw -->|"JWKS /.well-known/jwks.json"| a
   gw --- redis[("Redis :6379<br/>키 접두사 trace:")]:::infra
 ```
@@ -254,7 +260,25 @@ flowchart LR
 | 기능 ID | AG1(macOS), AG2(Windows) |
 | 읽는 명령 | `src/trace_agent/commands.py`의 `ALLOWED` 고정 목록(NFR-02) |
 
-## 이벤트 흐름 (11/8 코드 기준)
+## 2-11. inspect-worker (학교 서버 Compose, GAKDO/ml) — A
+
+| 항목 | 값 |
+|---|---|
+| 하는 일 | `trace.capture.uploaded`를 받아(큐 `trace.inspect.requested`, durable) 사진을 MinIO에서 읽고, 9면 표준 좌표로 정합·폰 사진 흠집 탐지(`best.onnx`, CPU)·3D 텍스처를 만들어 `trace-derived`에 쓰고 `trace.inspect.completed`를 냄. 부스 세트는 탐지 없이 정합·텍스처만(부스 탐지는 Jetson이 이미 보냄). 진행률은 Redis `trace:progress:{rentalId}` |
+| 기능 ID | ML1(검사 워커), ML2 일부 |
+| 모델 바꾸기 | 학교 서버 `compose/models/`에 `best.onnx`·`model.json` → `docker compose restart inspect-worker`. 비어 있으면 탐지만 건너뜀(modelVersion `contour-v1`) |
+| 환경 변수 | `TRACE_DETECT_CONF`(0.25), `TRACE_DETECT_THREADS`, `TRACE_ALIGN`(contour·features), `RABBITMQ_*`, `MINIO_*`, `REDIS_PASSWORD` |
+| 배포 | 검사 중 교체되지 않게 자동 배포(`autodeploy.sh`) 대상에서 뺌. 꺼져 있던 동안 쌓인 세트는 켜지면 처리 |
+
+## 2-12. chat-server · ollama (학교 서버 Compose, GAKDO/chat-server) — B
+
+| 항목 | 값 |
+|---|---|
+| 하는 일 | 사이트 도우미 챗봇. `POST /api/v1/chat`(공개). Gemini 무료 API로 답하고, 한도 초과(429)나 키가 없으면 같은 Compose의 ollama `qwen2.5:3b`로 답함. 로그인한 사용자가 물으면 그 사용자 토큰으로 gateway를 **GET만** 불러 내 렌탈·검사 결과를 읽음(DB·RabbitMQ에 붙지 않음, 바꾸는 API는 부르지 않음) |
+| 요청 제한 | chat-server 자체: IP당 분당 20회, IP당 하루 100회, 전체 하루 1000회(Gemini 사용량 보호) |
+| 환경 변수 | `GEMINI_API_KEY`, `GEMINI_MODEL`, `OLLAMA_BASE_URL`, `OLLAMA_MODEL`, `OLLAMA_NUM_THREAD`, `CHAT_RATE_LIMIT_PER_MINUTE`, `CHAT_DAILY_LIMIT_PER_IP`, `CHAT_DAILY_LIMIT_TOTAL`, `TRACE_API_URL` |
+
+## 이벤트 흐름 (11/20 코드 기준)
 
 exchange는 topic `trace.events` 하나, 실패한 메시지는 `trace.dlx` → 큐마다 `<큐>.dlq`. 아래는 각 서버 코드의 `@RabbitListener` 큐·바인딩과 발행(`convertAndSend`)을 그대로 옮긴 것입니다.
 
@@ -265,7 +289,7 @@ exchange는 topic `trace.events` 하나, 실패한 메시지는 `trace.dlx` → 
 | `trace.inspect.completed` | ml inspect-worker | `trace.capture.inspected` (capture), `trace.report.updates` (report, 진행률) |
 | `trace.checkpoint.graded` | capture-server (등급) | `trace.rental.checkpoints` (rental → GRADED), `trace.report.updates` (report → 봉인) |
 | `trace.diagnostics.recorded` | diagnostics-server (진단 저장) | `trace.report.updates` (report, 봉인 재료) |
-| `trace.record.sealed` | report-server (봉인) | `trace.rental.checkpoints` (rental → SEALED), `trace.auth.receipts` (auth, 영수증 메일) |
+| `trace.record.sealed` | report-server (봉인) | `trace.rental.checkpoints` (rental → SEALED), `trace.auth.receipts` (auth, 영수증 메일), `trace.diagnostics.seals` (diagnostics, 봉인된 시점은 재진단 막기, 11/13) |
 | `trace.checkpoint.purged` | rental-server (시험 렌탈 지우기) | `trace.capture.purged` (capture), `trace.report.updates` (report), `trace.diagnostics.purged` (diagnostics) |
 
 ```mermaid
@@ -290,6 +314,7 @@ flowchart LR
   DI -->|"diagnostics.recorded"| RP
   RP -->|"record.sealed"| RE
   RP -->|"record.sealed"| AU
+  RP -->|"record.sealed"| DI
   RE -->|"checkpoint.purged"| CA
   RE -->|"checkpoint.purged"| RP
   RE -->|"checkpoint.purged"| DI
