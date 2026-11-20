@@ -283,7 +283,7 @@ Crowfoot ERD v1(10/31): [TRACE MVP ERD](https://crowfoot.java21.net/workspaces/6
 | `trace.checkpoint.graded` | capture-server | report-server (`trace.report.updates`), rental-server (`trace.rental.checkpoints`) | 이전 시점과 비교·등급 완료 | grade, ruleVersion, newDefectIds, unjudgeableFaces, pins\[defectId, face, x, y, isNew\](1.1, 3D 핀·최대 500) |
 | `trace.diagnostics.recorded` | diagnostics-server | report-server (`trace.report.updates`) | 진단 저장·비교 완료 | runId, sha256, flags\[kind, detail\], maxCapacityPct(1.1, 서버 계산 % 또는 null) |
 | `trace.checkpoint.started` | rental-server | report-server (`trace.report.updates`) | 시점 시작(1.1) | checkpointType, deviceId, serial, modelCode, modelName |
-| `trace.record.sealed` | report-server | auth-server 영수증 메일 (`trace.auth.receipts`), rental-server (`trace.rental.checkpoints`). web은 이벤트를 받지 않고 report-server SSE로 봄. 검색 색인은 구현 안 됨 | 해시 체인 봉인 | seq, checkpointType, grade, payloadHash, prevHash, signedAt |
+| `trace.record.sealed` | report-server | auth-server 영수증 메일 (`trace.auth.receipts`), rental-server (`trace.rental.checkpoints`), diagnostics-server 진단 다시 하기 잠금 (`trace.diagnostics.seals`, 11/13). web은 이벤트를 받지 않고 report-server SSE로 봄. 검색 색인은 구현 안 됨 | 해시 체인 봉인 | seq, checkpointType, grade, payloadHash, prevHash, signedAt |
 | `trace.checkpoint.purged` | rental-server (`DELETE /rentals/{id}`, 시험 렌탈만) | capture-server (`trace.capture.purged`), report-server (`trace.report.updates`), diagnostics-server (`trace.diagnostics.purged`) | 시험 렌탈 지우기(11/4) | checkpointType, deviceId, serial(`TEST-`로 시작) |
 
 공통 규칙
