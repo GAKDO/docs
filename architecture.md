@@ -128,7 +128,7 @@ sequenceDiagram
 | 데이터 도구(집 PC) | ml | 데이터셋 버전, 학습 실행 |
 
 - 서비스 간 외래 키는 걸지 않습니다. 다른 서비스의 ID는 값으로만 들고, 정합성은 RabbitMQ 이벤트(`trace.events`)로 맞춥니다. 처음 5종에서 지금은 7종입니다(11/2 `trace.checkpoint.started`, 11/4 `trace.checkpoint.purged` 추가, [design/mvp-design.md](design/mvp-design.md#이벤트-계약)).
-- 테이블 정의(11/8 지금 스키마 35개와 Mermaid ERD): [design/ddl.md](design/ddl.md), 처음 스키마 SQL(31개): [db/V1__init.sql](db/V1__init.sql), ERD v1(10/31): [Crowfoot](https://crowfoot.java21.net/workspaces/68/models/688)
+- 테이블 정의(11/20 지금 스키마 37개와 Mermaid ERD, 정규화 점검 [design/erd-normalization.md](design/erd-normalization.md)): [design/ddl.md](design/ddl.md), 처음 스키마 SQL(31개): [db/V1__init.sql](db/V1__init.sql), ERD v1(10/31): [Crowfoot](https://crowfoot.java21.net/workspaces/68/models/688)
 
 ## 확장성 (강사님 리뷰 반영)
 
