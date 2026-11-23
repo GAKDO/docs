@@ -15,6 +15,25 @@ ID는 두 가지입니다. 모든 테이블의 기본 키 `id`는 DB가 매기�
 
 ## ERD (11/20 지금 스키마)
 
+ERD는 두 장입니다. **논리 모델**은 업무 엔터티·속성·관계를 한글로 보이고, **물리 모델**은 실제 PostgreSQL 표·칼럼·타입·키를 그대로 보입니다. 두 그림 모두 [scripts/erd/](../scripts/erd/)로 그리므로, 마이그레이션으로 아래 SQL을 고치면 `python scripts/erd/render_physical.py`(물리, 이 파일을 읽음)와 `python scripts/erd/render_logical.py`(논리, 스크립트 안의 엔터티 정의)를 다시 돌립니다.
+
+### 논리 모델
+
+[![TRACE 논리 ERD](erd-logical.svg)](erd-logical.svg)
+
+- 엔터티 33개. 내부 `id`·`created_at`·`updated_at`, 멱등 키·완료 응답 같은 구현 칼럼과, 다른 서버 값을 받아 둔 사본 표 4개(`report.checkpoint_view`·`report_view`·`processed_event`, `diagnostics.sealed_checkpoint`)는 물리 모델에만 있습니다.
+- 식별자(PK)는 업무로 구별하는 값입니다. 공개 ID가 있는 엔터티는 공개 ID, 부모에 딸린 엔터티는 부모 + 구별 속성(예: 벤치마크 결과 = 진단 실행 + 측정 항목, 물리에서는 대리 키 `id` + `UNIQUE (run_id, metric)`)입니다.
+- 서버가 달라 DB 외래 키가 없는 관계도 논리적으로는 관계이므로 `FK → 검사 시점`처럼 대상 엔터티를 적었습니다.
+
+### 물리 모델
+
+[![TRACE 물리 ERD](erd-physical.svg)](erd-physical.svg)
+
+- 표 37개 전체와 칼럼 타입·NOT NULL·PK·FK·UNIQUE. 표 이름 아래 작은 글씨가 논리명입니다. 칼럼 논리명은 [scripts/erd/names.py](../scripts/erd/names.py)에 있습니다.
+- 선은 같은 서버 안의 외래 키만 긋고, 다른 서버 행은 `→ checkpoint`처럼 `public_id`(varchar 21)를 값으로만 둔다고 표시했습니다.
+
+### 관계만 본 그림(Mermaid)
+
 실선은 같은 서버 안의 FK, 점선은 다른 서버의 `public_id`를 값으로만 드는 참조입니다(FK 없음). 표 이름은 `<스키마>_<표>`로 썼습니다. 원래 ERD v1(10/31, 테이블 30개)은 [Crowfoot](https://crowfoot.java21.net/workspaces/68/models/688)에 있고, V1(31개) 뒤에 서버가 더한 표 6개(`rental.booth_code`, `report.checkpoint_view`·`processed_event`·`manual_seal_log`, `auth.social_identity`, `diagnostics.sealed_checkpoint`)는 Crowfoot에 아직 없으므로 이 그림이 기준입니다.
 
 ```mermaid
