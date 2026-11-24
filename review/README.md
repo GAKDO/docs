@@ -10,6 +10,7 @@
 | 아키텍처 | [architecture.md](architecture.md) | gateway 하나 + 업무 서버 5개, 서버끼리는 이벤트 7종으로만 |
 | API | [api.md](api.md) | 경로 74개가 계약과 1:1, RFC 9457 오류, 커서 페이징, 멱등 키 |
 | 개발 과정 | [process.md](process.md) | 계약 고정 → MVP 먼저 → 하나씩 다시 넣기, 운영은 develop 이미지 |
+| 테스트 실행 | [tests.md](tests.md) | 레포 13곳의 설치·실행 명령, Docker 없을 때 빠지는 테스트와 켜는 법, CI 관문 |
 
 숫자는 모두 11/20 각 레포 develop(docs는 main) 기준입니다. 자바 커버리지는 Docker 없는 곳에서 잰 값이라 Testcontainers 테스트가 빠져 있습니다.
 
